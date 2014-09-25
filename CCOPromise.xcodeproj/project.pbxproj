@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE121ABF19D31880001A4473 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE121ABE19D31880001A4473 /* PromiseTests.swift */; };
+		BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70119D386CA009C6326 /* APlusPromise.swift */; };
+		BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70319D39769009C6326 /* APlusPromiseTests.swift */; };
 		BEE0A03119D23C8B005B4CE4 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03019D23C8B005B4CE4 /* Promise.swift */; };
 		BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03219D23D79005B4CE4 /* Thenable.swift */; };
 		BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */; };
@@ -26,6 +29,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BE121ABE19D31880001A4473 /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
+		BE46E70119D386CA009C6326 /* APlusPromise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusPromise.swift; sourceTree = "<group>"; };
+		BE46E70319D39769009C6326 /* APlusPromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusPromiseTests.swift; sourceTree = "<group>"; };
 		BEE0A03019D23C8B005B4CE4 /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		BEE0A03219D23D79005B4CE4 /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
 		BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThenableTests.swift; sourceTree = "<group>"; };
@@ -78,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				BEE0A03019D23C8B005B4CE4 /* Promise.swift */,
+				BE46E70119D386CA009C6326 /* APlusPromise.swift */,
 				BEE0A03219D23D79005B4CE4 /* Thenable.swift */,
 				BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */,
 				BEFE4CFC19D1C49C0086A00B /* Supporting Files */,
@@ -98,6 +105,8 @@
 			children = (
 				BEFE4D0819D1C49C0086A00B /* CCOPromiseTests.swift */,
 				BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */,
+				BE121ABE19D31880001A4473 /* PromiseTests.swift */,
+				BE46E70319D39769009C6326 /* APlusPromiseTests.swift */,
 				BEFE4D0619D1C49C0086A00B /* Supporting Files */,
 			);
 			path = CCOPromiseTests;
@@ -218,6 +227,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */,
 				BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */,
 				BEE0A03119D23C8B005B4CE4 /* Promise.swift in Sources */,
 			);
@@ -227,6 +237,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE121ABF19D31880001A4473 /* PromiseTests.swift in Sources */,
+				BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */,
 				BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */,
 				BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */,
 			);

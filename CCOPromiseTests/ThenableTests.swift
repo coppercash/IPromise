@@ -10,11 +10,11 @@ import UIKit
 import XCTest
 import CCOPromise
 
-typealias NewCallback = (Float) -> Void
+typealias FutureCallback = (Float) -> Void
 
 protocol FutureTnenable
 {
-    func then(#onFulfilled: Resolution?, onRejected: Rejection?, onNewCallback: NewCallback?) -> Self
+    func then(#onFulfilled: Resolution?, onRejected: Rejection?, onFutureCallback: FutureCallback?) -> Self
     func then(onFulfilled: Resolution) -> Self
     func catch(onRejected: Rejection) -> Self
 }
@@ -40,19 +40,19 @@ class ThenableObject: Thenable
 
 class FutureThenableObject: FutureTnenable
 {
-    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil, onNewCallback: NewCallback? = nil) -> Self
+    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil, onFutureCallback: FutureCallback? = nil) -> Self
     {
         return self;
     }
     
     func then(onFulfilled: Resolution) -> Self
     {
-        return then(onFulfilled, onRejected: nil, onNewCallback: nil);
+        return then(onFulfilled, onRejected: nil, onFutureCallback: nil);
     }
     
     func catch(onRejected: Rejection) -> Self
     {
-        return then(nil, onRejected: onRejected, onNewCallback: nil)
+        return then(nil, onRejected: onRejected, onFutureCallback: nil)
     }
 }
 
@@ -147,27 +147,4 @@ class ThenableTests: XCTestCase
             return nil
         }
     }
-    
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-    }
-
-    func testExample() {
-        // This is an example of a functional test case.
-        XCTAssert(true, "Pass")
-    }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock() {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }
