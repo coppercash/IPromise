@@ -8,8 +8,8 @@
 
 import Foundation
 
-public typealias Resolution = (Any?) -> Any?
-public typealias Rejection = (Any?) -> Any?
+public typealias Resolution = (result: Any?) -> Any?
+public typealias Rejection = (reason: Any?) -> Any?
 
 public protocol Thenable
 {

@@ -8,14 +8,19 @@
 
 import Foundation
 
-public typealias Resovler = (value: Any?) -> Void
-public typealias Rejector = (value: Any?) -> Void
+public typealias Resovler = (result: Any?) -> Void
+public typealias Rejector = (reason: Any?) -> Void
 
 public class APlusPromise: Thenable
 {
+    // MARK: - Initializers
+    
     public required init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
     {
-        
+        resovler(
+            resolve: self.resolve,
+            reject: self.reject
+        )
     }
     
     public required init(thenable: Thenable)
@@ -28,6 +33,8 @@ public class APlusPromise: Thenable
         
     }
     
+    // MARK: - Public APIs
+
     public class func resolve(value: Any?) -> Self
     {
         return self(value: nil)
@@ -63,5 +70,22 @@ public class APlusPromise: Thenable
     public func catch(onRejected: Rejection) -> Self
     {
         return self;
+    }
+    
+    // MARK: -
+    
+    func resolve(result: Any?) -> Void
+    {
+        
+    }
+    
+    func reject(reason: Any?) -> Void
+    {
+        
+    }
+    
+    enum State
+    {
+        case Pending, Fulfilled, Rejected
     }
 }
