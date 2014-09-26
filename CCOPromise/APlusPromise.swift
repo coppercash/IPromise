@@ -25,32 +25,40 @@ public class APlusPromise: Thenable
     
     public convenience required init(thenable: Thenable)
     {
-        self.init({
-                (resolve: Resovler, reject: Rejector) -> Void in
-                
-                let onFulfilled = { (result: Any?) -> Any? in
-                    resolve(result: result)
-                    return nil
-                }
-                
-                let onRejected = { (reason: NSError?) -> Any? in
-                    reject(reason: reason)
-                    return nil
-                }
-                
-                thenable.then(
-                    onFulfilled: onFulfilled,
-                    onRejected: onRejected
-                )
-            })
-    }
-    
-    public required init(value: Any?)
-    {
+        let resovler = { (resolve: Resovler, reject: Rejector) -> Void in
+            
+            let onFulfilled = { (result: Any?) -> Any? in
+                resolve(result: result)
+                return nil
+            }
+            
+            let onRejected = { (reason: NSError?) -> Any? in
+                reject(reason: reason)
+                return nil
+            }
+            
+            thenable.then(
+                onFulfilled: onFulfilled,
+                onRejected: onRejected
+            )
+        }
         
+        self.init(resovler)
     }
     
+    public convenience required init(value: Any?)
+    {
+        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+            resolve(result: value)
+        })
+    }
     
+    public convenience required init(reason: NSError?)
+    {
+        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+            reject(reason: reason)
+        })
+    }
     
     // MARK: - Public APIs
 
