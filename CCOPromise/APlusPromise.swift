@@ -9,7 +9,7 @@
 import Foundation
 
 public typealias Resovler = (result: Any?) -> Void
-public typealias Rejector = (reason: Any?) -> Void
+public typealias Rejector = (reason: NSError?) -> Void
 
 public class APlusPromise: Thenable
 {
@@ -23,15 +23,34 @@ public class APlusPromise: Thenable
         )
     }
     
-    public required init(thenable: Thenable)
+    public convenience required init(thenable: Thenable)
     {
-        
+        self.init({
+                (resolve: Resovler, reject: Rejector) -> Void in
+                
+                let onFulfilled = { (result: Any?) -> Any? in
+                    resolve(result: result)
+                    return nil
+                }
+                
+                let onRejected = { (reason: NSError?) -> Any? in
+                    reject(reason: reason)
+                    return nil
+                }
+                
+                thenable.then(
+                    onFulfilled: onFulfilled,
+                    onRejected: onRejected
+                )
+            })
     }
     
     public required init(value: Any?)
     {
         
     }
+    
+    
     
     // MARK: - Public APIs
 
@@ -58,11 +77,6 @@ public class APlusPromise: Thenable
     // MARK: - Thenable
     
     public func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Self
-    {
-        return self;
-    }
-    
-    public func then(onFulfilled: Resolution) -> Self
     {
         return self;
     }

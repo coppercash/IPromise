@@ -10,5 +10,8 @@ import Foundation
 
 public class Promise: APlusPromise
 {
-
+    func then(onFulfilled: Resolution) -> Self
+    {
+        return self
+    }
 }
