@@ -45,8 +45,14 @@ public class Promise<V>: APlusPromise
         })
     }
 
-    func then(onFulfilled: Resolution) -> Self
+    // MARK: - Public APIs
+
+    func then(onFulfilled: (value: V?) -> Any?) -> Thenable
     {
-        return self
+        return self.then(
+            onFulfilled: { (value) -> Any? in
+                onFulfilled(value: (value as V))
+            },
+            onRejected: nil)
     }
 }

@@ -13,9 +13,6 @@ public typealias Rejector = (reason: NSError?) -> Void
 
 public class APlusPromise: Thenable
 {
-    var value: Any?
-    var reason: NSError?
-    
     // MARK: - Initializers
     
     public required init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
@@ -26,7 +23,7 @@ public class APlusPromise: Thenable
         )
     }
     
-    public required convenience init(thenable: Thenable)
+    public convenience init(thenable: Thenable)
     {
         self.init({ (resolve: Resovler, reject: Rejector) -> Void in
             
@@ -90,14 +87,17 @@ public class APlusPromise: Thenable
     
     // MARK: - Thenable
     
-    public func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Thenable
+    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
     {
         return self;
     }
     
     public func catch(onRejected: Rejection) -> Thenable
     {
-        return self;
+        return self.then(
+            onFulfilled: nil,
+            onRejected: onRejected
+        );
     }
     
     // MARK: -
