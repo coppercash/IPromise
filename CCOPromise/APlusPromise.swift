@@ -11,6 +11,10 @@ import Foundation
 public class APlusPromise: Thenable
 {
     var state: State = .Pending
+    var value: Any? = nil
+    var reason: Any? = nil
+    lazy var resolutions: [Resolution] = []
+    lazy var rejections: [Rejection] = []
     
     // MARK: - Initializers
     
@@ -107,12 +111,30 @@ public class APlusPromise: Thenable
     
     func resolve(value: Any?) -> Void
     {
+        if self.state != .Pending {
+            abort()
+        }
         
+        self.value = value
+        self.state = .Fulfilled
+        
+        for resolution in self.resolutions {
+            resolution(value: value)
+        }
     }
     
     func reject(reason: Any?) -> Void
     {
+        if self.state != .Pending {
+            abort()
+        }
+
+        self.reason = reason
+        self.state = .Rejected
         
+        for rejection in self.rejections {
+            rejection(reason: reason)
+        }
     }
     
     // MARK: -
