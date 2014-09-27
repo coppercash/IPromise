@@ -13,6 +13,6 @@ public typealias Rejection = (reason: NSError?) -> Any?
 
 public protocol Thenable
 {
-    func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Self
-    func catch(onRejected: Rejection) -> Self
+    func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Thenable
+    func catch(onRejected: Rejection) -> Thenable
 }

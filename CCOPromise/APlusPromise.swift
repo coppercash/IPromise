@@ -25,7 +25,7 @@ public class APlusPromise: Thenable
     
     public convenience required init(thenable: Thenable)
     {
-        let resovler = { (resolve: Resovler, reject: Rejector) -> Void in
+        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
             
             let onFulfilled = { (result: Any?) -> Any? in
                 resolve(result: result)
@@ -41,9 +41,7 @@ public class APlusPromise: Thenable
                 onFulfilled: onFulfilled,
                 onRejected: onRejected
             )
-        }
-        
-        self.init(resovler)
+        })
     }
     
     public convenience required init(value: Any?)
@@ -84,12 +82,12 @@ public class APlusPromise: Thenable
     
     // MARK: - Thenable
     
-    public func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Self
+    public func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Thenable
     {
         return self;
     }
     
-    public func catch(onRejected: Rejection) -> Self
+    public func catch(onRejected: Rejection) -> Thenable
     {
         return self;
     }
