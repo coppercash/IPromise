@@ -18,7 +18,11 @@ public class Promise<V>: APlusPromise
     public required
     init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
     {
-        super.init(resovler: resovler)
+        super.init()
+        resovler(
+            resolve: self.onFulfilled,
+            reject: self.onRejected
+        )
     }
 
     public required convenience
@@ -33,47 +37,46 @@ public class Promise<V>: APlusPromise
     // MARK: - Inherited Initializers
     
     public required
+    init()
+    {
+        super.init()
+    }
+    
+    public required
+    init(value: Any?)
+    {
+        super.init(value: value)
+    }
+    
+    public required
+    init(reason: Any?)
+    {
+        super.init(reason: reason)
+    }
+
+    public required
     init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
     {
-        super.init(resovler: resovler)
+        super.init()
+        resovler(
+            resolve: self.onFulfilled,
+            reject: self.onRejected
+        )
     }
 
     public required convenience
     init(thenable: Thenable)
     {
-        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
-            
-            let onFulfilled = { (value: Any?) -> Any? in
-                resolve(value: value)
-                return nil
+        self.init()
+        thenable.then(
+            onFulfilled: { (value) -> Any? in
+                self.onFulfilled(value)
+            },
+            onRejected: { (reason) -> Any? in
+                self.onRejected(reason)
             }
-            
-            let onRejected = { (reason: Any?) -> Any? in
-                reject(reason: reason)
-                return nil
-            }
-            
-            thenable.then(
-                onFulfilled: onFulfilled,
-                onRejected: onRejected
-            )
-        })
+        )
     }
-
-    public required convenience
-    init(value: Any?)
-    {
-        self.init(resovler: { (resolve: APlusResovler, reject: APlusRejector) -> Void in
-            resolve(value: value)
-        })
-    }
-
-    public required
-    init()
-    {
-        super.init()
-    }
-
 
     
     // MARK: - Public APIs
