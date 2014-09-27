@@ -18,4 +18,9 @@ class PromiseTests: XCTestCase
             
         }
     }
+    
+    func test_generic()
+    {
+        
+    }
 }

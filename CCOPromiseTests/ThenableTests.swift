@@ -14,25 +14,18 @@ typealias FutureCallback = (Float) -> Void
 
 protocol FutureTnenable
 {
-    func then(#onFulfilled: Resolution?, onRejected: Rejection?, onFutureCallback: FutureCallback?) -> Self
-    func then(onFulfilled: Resolution) -> Self
-    func catch(onRejected: Rejection) -> Self
+    func then(#onFulfilled: Resolution?, onRejected: Rejection?, onFutureCallback: FutureCallback?) -> FutureTnenable
+    func catch(onRejected: Rejection) -> FutureTnenable
 }
 
 class ThenableObject: Thenable
 {
-    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Self
+    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
     {
-        println("\(__FUNCTION__)")
         return self
     }
     
-    func then(onFulfilled: Resolution) -> Self
-    {
-        return then(onFulfilled: onFulfilled, onRejected: nil);
-    }
-    
-    func catch(onRejected: Rejection) -> Self
+    func catch(onRejected: Rejection) -> Thenable
     {
         return then(onFulfilled: nil, onRejected: onRejected);
     }
@@ -40,17 +33,12 @@ class ThenableObject: Thenable
 
 class FutureThenableObject: FutureTnenable
 {
-    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil, onFutureCallback: FutureCallback? = nil) -> Self
+    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil, onFutureCallback: FutureCallback? = nil) -> FutureTnenable
     {
         return self;
     }
     
-    func then(onFulfilled: Resolution) -> Self
-    {
-        return then(onFulfilled, onRejected: nil, onFutureCallback: nil);
-    }
-    
-    func catch(onRejected: Rejection) -> Self
+    func catch(onRejected: Rejection) -> FutureTnenable
     {
         return then(nil, onRejected: onRejected, onFutureCallback: nil)
     }
@@ -65,7 +53,7 @@ class ThenableTests: XCTestCase
         
         aThenableObject.then(
             onFulfilled:
-            { (result) -> Any? in
+            { (value) -> Any? in
                 return nil
             },
             onRejected:
@@ -77,7 +65,7 @@ class ThenableTests: XCTestCase
         
         aThenableObject.then(
             onFulfilled:
-            { (result) -> Any? in
+            { (value) -> Any? in
                 return nil
             },
             onRejected:
@@ -95,7 +83,7 @@ class ThenableTests: XCTestCase
         
         aThenableObject.then(
             onFulfilled:
-            { (result) -> Any? in
+            { (value) -> Any? in
                 
                 return nil
             },
@@ -108,7 +96,7 @@ class ThenableTests: XCTestCase
         
         aThenableObject.then(
             onFulfilled:
-            { (result) -> Any? in
+            { (value) -> Any? in
                 
                 return nil
             }
@@ -125,13 +113,13 @@ class ThenableTests: XCTestCase
         // Then
         
         aThenableObject.then(
-            { (result) -> Any? in
+            { (value) -> Any? in
                 
                 return nil
             }
         )
         
-        aThenableObject.then { (result) -> Any? in
+        aThenableObject.then { (value) -> Any? in
             return nil
         }
         
