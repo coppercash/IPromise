@@ -10,65 +10,61 @@ import Foundation
 
 public class APlusPromise: Thenable
 {
-    var state: State = .Pending
-    var value: Any? = nil
-    var reason: Any? = nil
-    var thens: [(resolution: Resolution?, rejection: Rejection?, child: APlusPromise?)] = []
-    
-    lazy var resolutions: [Resolution] = []
-    lazy var rejections: [Rejection] = []
+    var state: State
+    var value: Any?
+    var reason: Any?
+    var thens: [(resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise)] = []
     
     // MARK: - Initializers
     
     public required
-    init(){}
+    init()
+    {
+        self.value = nil;
+        self.reason = nil;
+        self.state = .Pending
+    }
     
     public required
+    init(value: Any?)
+    {
+        self.value = value;
+        self.reason = nil;
+        self.state = .Fulfilled
+    }
+    
+    public required
+    init(reason: Any?)
+    {
+        self.value = nil;
+        self.reason = reason
+        self.state = .Rejected
+    }
+
+    public required convenience
     init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
     {
+        self.init()
         resovler(
-            resolve: self.resolve,
-            reject: self.reject
+            resolve: self.onFulfilled,
+            reject: self.onRejected
         )
     }
     
     public required convenience
     init(thenable: Thenable)
     {
-        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
-            
-            let onFulfilled = { (value: Any?) -> Any? in
-                resolve(value: value)
-                return nil
+        self.init()
+        thenable.then(
+            onFulfilled: { (value) -> Any? in
+                self.onFulfilled(value)
+            },
+            onRejected: { (reason) -> Any? in
+                self.onRejected(reason)
             }
-            
-            let onRejected = { (reason: Any?) -> Any? in
-                reject(reason: reason)
-                return nil
-            }
-            
-            thenable.then(
-                onFulfilled: onFulfilled,
-                onRejected: onRejected
-            )
-        })
+        )
     }
     
-    public required convenience
-    init(value: Any?)
-    {
-        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
-            resolve(value: value)
-        })
-    }
-    
-    public required convenience
-    init(reason: Any?)
-    {
-        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
-            reject(reason: reason)
-        })
-    }
     
     // MARK: - Public APIs
 
@@ -101,21 +97,21 @@ public class APlusPromise: Thenable
     
     public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
     {
-        var child: APlusPromise
+        var subPromise: APlusPromise
         
         switch self.state {
         case .Pending:
-            child = self.dynamicType()
+            subPromise = self.dynamicType()
         case .Fulfilled:
-            child = self.dynamicType(value: self.value)
+            subPromise = self.dynamicType(value: self.value)
         case .Rejected:
-            child = self.dynamicType(reason: self.reason)
+            subPromise = self.dynamicType(reason: self.reason)
         }
         
-        let then: (resolution: Resolution?, rejection: Rejection?, child: APlusPromise?) = (onFulfilled, onRejected, child)
+        let then: (resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise) = (onFulfilled, onRejected, subPromise)
         self.thens.append(then)
         
-        return child
+        return subPromise
     }
     
     public func catch(onRejected: Rejection) -> Thenable
@@ -128,7 +124,7 @@ public class APlusPromise: Thenable
     
     // MARK: -
     
-    func resolve(value: Any?) -> Void
+    func onFulfilled(value: Any?) -> Void
     {
         if self.state != .Pending {
             abort()
@@ -137,12 +133,22 @@ public class APlusPromise: Thenable
         self.value = value
         self.state = .Fulfilled
         
-        for resolution in self.resolutions {
-            resolution(value: value)
+        for then in self.thens
+        {
+            let subPromise = then.subPromise
+            if let resolution = then.resolution?
+            {
+                let value = resolution(value: value)
+                subPromise.resolve(value)
+            }
+            else
+            {
+                subPromise.onFulfilled(value)
+            }
         }
     }
     
-    func reject(reason: Any?) -> Void
+    func onRejected(reason: Any?) -> Void
     {
         if self.state != .Pending {
             abort()
@@ -151,8 +157,41 @@ public class APlusPromise: Thenable
         self.reason = reason
         self.state = .Rejected
         
-        for rejection in self.rejections {
-            rejection(reason: reason)
+        for then in self.thens
+        {
+            let subPromise = then.subPromise
+            if let rejection = then.rejection?
+            {
+                let value = rejection(reason: reason)
+                subPromise.resolve(value)
+            }
+            else
+            {
+                subPromise.onRejected(value)
+            }
+        }
+    }
+    
+    func resolve(value: Any?)
+    {
+        if self.state != .Pending {
+            abort()
+        }
+
+        switch value {
+        case let promise as APlusPromise where promise === self:
+            self.onRejected(NSError())
+        case let promise as APlusPromise:
+            promise.then(
+                onFulfilled: { (value) -> Any? in
+                    self.onFulfilled(value)
+                },
+                onRejected: { (reason) -> Any? in
+                    self.onRejected(reason)
+                }
+            )
+        default:
+            self.onFulfilled(value)
         }
     }
     
