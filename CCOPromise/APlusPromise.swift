@@ -60,14 +60,19 @@ public class APlusPromise: Thenable
     
     // MARK: - Public APIs
 
-    public class func resolve(value: Any?) -> Self
+    public class func resolve(value: Any?) -> APlusPromise
     {
-        return self(value: nil)
+        switch value {
+        case let promise as APlusPromise:
+            return promise
+        default:
+            return self(value: value)
+        }
     }
     
-    public class func reject(reason: Any?) -> Self
+    public class func reject(reason: NSError?) -> Self
     {
-        return self(value: nil)
+        return self(reason: reason)
     }
     
     public class func all(values: [Any?]) -> Self
