@@ -10,9 +10,8 @@ import Foundation
 
 public class APlusPromise: Thenable
 {
-    public typealias APlusResovler = (value: Any?) -> Void
-    public typealias APlusRejector = (reason: NSError?) -> Void
-
+    var state: State = .Pending
+    
     // MARK: - Initializers
     
     public required
@@ -34,7 +33,7 @@ public class APlusPromise: Thenable
                 return nil
             }
             
-            let onRejected = { (reason: NSError?) -> Any? in
+            let onRejected = { (reason: Any?) -> Any? in
                 reject(reason: reason)
                 return nil
             }
@@ -55,7 +54,7 @@ public class APlusPromise: Thenable
     }
     
     public required convenience
-    init(reason: NSError?)
+    init(reason: Any?)
     {
         self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
             reject(reason: reason)
@@ -74,7 +73,7 @@ public class APlusPromise: Thenable
         }
     }
     
-    public class func reject(reason: NSError?) -> Self
+    public class func reject(reason: Any?) -> Self
     {
         return self(reason: reason)
     }
@@ -111,11 +110,16 @@ public class APlusPromise: Thenable
         
     }
     
-    func reject(reason: NSError?) -> Void
+    func reject(reason: Any?) -> Void
     {
         
     }
     
+    // MARK: -
+
+    public typealias APlusResovler = (value: Any?) -> Void
+    public typealias APlusRejector = (reason: Any?) -> Void
+
     enum State
     {
         case Pending, Fulfilled, Rejected

@@ -9,7 +9,7 @@
 import Foundation
 
 public typealias Resolution = (value: Any?) -> Any?
-public typealias Rejection = (reason: NSError?) -> Any?
+public typealias Rejection = (reason: Any?) -> Any?
 
 public protocol Thenable
 {

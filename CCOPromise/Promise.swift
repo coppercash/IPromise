@@ -48,7 +48,7 @@ public class Promise<V>: APlusPromise
                 return nil
             }
             
-            let onRejected = { (reason: NSError?) -> Any? in
+            let onRejected = { (reason: Any?) -> Any? in
                 reject(reason: reason)
                 return nil
             }
