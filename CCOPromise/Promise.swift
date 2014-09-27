@@ -68,6 +68,13 @@ public class Promise<V>: APlusPromise
         })
     }
 
+    public required
+    init()
+    {
+        super.init()
+    }
+
+
     
     // MARK: - Public APIs
 

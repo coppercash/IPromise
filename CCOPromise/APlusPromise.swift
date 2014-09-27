@@ -13,10 +13,15 @@ public class APlusPromise: Thenable
     var state: State = .Pending
     var value: Any? = nil
     var reason: Any? = nil
+    var thens: [(resolution: Resolution?, rejection: Rejection?, child: APlusPromise?)] = []
+    
     lazy var resolutions: [Resolution] = []
     lazy var rejections: [Rejection] = []
     
     // MARK: - Initializers
+    
+    public required
+    init(){}
     
     public required
     init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
@@ -96,7 +101,21 @@ public class APlusPromise: Thenable
     
     public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
     {
-        return self;
+        var child: APlusPromise
+        
+        switch self.state {
+        case .Pending:
+            child = self.dynamicType()
+        case .Fulfilled:
+            child = self.dynamicType(value: self.value)
+        case .Rejected:
+            child = self.dynamicType(reason: self.reason)
+        }
+        
+        let then: (resolution: Resolution?, rejection: Rejection?, child: APlusPromise?) = (onFulfilled, onRejected, child)
+        self.thens.append(then)
+        
+        return child
     }
     
     public func catch(onRejected: Rejection) -> Thenable
