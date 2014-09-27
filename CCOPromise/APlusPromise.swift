@@ -8,14 +8,15 @@
 
 import Foundation
 
-public typealias Resovler = (value: Any?) -> Void
-public typealias Rejector = (reason: NSError?) -> Void
-
 public class APlusPromise: Thenable
 {
+    public typealias APlusResovler = (value: Any?) -> Void
+    public typealias APlusRejector = (reason: NSError?) -> Void
+
     // MARK: - Initializers
     
-    public required init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
+    public required
+    init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
     {
         resovler(
             resolve: self.resolve,
@@ -23,9 +24,10 @@ public class APlusPromise: Thenable
         )
     }
     
-    public convenience init(thenable: Thenable)
+    public required convenience
+    init(thenable: Thenable)
     {
-        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
             
             let onFulfilled = { (value: Any?) -> Any? in
                 resolve(value: value)
@@ -44,16 +46,18 @@ public class APlusPromise: Thenable
         })
     }
     
-    public required convenience init(value: Any?)
+    public required convenience
+    init(value: Any?)
     {
-        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
             resolve(value: value)
         })
     }
     
-    public required convenience init(reason: NSError?)
+    public required convenience
+    init(reason: NSError?)
     {
-        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
             reject(reason: reason)
         })
     }

@@ -10,16 +10,38 @@ import Foundation
 
 public class Promise<V>: APlusPromise
 {
+    public typealias Resovler = (value: V) -> Void
+    public typealias Rejector = APlusRejector
+
     // MARK: - Initializers
 
-    public required init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
+    public required
+    init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
     {
         super.init(resovler: resovler)
     }
-    
-    public required convenience init(thenable: Thenable)
+
+    public required convenience
+    init(value: V)
     {
-        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+        self.init(resovler: { (resolve: Resovler, reject: Rejector) -> Void in
+            resolve(value: value)
+        })
+    }
+    
+    
+    // MARK: - Inherited Initializers
+    
+    public required
+    init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
+    {
+        super.init(resovler: resovler)
+    }
+
+    public required convenience
+    init(thenable: Thenable)
+    {
+        self.init({ (resolve: APlusResovler, reject: APlusRejector) -> Void in
             
             let onFulfilled = { (value: Any?) -> Any? in
                 resolve(value: value)
@@ -38,16 +60,19 @@ public class Promise<V>: APlusPromise
         })
     }
 
-    public required convenience init(value: V)
+    public required convenience
+    init(value: Any?)
     {
-        self.init({ (resolve: Resovler, reject: Rejector) -> Void in
+        self.init(resovler: { (resolve: APlusResovler, reject: APlusRejector) -> Void in
             resolve(value: value)
         })
     }
 
+    
     // MARK: - Public APIs
 
-    func then(onFulfilled: (value: V?) -> Any?) -> Thenable
+    public
+    func then(onFulfilled: (value: V) -> Any?) -> Thenable
     {
         return self.then(
             onFulfilled: { (value) -> Any? in
