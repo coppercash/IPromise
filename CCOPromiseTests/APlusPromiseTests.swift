@@ -20,25 +20,25 @@ class APlusPromiseTests: XCTestCase
     func test_init()
     {
         let pendingPrms = APlusPromise()
-        XCTAssertNotNil(pendingPrms, " ")
-        XCTAssertEqual(pendingPrms.state, APlusPromise.State.Pending, " ")
-        XCTAssertTrue(pendingPrms.value == nil, " ")
-        XCTAssertTrue(pendingPrms.reason == nil, " ")
+        XCTAssertNotNil(pendingPrms)
+        XCTAssertEqual(pendingPrms.state, APlusPromise.State.Pending)
+        XCTAssertTrue(pendingPrms.value == nil)
+        XCTAssertTrue(pendingPrms.reason == nil)
 
         (pendingPrms.value as APlusPromise?) == nil
         
         let fulfulledPrms = APlusPromise(value: "A value")
-        XCTAssertNotNil(fulfulledPrms, " ")
-        XCTAssertEqual(fulfulledPrms.state, APlusPromise.State.Fulfilled, " ")
-        XCTAssertEqual((fulfulledPrms.value as String), "A value", " ")
-        XCTAssertTrue(fulfulledPrms.reason == nil, " ")
+        XCTAssertNotNil(fulfulledPrms)
+        XCTAssertEqual(fulfulledPrms.state, APlusPromise.State.Fulfilled)
+        XCTAssertEqual((fulfulledPrms.value as String), "A value")
+        XCTAssertTrue(fulfulledPrms.reason == nil)
 
         let error = NSError()
         let rejectedPrms = APlusPromise(reason: error)
-        XCTAssertNotNil(rejectedPrms, " ")
-        XCTAssertEqual(rejectedPrms.state, APlusPromise.State.Rejected, " ")
-        XCTAssertTrue(rejectedPrms.value == nil, " ")
-        XCTAssertEqual((rejectedPrms.reason as NSError), error, " ")
+        XCTAssertNotNil(rejectedPrms)
+        XCTAssertEqual(rejectedPrms.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(rejectedPrms.value == nil)
+        XCTAssertEqual((rejectedPrms.reason as NSError), error)
     }
     
     func test_initWithAction()
@@ -46,10 +46,10 @@ class APlusPromiseTests: XCTestCase
         let actionPrms = APlusPromise { (resolve, reject) -> Void in
         }
         
-        XCTAssertNotNil(actionPrms, " ")
-        XCTAssertEqual(actionPrms.state, APlusPromise.State.Pending, " ")
-        XCTAssertTrue(actionPrms.value == nil, " ")
-        XCTAssertTrue(actionPrms.reason == nil, " ")
+        XCTAssertNotNil(actionPrms)
+        XCTAssertEqual(actionPrms.state, APlusPromise.State.Pending)
+        XCTAssertTrue(actionPrms.value == nil)
+        XCTAssertTrue(actionPrms.reason == nil)
         
         let actionPrmsFulfill = APlusPromise { (resolve, reject) -> Void in
             resolve(value: value1)
@@ -58,10 +58,10 @@ class APlusPromiseTests: XCTestCase
             reject(reason: error2)
         }
         
-        XCTAssertNotNil(actionPrmsFulfill, " ")
-        XCTAssertEqual(actionPrmsFulfill.state, APlusPromise.State.Fulfilled, " ")
-        XCTAssertEqual((actionPrmsFulfill.value as String), value1, " ")
-        XCTAssertTrue(actionPrmsFulfill.reason == nil, " ")
+        XCTAssertNotNil(actionPrmsFulfill)
+        XCTAssertEqual(actionPrmsFulfill.state, APlusPromise.State.Fulfilled)
+        XCTAssertEqual((actionPrmsFulfill.value as String), value1)
+        XCTAssertTrue(actionPrmsFulfill.reason == nil)
 
         let actionPrmsReject = APlusPromise { (resolve, reject) -> Void in
             reject(reason: error1)
@@ -70,10 +70,10 @@ class APlusPromiseTests: XCTestCase
             resolve(value: value2)
         }
         
-        XCTAssertNotNil(actionPrmsReject, " ")
-        XCTAssertEqual(actionPrmsReject.state, APlusPromise.State.Rejected, " ")
-        XCTAssertTrue(actionPrmsReject.value == nil, " ")
-        XCTAssertEqual((actionPrmsReject.reason as NSError), error1, " ")
+        XCTAssertNotNil(actionPrmsReject)
+        XCTAssertEqual(actionPrmsReject.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(actionPrmsReject.value == nil)
+        XCTAssertEqual((actionPrmsReject.reason as NSError), error1)
     }
     
     func test_initWithActionFulfill()
@@ -93,7 +93,7 @@ class APlusPromiseTests: XCTestCase
         }
         actionPrms.then(
             onFulfilled: { (value) -> Any? in
-                XCTAssertEqual((value as String), value1, " ")
+                XCTAssertEqual((value as String), value1)
                 expectation.fulfill()
                 return nil
             },
@@ -103,9 +103,9 @@ class APlusPromiseTests: XCTestCase
             }
         )
         waitForExpectationsWithTimeout(1) { (error) in
-            XCTAssertEqual(actionPrms.state, APlusPromise.State.Fulfilled, " ")
-            XCTAssertTrue((actionPrms.value as String) == value1, " ")
-            XCTAssertTrue(actionPrms.reason == nil, " ")
+            XCTAssertEqual(actionPrms.state, APlusPromise.State.Fulfilled)
+            XCTAssertTrue((actionPrms.value as String) == value1)
+            XCTAssertTrue(actionPrms.reason == nil)
         };
     }
     
@@ -130,15 +130,15 @@ class APlusPromiseTests: XCTestCase
                 return nil
             },
             onRejected: { (reason) -> Any? in
-                XCTAssertEqual((reason as NSError), error1, " ")
+                XCTAssertEqual((reason as NSError), error1)
                 expectation.fulfill()
                 return nil
             }
         )
         waitForExpectationsWithTimeout(1) { (error) in
-            XCTAssertEqual(actionPrms.state, APlusPromise.State.Rejected, " ")
-            XCTAssertTrue(actionPrms.value == nil, " ")
-            XCTAssertEqual((actionPrms.reason as NSError), error1, " ")
+            XCTAssertEqual(actionPrms.state, APlusPromise.State.Rejected)
+            XCTAssertTrue(actionPrms.value == nil)
+            XCTAssertEqual((actionPrms.reason as NSError), error1)
         };
     }
 
@@ -146,10 +146,10 @@ class APlusPromiseTests: XCTestCase
     {
         let thenObject = APlusPromise()
         let thenPrms = APlusPromise(thenable: thenObject)
-        XCTAssertNotNil(thenPrms, " ")
-        XCTAssertEqual(thenPrms.state, APlusPromise.State.Pending, " ")
-        XCTAssertTrue(thenPrms.value == nil, " ")
-        XCTAssertTrue(thenPrms.reason == nil, " ")
+        XCTAssertNotNil(thenPrms)
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Pending)
+        XCTAssertTrue(thenPrms.value == nil)
+        XCTAssertTrue(thenPrms.reason == nil)
     }
     
     func test_initThenableFulfill()
@@ -168,9 +168,9 @@ class APlusPromiseTests: XCTestCase
         resolver!(value: value2)
         rejecter!(reason: error2)
 
-        XCTAssertEqual(thenPrms.state, APlusPromise.State.Fulfilled, " ")
-        XCTAssertTrue((thenPrms.value as String) == value1, " ")
-        XCTAssertTrue(thenPrms.reason == nil, " ")
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Fulfilled)
+        XCTAssertTrue((thenPrms.value as String) == value1)
+        XCTAssertTrue(thenPrms.reason == nil)
     }
 
     func test_initThenableReject()
@@ -189,8 +189,48 @@ class APlusPromiseTests: XCTestCase
         rejecter!(reason: error2)
         resolver!(value: value2)
         
-        XCTAssertEqual(thenPrms.state, APlusPromise.State.Rejected, " ")
-        XCTAssertTrue(thenPrms.value == nil, " ")
-        XCTAssertEqual((thenPrms.reason as NSError), error1, " ")
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(thenPrms.value == nil)
+        XCTAssertEqual((thenPrms.reason as NSError), error1)
+    }
+    
+    func test_resolve()
+    {
+        let promiseValue = APlusPromise()
+        let promise1 = APlusPromise.resolve(promiseValue)
+        XCTAssertTrue(promise1 === promiseValue)
+        
+        let promise2 = APlusPromise.resolve(value1)
+        XCTAssertEqual(promise2.state, APlusPromise.State.Fulfilled)
+        XCTAssertTrue((promise2.value as String) == value1)
+        XCTAssertTrue(promise2.reason == nil)
+    }
+
+    func test_reject()
+    {
+        let promise1 = APlusPromise.reject(error1)
+        XCTAssertEqual(promise1.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(promise1.value == nil)
+        XCTAssertEqual((promise1.reason as NSError), error1)
+    }
+    
+    func test_all()
+    {
+        
+    }
+    
+    func test_race()
+    {
+        
+    }
+    
+    func test_catch()
+    {
+        
+    }
+    
+    func test_chain()
+    {
+        
     }
 }
