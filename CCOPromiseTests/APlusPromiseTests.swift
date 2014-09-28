@@ -214,11 +214,50 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual((promise1.reason as NSError), error1)
     }
     
-    func test_all()
+    func test_allFulfill()
+    {
+        let expectation = expectationWithDescription("allFulfill")
+        
+        let prms1 = APlusPromise(value: value1)
+        let prms2 = APlusPromise(value: value2)
+        let prms3 = APlusPromise { (resolve, reject) -> Void in
+            dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                resolve(value: value1)
+            })
+        }
+        
+        let promise = APlusPromise
+            .all([prms1, prms2, prms3])
+            .then(
+                onFulfilled: { (value) -> Any? in
+                    XCTAssertEqual((value as String), value1)
+                    expectation.fulfill()
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    XCTAssertFalse(true, "")
+                    return nil
+                }
+        )
+        
+        
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertTrue(promise.reason == nil)
+
+        
+        
+        waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
+            
+        })
+    }
+    
+    func test_allReject()
     {
         
     }
-    
+
     func test_race()
     {
         
