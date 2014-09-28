@@ -58,9 +58,11 @@ public class APlusPromise: Thenable
         thenable.then(
             onFulfilled: { (value) -> Any? in
                 self.onFulfilled(value)
+                return nil
             },
             onRejected: { (reason) -> Any? in
                 self.onRejected(reason)
+                return nil
             }
         )
     }
@@ -111,11 +113,32 @@ public class APlusPromise: Thenable
             )
         }
         
-        return self(value: nil)
+        return allPromise
     }
     
     public class func race(values: [Any?]) -> Self
     {
+        let racePromise = self()
+        
+        for value in values
+        {
+            let promise = self.resolve(value)
+            promise.then(
+                onFulfilled: { (value) -> Any? in
+                    if .Pending == racePromise.state {
+                        racePromise.onFulfilled(value)
+                    }
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    if .Pending == racePromise.state {
+                        racePromise.onRejected(reason)
+                    }
+                    return nil
+                }
+            )
+        }
+
         return self(value: nil)
     }
     
@@ -213,9 +236,11 @@ public class APlusPromise: Thenable
                 promise.then(
                     onFulfilled: { (value) -> Any? in
                         self.onFulfilled(value)
+                        return nil
                     },
                     onRejected: { (reason) -> Any? in
                         self.onRejected(reason)
+                        return nil
                     }
                 )
             }
