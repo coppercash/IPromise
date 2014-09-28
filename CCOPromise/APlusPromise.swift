@@ -122,7 +122,7 @@ public class APlusPromise: Thenable
         );
     }
     
-    // MARK: -
+    // MARK: - Private APIs
     
     func onFulfilled(value: Any?) -> Void
     {
@@ -177,31 +177,33 @@ public class APlusPromise: Thenable
         if self.state != .Pending {
             abort()
         }
-
+        
         switch value {
-        case let promise as APlusPromise where promise === self:
-            self.onRejected(NSError())
         case let promise as APlusPromise:
-            promise.then(
-                onFulfilled: { (value) -> Any? in
-                    self.onFulfilled(value)
-                },
-                onRejected: { (reason) -> Any? in
-                    self.onRejected(reason)
-                }
-            )
+            if promise === self {
+                self.onRejected(NSError())
+            }
+            else {
+                promise.then(
+                    onFulfilled: { (value) -> Any? in
+                        self.onFulfilled(value)
+                    },
+                    onRejected: { (reason) -> Any? in
+                        self.onRejected(reason)
+                    }
+                )
+            }
         default:
             self.onFulfilled(value)
         }
     }
     
-    // MARK: -
+    // MARK: - Type
 
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
 
-    enum State
-    {
+    enum State {
         case Pending, Fulfilled, Rejected
     }
 }
