@@ -83,7 +83,7 @@ public class APlusPromise: Thenable
     func onFulfilled(value: Any?) -> Void
     {
         if self.state != .Pending {
-            abort()
+            NSException.aPlusPromiseStateTransitionException().raise()
         }
         
         self.value = value
@@ -107,7 +107,7 @@ public class APlusPromise: Thenable
     func onRejected(reason: Any?) -> Void
     {
         if self.state != .Pending {
-            abort()
+            NSException.aPlusPromiseStateTransitionException().raise()
         }
         
         self.reason = reason
@@ -131,13 +131,13 @@ public class APlusPromise: Thenable
     func resolve(value: Any?)
     {
         if self.state != .Pending {
-            abort()
+            NSException.aPlusPromiseStateTransitionException().raise()
         }
         
         switch value {
         case let promise as APlusPromise:
             if promise === self {
-                self.onRejected(NSError())
+                self.onRejected(NSError.aPlusPromiseTypeError())
             }
             else {
                 promise.then(
@@ -257,5 +257,26 @@ public class APlusPromise: Thenable
         self.thens.append(then)
         
         return subPromise
+    }
+}
+
+public let APlusPromiseTypeError = 1000
+public extension NSError {
+    class func aPlusPromiseTypeError() -> Self {
+        return self(
+            domain: "APlusPromiseErrorDomain",
+            code: APlusPromiseTypeError,
+            userInfo: [NSLocalizedDescriptionKey: "TypeError"]
+        )
+    }
+}
+
+public extension NSException {
+    class func aPlusPromiseStateTransitionException() -> Self {
+        return self(
+            name: "APlusPromiseStateTransitionException",
+            reason: "Promise has already been fulfilled or rejected. Transition to any other state is forbidden.",
+            userInfo: nil
+        )
     }
 }

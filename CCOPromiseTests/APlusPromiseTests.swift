@@ -12,5 +12,8 @@ import CCOPromise
 
 class APlusPromiseTests: XCTestCase
 {
-
+    func test_init()
+    {
+        
+    }
 }
