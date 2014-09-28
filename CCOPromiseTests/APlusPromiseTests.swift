@@ -214,48 +214,165 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual((promise1.reason as NSError), error1)
     }
     
-    func test_allFulfill()
+    func test_allFulfillAsync()
     {
-        let expectation = expectationWithDescription("allFulfill")
+        let expectation = expectationWithDescription("allFulfillAsync")
         
-        let prms1 = APlusPromise(value: value1)
-        let prms2 = APlusPromise(value: value2)
+        let prms1 = APlusPromise(value: nil)
         let prms3 = APlusPromise { (resolve, reject) -> Void in
-            dispatch_sync(dispatch_get_main_queue(), { () -> Void in
-                resolve(value: value1)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                    resolve(value: value1)
+                })
             })
         }
         
-        let promise = APlusPromise
-            .all([prms1, prms2, prms3])
-            .then(
-                onFulfilled: { (value) -> Any? in
-                    XCTAssertEqual((value as String), value1)
-                    expectation.fulfill()
-                    return nil
-                },
-                onRejected: { (reason) -> Any? in
-                    XCTAssertFalse(true, "")
-                    return nil
-                }
+        let promise = APlusPromise.all([prms1, value2, prms3])
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                let results = value as [Any?]
+                XCTAssertTrue((results[0] as Any?) == nil)
+                XCTAssertEqual((results[1] as String), value2)
+                XCTAssertEqual((results[2] as String), value1)
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
         )
-        
         
         XCTAssertNotNil(promise)
         XCTAssertEqual(promise.state, APlusPromise.State.Pending)
         XCTAssertTrue(promise.value == nil)
         XCTAssertTrue(promise.reason == nil)
-
-        
         
         waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
+            XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
+            XCTAssertTrue(promise.reason == nil)
             
+            let results = promise.value as [Any?]
+            XCTAssertTrue((results[0] as Any?) == nil)
+            XCTAssertEqual((results[1] as String), value2)
+            XCTAssertEqual((results[2] as String), value1)
         })
     }
     
-    func test_allReject()
+    func test_allFulfillSync()
     {
+        let expectation = expectationWithDescription("allFulfillSync")
+        let prms1 = APlusPromise(value: value1)
+        let promise = APlusPromise.all([nil, value2, prms1])
+
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                let results = value as [Any?]
+                XCTAssertTrue((results[0] as Any?) == nil)
+                XCTAssertEqual((results[1] as String), value2)
+                XCTAssertEqual((results[2] as String), value1)
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+
+        promise.then()  //  Test pass nil as callback
+
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
+        XCTAssertTrue(promise.reason == nil)
         
+        let results = promise.value as [Any?]
+        XCTAssertTrue((results[0] as Any?) == nil)
+        XCTAssertEqual((results[1] as String), value2)
+        XCTAssertEqual((results[2] as String), value1)
+        
+        waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
+        })
+    }
+    
+    func test_allRejectAsync()
+    {
+        let expectation = expectationWithDescription("allRejectAsync")
+        var times = 0
+        
+        let prms1 = APlusPromise(value: value1)
+        let prms3 = APlusPromise { (resolve, reject) -> Void in
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                    reject(reason: error2)
+                })
+            })
+        }
+        
+        let promise = APlusPromise.all([prms1, value2, prms3])
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual((reason as NSError), error2)
+                expectation.fulfill()
+                XCTAssertTrue(++times < 2)
+                return nil
+            }
+        )
+        
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertTrue(promise.reason == nil)
+        
+        waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
+            XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
+            XCTAssertTrue(promise.value == nil)
+            XCTAssertEqual((promise.reason as NSError), error2)
+        })
+    }
+
+    func test_allRejectSync()
+    {
+        let expectation = expectationWithDescription("allRejectSync")
+        var times = 0
+        
+        let prms1 = APlusPromise(reason: error1)
+        let prms3 = APlusPromise { (resolve, reject) -> Void in
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                    reject(reason: error2)
+                })
+            })
+        }
+        
+        let promise = APlusPromise.all([prms1, value2, prms3])
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual((reason as NSError), error1)
+                expectation.fulfill()
+                XCTAssertTrue(++times < 2)
+                return nil
+            }
+        )
+        
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertEqual((promise.reason as NSError), error1)
+        
+        waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
+            XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
+            XCTAssertTrue(promise.value == nil)
+            XCTAssertEqual((promise.reason as NSError), error1)
+        })
     }
 
     func test_race()

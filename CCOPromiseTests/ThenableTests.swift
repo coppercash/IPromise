@@ -19,7 +19,8 @@ protocol FutureTnenable
 
 class ThenableObject: Thenable
 {
-    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
+    typealias ReturnType = ThenableObject
+    func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> ThenableObject
     {
         return self
     }

@@ -14,6 +14,7 @@ public class APlusPromise: Thenable
     
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
+    typealias ReturnType = APlusPromise
     
     public enum State: Printable {
         case Pending, Fulfilled, Rejected
@@ -74,7 +75,7 @@ public class APlusPromise: Thenable
     }
     
     public required convenience
-    init(thenable: Thenable)
+    init<T: Thenable>(thenable: T)
     {
         self.init()
         thenable.then(
@@ -241,7 +242,7 @@ public class APlusPromise: Thenable
         return self(value: nil)
     }
     
-    public func catch(onRejected: Rejection) -> Thenable
+    public func catch(onRejected: Rejection) -> APlusPromise
     {
         return self.then(
             onFulfilled: nil,
@@ -251,21 +252,33 @@ public class APlusPromise: Thenable
 
     // MARK: - Thenable
     
-    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Thenable
+    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> APlusPromise
     {
         var subPromise: APlusPromise
+        let state = self.state
+        let value = self.value
+        let reason = self.reason
         
-        switch self.state {
+        switch state {
         case .Pending:
             subPromise = self.dynamicType()
         case .Fulfilled:
-            subPromise = self.dynamicType(value: self.value)
+            subPromise = self.dynamicType(value: value)
         case .Rejected:
-            subPromise = self.dynamicType(reason: self.reason)
+            subPromise = self.dynamicType(reason: reason)
         }
         
         let then: (resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise) = (onFulfilled, onRejected, subPromise)
         self.thens.append(then)
+        
+        switch state {
+        case .Fulfilled:
+            subPromise.resolve(onFulfilled?(value: value))
+        case .Rejected:
+            subPromise.resolve(onRejected?(reason: reason))
+        default:
+            break
+        }
         
         return subPromise
     }

@@ -13,5 +13,6 @@ public typealias Rejection = (reason: Any?) -> Any?
 
 public protocol Thenable
 {
-    func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> Thenable
+    typealias ReturnType
+    func then(#onFulfilled: Resolution?, onRejected: Rejection?) -> ReturnType
 }
