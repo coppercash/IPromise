@@ -142,4 +142,55 @@ class APlusPromiseTests: XCTestCase
         };
     }
 
+    func test_initThenable()
+    {
+        let thenObject = APlusPromise()
+        let thenPrms = APlusPromise(thenable: thenObject)
+        XCTAssertNotNil(thenPrms, " ")
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Pending, " ")
+        XCTAssertTrue(thenPrms.value == nil, " ")
+        XCTAssertTrue(thenPrms.reason == nil, " ")
+    }
+    
+    func test_initThenableFulfill()
+    {
+        var resolver: APlusPromise.APlusResovler? = nil
+        var rejecter: APlusPromise.APlusRejector? = nil
+        
+        let thenObject = APlusPromise { (resolve, reject) -> Void in
+            resolver = resolve
+            rejecter = reject
+        }
+        let thenPrms = APlusPromise(thenable: thenObject)
+
+        resolver!(value: value1)
+        rejecter!(reason: error1)
+        resolver!(value: value2)
+        rejecter!(reason: error2)
+
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Fulfilled, " ")
+        XCTAssertTrue((thenPrms.value as String) == value1, " ")
+        XCTAssertTrue(thenPrms.reason == nil, " ")
+    }
+
+    func test_initThenableReject()
+    {
+        var resolver: APlusPromise.APlusResovler? = nil
+        var rejecter: APlusPromise.APlusRejector? = nil
+        
+        let thenObject = APlusPromise { (resolve, reject) -> Void in
+            resolver = resolve
+            rejecter = reject
+        }
+        let thenPrms = APlusPromise(thenable: thenObject)
+        
+        rejecter!(reason: error1)
+        resolver!(value: value1)
+        rejecter!(reason: error2)
+        resolver!(value: value2)
+        
+        XCTAssertEqual(thenPrms.state, APlusPromise.State.Rejected, " ")
+        XCTAssertTrue(thenPrms.value == nil, " ")
+        XCTAssertEqual((thenPrms.reason as NSError), error1, " ")
+    }
 }
