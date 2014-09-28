@@ -15,15 +15,26 @@ public class APlusPromise: Thenable
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
     
-    public enum State {
+    public enum State: Printable {
         case Pending, Fulfilled, Rejected
+        
+        public var description: String {
+            switch self {
+            case .Pending:
+                return "Pending"
+            case .Fulfilled:
+                return "Fulfilled"
+            case .Rejected:
+                return "Rejected"
+                }
+        }
     }
 
     // MAKR: ivars
     
-    public private(set) var state: State
-    public private(set) var value: Any?
-    public private(set) var reason: Any?
+    public internal(set) var state: State
+    public internal(set) var value: Any?
+    public internal(set) var reason: Any?
     var thens: [(resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise)] = []
     
     // MARK: - Initializers
