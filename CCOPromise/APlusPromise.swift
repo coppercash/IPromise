@@ -85,6 +85,32 @@ public class APlusPromise: Thenable
     
     public class func all(values: [Any?]) -> Self
     {
+        let allPromise = self()
+        let count = values.count;
+        var results: [Any?] = []
+
+        for value in values
+        {
+            let promise = self.resolve(value)
+            promise.then(
+                onFulfilled: { (value) -> Any? in
+                    if .Pending == allPromise.state {
+                        results.append(value)
+                        if results.count >= count {
+                            allPromise.onFulfilled(results)
+                        }
+                    }
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    if .Pending == allPromise.state {
+                        allPromise.onRejected(reason)
+                    }
+                    return nil
+                }
+            )
+        }
+        
         return self(value: nil)
     }
     
