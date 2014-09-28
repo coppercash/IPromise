@@ -15,6 +15,16 @@ let value2 = "value 2"
 let error1 = NSError(domain: "error 1", code: 0, userInfo: nil)
 let error2 = NSError(domain: "error 2", code: 0, userInfo: nil)
 
+infix operator ~> {}
+func ~> (lhs: @autoclosure () -> Any, rhs: @autoclosure () -> ())
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+        lhs();
+        dispatch_sync(dispatch_get_main_queue(), rhs)
+    })
+}
+
+
 class APlusPromiseTests: XCTestCase
 {
     func test_init()
@@ -378,6 +388,83 @@ class APlusPromiseTests: XCTestCase
     func test_race()
     {
         
+    }
+    
+    // spec 2.2.6 2.2.6.1
+    func test_then_sync()
+    {
+        let expectationSync0 = expectationWithDescription("thenSync0")
+        let expectationSync1 = expectationWithDescription("thenSync1")
+        var syncTime = 0
+        
+        let syncPromise = APlusPromise { (resolve, reject) -> Void in
+            resolve(value: value1)
+        }
+        syncPromise.then(onFulfilled:
+            { (value) -> Any? in
+                XCTAssertEqual((value as String), value1)
+                XCTAssertEqual(syncTime++, 0)
+                expectationSync0.fulfill()
+                return nil
+            }
+        )
+        syncPromise.then(onFulfilled:
+            { (value) -> Any? in
+                XCTAssertEqual((value as String), value1)
+                XCTAssertEqual(syncTime++, 1)
+                expectationSync1.fulfill()
+                return nil
+            }
+        )
+
+        
+        XCTAssertEqual(syncPromise.state, APlusPromise.State.Fulfilled)
+        XCTAssertEqual((syncPromise.value as String), value1)
+        XCTAssertTrue(syncPromise.reason == nil)
+        
+        
+        waitForExpectationsWithTimeout(1) { println($0)}
+    }
+    
+    // spec 2.2.6 2.2.6.1
+    func test_then_async()
+    {
+        let expectationAsync0 = expectationWithDescription("thenAsync0")
+        let expectationAsync1 = expectationWithDescription("thenAsync1")
+        var asyncTime = 0
+
+        let asyncPromise = APlusPromise { (resolve, reject) -> Void in
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                    resolve(value: value1)
+                })
+            })
+        }
+        asyncPromise.then(
+            onFulfilled:
+            { (value) -> Any? in
+                XCTAssertEqual((value as String), value1)
+                XCTAssertEqual(asyncTime++, 0)
+                expectationAsync0.fulfill()
+                return nil
+            }
+        )
+        asyncPromise.then(
+            onFulfilled:
+            { (value) -> Any? in
+                XCTAssertEqual((value as String), value1)
+                XCTAssertEqual(asyncTime++, 1)
+                expectationAsync1.fulfill()
+                return nil
+            }
+        )
+        
+        XCTAssertEqual(asyncPromise.state, APlusPromise.State.Pending)
+        XCTAssertTrue(asyncPromise.value == nil)
+        XCTAssertTrue(asyncPromise.reason == nil)
+
+        
+        waitForExpectationsWithTimeout(1) { println($0)}
     }
     
     func test_catch()
