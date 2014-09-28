@@ -593,8 +593,8 @@ class APlusPromiseTests: XCTestCase
     // spec 2.2.6 2.2.6.2
     func test_catch_sync()
     {
-        let expectation0 = expectationWithDescription("catchSync0")
-        let expectation1 = expectationWithDescription("catchSync1")
+        let expectation0 = expectationWithDescription("\(__FUNCTION__)0")
+        let expectation1 = expectationWithDescription("\(__FUNCTION__)1")
         var time = 0
         
         let promise = APlusPromise { (resolve, reject) -> Void in
@@ -624,8 +624,8 @@ class APlusPromiseTests: XCTestCase
     // spec 2.2.6 2.2.6.2
     func test_catch_async()
     {
-        let expectation0 = expectationWithDescription("catchAsync0")
-        let expectation1 = expectationWithDescription("catchAsync1")
+        let expectation0 = expectationWithDescription("\(__FUNCTION__)0")
+        let expectation1 = expectationWithDescription("\(__FUNCTION__)1")
         var time = 0
         
         let promise = APlusPromise { (resolve, reject) -> Void in
@@ -652,8 +652,52 @@ class APlusPromiseTests: XCTestCase
         waitForExpectationsWithTimeout(1) { println($0)}
     }
     
-    func test_chain()
+    // spec 2.3.1
+    func test_chain_typeError_fulfill()
     {
+        let expectation = expectationWithDescription(__FUNCTION__)
         
+        var promiseRefer: APlusPromise? = nil
+        
+        let promise = APlusPromise
+            { (resolve, reject) -> Void in
+                () ~> resolve(value: value1)
+            }.then(onFulfilled: { (value) -> Any? in
+                return promiseRefer
+            })
+        promiseRefer = promise
+        
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, NSError.aPlusPromiseTypeError())
+            expectation.fulfill()
+            return nil
+        }
+        
+        waitForExpectationsWithTimeout(1) { println($0) }
+    }
+    
+    // spec 2.3.1
+    func test_chain_typeError_reject()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        var promiseRefer: APlusPromise? = nil
+        
+        let promise = APlusPromise
+            { (resolve, reject) -> Void in
+                () ~> reject(reason: value1)
+            }
+            .catch { (reason) -> Any? in
+                return promiseRefer
+        }
+        promiseRefer = promise
+        
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, NSError.aPlusPromiseTypeError())
+            expectation.fulfill()
+            return nil
+        }
+        
+        waitForExpectationsWithTimeout(1) { println($0) }
     }
 }
