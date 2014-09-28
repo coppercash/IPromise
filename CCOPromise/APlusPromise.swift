@@ -185,7 +185,7 @@ public class APlusPromise: Thenable
         return self(reason: reason)
     }
     
-    public class func all(values: [Any?]) -> Self
+    public class func all(values: Any?...) -> Self
     {
         let allPromise = self()
         let count = values.count
@@ -216,7 +216,7 @@ public class APlusPromise: Thenable
         return allPromise
     }
     
-    public class func race(values: [Any?]) -> Self
+    public class func race(values: Any?...) -> Self
     {
         let racePromise = self()
         

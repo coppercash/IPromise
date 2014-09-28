@@ -240,7 +240,7 @@ class APlusPromiseTests: XCTestCase
             })
         }
         
-        let promise = APlusPromise.all([prms1, value2, prms3])
+        let promise = APlusPromise.all(prms1, value2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 let results = value as [Any?]
@@ -277,7 +277,7 @@ class APlusPromiseTests: XCTestCase
         let expectation = expectationWithDescription("allFulfillSync")
         
         let prms1 = APlusPromise(value: value1)
-        let promise = APlusPromise.all([nil, value2, prms1])
+        let promise = APlusPromise.all(nil, value2, prms1)
 
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -322,7 +322,7 @@ class APlusPromiseTests: XCTestCase
             })
         }
         
-        let promise = APlusPromise.all([prms1, value2, prms3])
+        let promise = APlusPromise.all(prms1, value2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -362,7 +362,7 @@ class APlusPromiseTests: XCTestCase
             })
         }
         
-        let promise = APlusPromise.all([prms1, value2, prms3])
+        let promise = APlusPromise.all(prms1, value2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -394,7 +394,7 @@ class APlusPromiseTests: XCTestCase
         
         let prms1 = APlusPromise(value: value1)
         let prms2 = APlusPromise(reason: error1)
-        let promise = APlusPromise.race([prms1, value2, prms2])
+        let promise = APlusPromise.race(prms1, value2, prms2)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -427,7 +427,7 @@ class APlusPromiseTests: XCTestCase
         let prms2 = APlusPromise()
         let prms3 = APlusPromise()
         
-        let promise = APlusPromise.race([prms1, prms2, prms3])
+        let promise = APlusPromise.race(prms1, prms2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value as String, value1)
@@ -459,7 +459,7 @@ class APlusPromiseTests: XCTestCase
         
         let prms1 = APlusPromise()
         let prms2 = APlusPromise(reason: error1)
-        let promise = APlusPromise.race([prms1, prms2, value1])
+        let promise = APlusPromise.race(prms1, prms2, value1)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -491,7 +491,7 @@ class APlusPromiseTests: XCTestCase
             () ~> reject(reason: error1)
         }
         let prms3 = APlusPromise()
-        let promise = APlusPromise.race([prms1, prms2, prms3])
+        let promise = APlusPromise.race(prms1, prms2, prms3)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
