@@ -224,7 +224,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual((promise1.reason as NSError), error1)
     }
     
-    func test_allFulfillAsync()
+    func test_all_fullfill_async()
     {
         let expectation = expectationWithDescription("allFulfillAsync")
         
@@ -269,9 +269,10 @@ class APlusPromiseTests: XCTestCase
         })
     }
     
-    func test_allFulfillSync()
+    func test_all_fulfill_sync()
     {
         let expectation = expectationWithDescription("allFulfillSync")
+        
         let prms1 = APlusPromise(value: value1)
         let promise = APlusPromise.all([nil, value2, prms1])
 
@@ -301,11 +302,10 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual((results[1] as String), value2)
         XCTAssertEqual((results[2] as String), value1)
         
-        waitForExpectationsWithTimeout(1, handler: { (error) -> Void in
-        })
+        waitForExpectationsWithTimeout(1) { println($0) }
     }
     
-    func test_allRejectAsync()
+    func test_all_reject_async()
     {
         let expectation = expectationWithDescription("allRejectAsync")
         var times = 0
@@ -345,7 +345,7 @@ class APlusPromiseTests: XCTestCase
         })
     }
 
-    func test_allRejectSync()
+    func test_all_reject_sync()
     {
         let expectation = expectationWithDescription("allRejectSync")
         var times = 0
@@ -385,7 +385,76 @@ class APlusPromiseTests: XCTestCase
         })
     }
 
-    func test_race()
+    func test_race_fulfill_sync()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = APlusPromise(value: value1)
+        let promise = APlusPromise.race([prms1, value2, nil])
+        
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertEqual(value as String, value1)
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
+        XCTAssertEqual(promise.value as String, value1)
+        XCTAssertTrue(promise.reason == nil)
+
+        
+        waitForExpectationsWithTimeout(1) { println($0) }
+    }
+    
+    func test_race_fulfill_async()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = APlusPromise { (resolve, reject) -> Void in
+            () ~> resolve(value: value1)
+        }
+        let prms2 = APlusPromise()
+        let prms3 = APlusPromise()
+        
+        let promise = APlusPromise.race([prms1, prms2, prms3])
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertEqual(value as String, value1)
+                
+                expectation.fulfill()
+
+                XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
+                XCTAssertEqual(promise.value as String, value1)
+                XCTAssertTrue(promise.reason == nil)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertNotNil(promise)
+        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertTrue(promise.reason == nil)
+        
+        waitForExpectationsWithTimeout(1) { println($0) }
+    }
+
+    func test_race_reject_sync()
+    {
+        
+    }
+    
+    func test_race_reject_async()
     {
         
     }
@@ -416,6 +485,7 @@ class APlusPromiseTests: XCTestCase
                 return nil
             }
         )
+        syncPromise.then()  //  Test pass nil as callback
 
         
         XCTAssertEqual(syncPromise.state, APlusPromise.State.Fulfilled)
@@ -458,7 +528,8 @@ class APlusPromiseTests: XCTestCase
                 return nil
             }
         )
-        
+        asyncPromise.then()  //  Test pass nil as callback
+
         XCTAssertEqual(asyncPromise.state, APlusPromise.State.Pending)
         XCTAssertTrue(asyncPromise.value == nil)
         XCTAssertTrue(asyncPromise.reason == nil)
@@ -467,6 +538,7 @@ class APlusPromiseTests: XCTestCase
         waitForExpectationsWithTimeout(1) { println($0)}
     }
     
+    // spec 2.2.6 2.2.6.2
     func test_catch_sync()
     {
         let expectation0 = expectationWithDescription("catchSync0")
@@ -488,7 +560,7 @@ class APlusPromiseTests: XCTestCase
             expectation1.fulfill()
             return nil
         }
-        
+
         XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
         XCTAssertTrue(promise.value == nil)
         XCTAssertEqual(promise.reason as NSError, error1)
@@ -497,6 +569,7 @@ class APlusPromiseTests: XCTestCase
         waitForExpectationsWithTimeout(1) { println($0)}
     }
     
+    // spec 2.2.6 2.2.6.2
     func test_catch_async()
     {
         let expectation0 = expectationWithDescription("catchAsync0")

@@ -239,7 +239,7 @@ public class APlusPromise: Thenable
             )
         }
 
-        return self(value: nil)
+        return racePromise
     }
     
     public func catch(onRejected: Rejection) -> APlusPromise
