@@ -12,8 +12,11 @@ import CCOPromise
 
 let value1 = "value 1"
 let value2 = "value 2"
+let value3 = "value 3"
+let value4 = "value 4"
 let error1 = NSError(domain: "error 1", code: 0, userInfo: nil)
 let error2 = NSError(domain: "error 2", code: 0, userInfo: nil)
+let error3 = NSError(domain: "error 3", code: 0, userInfo: nil)
 
 infix operator ~> {}
 func ~> (lhs: @autoclosure () -> Any, rhs: @autoclosure () -> ())
@@ -112,7 +115,7 @@ class APlusPromiseTests: XCTestCase
                 return nil
             }
         )
-        waitForExpectationsWithTimeout(1) { (error) in
+        waitForExpectationsWithTimeout(7) { (error) in
             XCTAssertEqual(actionPrms.state, APlusPromise.State.Fulfilled)
             XCTAssertTrue((actionPrms.value as String) == value1)
             XCTAssertTrue(actionPrms.reason == nil)
@@ -145,7 +148,7 @@ class APlusPromiseTests: XCTestCase
                 return nil
             }
         )
-        waitForExpectationsWithTimeout(1) { (error) in
+        waitForExpectationsWithTimeout(7) { (error) in
             XCTAssertEqual(actionPrms.state, APlusPromise.State.Rejected)
             XCTAssertTrue(actionPrms.value == nil)
             XCTAssertEqual((actionPrms.reason as NSError), error1)
@@ -302,7 +305,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual((results[1] as String), value2)
         XCTAssertEqual((results[2] as String), value1)
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     func test_all_reject_async()
@@ -411,7 +414,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(promise.reason == nil)
 
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     func test_race_fulfill_async()
@@ -447,7 +450,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(promise.value == nil)
         XCTAssertTrue(promise.reason == nil)
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
 
     func test_race_reject_sync()
@@ -476,7 +479,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual(promise.reason as NSError, error1)
         
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     func test_race_reject_async()
@@ -508,7 +511,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(promise.reason == nil)
         
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     // spec 2.2.6 2.2.6.1
@@ -545,7 +548,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(syncPromise.reason == nil)
         
         
-        waitForExpectationsWithTimeout(1) { println($0)}
+        waitForExpectationsWithTimeout(7) { println($0)}
     }
     
     // spec 2.2.6 2.2.6.1
@@ -587,7 +590,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(asyncPromise.reason == nil)
 
         
-        waitForExpectationsWithTimeout(1) { println($0)}
+        waitForExpectationsWithTimeout(7) { println($0)}
     }
     
     // spec 2.2.6 2.2.6.2
@@ -618,7 +621,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertEqual(promise.reason as NSError, error1)
         
         
-        waitForExpectationsWithTimeout(1) { println($0)}
+        waitForExpectationsWithTimeout(7) { println($0)}
     }
     
     // spec 2.2.6 2.2.6.2
@@ -649,7 +652,7 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(promise.reason == nil)
         
         
-        waitForExpectationsWithTimeout(1) { println($0)}
+        waitForExpectationsWithTimeout(7) { println($0)}
     }
     
     // spec 2.3.1
@@ -673,7 +676,7 @@ class APlusPromiseTests: XCTestCase
             return nil
         }
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     // spec 2.3.1
@@ -698,6 +701,58 @@ class APlusPromiseTests: XCTestCase
             return nil
         }
         
-        waitForExpectationsWithTimeout(1) { println($0) }
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    func test_chain()
+    {
+        let expectation0 = expectationWithDescription("\(__FUNCTION__)0")
+        let expectation1 = expectationWithDescription("\(__FUNCTION__)1")
+        let expectation2 = expectationWithDescription("\(__FUNCTION__)2")
+        let expectation3 = expectationWithDescription("\(__FUNCTION__)3")
+        let expectation4 = expectationWithDescription("\(__FUNCTION__)4")
+        let expectation5 = expectationWithDescription("\(__FUNCTION__)5")
+        let expectation6 = expectationWithDescription("\(__FUNCTION__)6")
+        let expectation7 = expectationWithDescription("\(__FUNCTION__)7")
+
+        let promise = APlusPromise { (resolve, reject) -> Void in
+            () ~> resolve(value: value1)
+        }.then(onFulfilled: { (value) -> Any? in
+            XCTAssertEqual(value as String, value1)
+            expectation0.fulfill()
+            return value2
+        }).then(onFulfilled: { (value) -> Any? in
+            XCTAssertEqual(value as String, value2)
+            expectation1.fulfill()
+            return APlusPromise(value: value3)
+        }).then(onFulfilled: { (value) -> Any? in
+            XCTAssertEqual(value as String, value3)
+            expectation2.fulfill()
+            return APlusPromise(reason: error1)
+        }).catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error1)
+            expectation3.fulfill()
+            return nil
+        }.then(onFulfilled: { (value) -> Any? in
+            XCTAssertTrue(value == nil)
+            expectation4.fulfill()
+            return nil
+        }).then(onFulfilled: { (value) -> Any? in
+            XCTAssertTrue(value == nil)
+            expectation5.fulfill()
+            return APlusPromise(reason: error2)
+        }).catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error2)
+            expectation6.fulfill()
+            return APlusPromise(resovler: { (resolve, reject) -> Void in
+                () ~> reject(reason: error3)
+            })
+        }.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error3)
+            expectation7.fulfill()
+            return nil
+        }
+        
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
 }
