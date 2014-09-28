@@ -94,7 +94,7 @@ public class APlusPromise: Thenable
     func onFulfilled(value: Any?) -> Void
     {
         if self.state != .Pending {
-            NSException.aPlusPromiseStateTransitionException().raise()
+            return
         }
         
         self.value = value
@@ -118,7 +118,7 @@ public class APlusPromise: Thenable
     func onRejected(reason: Any?) -> Void
     {
         if self.state != .Pending {
-            NSException.aPlusPromiseStateTransitionException().raise()
+            return
         }
         
         self.reason = reason
@@ -142,7 +142,7 @@ public class APlusPromise: Thenable
     func resolve(value: Any?)
     {
         if self.state != .Pending {
-            NSException.aPlusPromiseStateTransitionException().raise()
+            return
         }
         
         switch value {
@@ -282,7 +282,7 @@ public extension NSError {
     }
 }
 
-public extension NSException {
+internal extension NSException {
     class func aPlusPromiseStateTransitionException() -> Self {
         return self(
             name: "APlusPromiseStateTransitionException",
