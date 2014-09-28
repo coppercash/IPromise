@@ -10,6 +10,8 @@ import UIKit
 import XCTest
 import CCOPromise
 
+typealias FutureAction = (Float) -> Void
+
 class FutureAPlusPromise
 {
     @availability(*, deprecated=2.0)
@@ -54,7 +56,7 @@ class PromiseTests: XCTestCase
 {
     func test_expansibility()
     {
-        let promise: Promise<String> = Promise { (resolve, reject) -> Void in
+        let promise = Promise<String> { (resolve, reject) -> Void in
 
         }
         
@@ -66,7 +68,6 @@ class PromiseTests: XCTestCase
     func test_generic()
     {
         let actionPromise = Promise<String> { (resolve, reject) -> Void in
-            resolve(value: 3)
         }
         
         actionPromise.then { (value: String) -> Any? in

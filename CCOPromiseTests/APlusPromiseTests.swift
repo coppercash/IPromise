@@ -10,9 +10,6 @@ import UIKit
 import XCTest
 import CCOPromise
 
-typealias FutureAction = (Float) -> Void
-
-
 class APlusPromiseTests: XCTestCase
 {
 

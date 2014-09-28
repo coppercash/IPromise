@@ -15,7 +15,6 @@ typealias FutureCallback = (Float) -> Void
 protocol FutureTnenable
 {
     func then(#onFulfilled: Resolution?, onRejected: Rejection?, onFutureCallback: FutureCallback?) -> FutureTnenable
-    func catch(onRejected: Rejection) -> FutureTnenable
 }
 
 class ThenableObject: Thenable
@@ -24,11 +23,6 @@ class ThenableObject: Thenable
     {
         return self
     }
-    
-    func catch(onRejected: Rejection) -> Thenable
-    {
-        return then(onFulfilled: nil, onRejected: onRejected);
-    }
 }
 
 class FutureThenableObject: FutureTnenable
@@ -36,11 +30,6 @@ class FutureThenableObject: FutureTnenable
     func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil, onFutureCallback: FutureCallback? = nil) -> FutureTnenable
     {
         return self;
-    }
-    
-    func catch(onRejected: Rejection) -> FutureTnenable
-    {
-        return then(nil, onRejected: onRejected, onFutureCallback: nil)
     }
 }
 
@@ -110,29 +99,5 @@ class ThenableTests: XCTestCase
             }
         )
         
-        // Then
-        
-        aThenableObject.then(
-            { (value) -> Any? in
-                
-                return nil
-            }
-        )
-        
-        aThenableObject.then { (value) -> Any? in
-            return nil
-        }
-        
-        // Catch
-        
-        aThenableObject.catch (
-            { (error) -> Any? in
-                return nil
-            }
-        )
-        
-        aThenableObject.catch { (error) -> Any? in
-            return nil
-        }
     }
 }

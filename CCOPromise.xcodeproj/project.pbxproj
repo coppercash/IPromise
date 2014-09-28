@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BE121ABF19D31880001A4473 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE121ABE19D31880001A4473 /* PromiseTests.swift */; };
 		BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70119D386CA009C6326 /* APlusPromise.swift */; };
 		BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70319D39769009C6326 /* APlusPromiseTests.swift */; };
-		BEE0612419D709D200F16C9D /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03019D23C8B005B4CE4 /* Promise.swift */; };
 		BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03219D23D79005B4CE4 /* Thenable.swift */; };
 		BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */; };
 		BEFE4CFF19D1C49C0086A00B /* CCOPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -227,7 +225,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEE0612419D709D200F16C9D /* Promise.swift in Sources */,
 				BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */,
 				BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */,
 			);
@@ -237,7 +234,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE121ABF19D31880001A4473 /* PromiseTests.swift in Sources */,
 				BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */,
 				BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */,
 				BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */,
