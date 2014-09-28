@@ -467,9 +467,64 @@ class APlusPromiseTests: XCTestCase
         waitForExpectationsWithTimeout(1) { println($0)}
     }
     
-    func test_catch()
+    func test_catch_sync()
     {
+        let expectation0 = expectationWithDescription("catchSync0")
+        let expectation1 = expectationWithDescription("catchSync1")
+        var time = 0
         
+        let promise = APlusPromise { (resolve, reject) -> Void in
+            reject(reason: error1)
+        }
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error1)
+            XCTAssertEqual(time++, 0)
+            expectation0.fulfill()
+            return nil
+        }
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error1)
+            XCTAssertEqual(time++, 1)
+            expectation1.fulfill()
+            return nil
+        }
+        
+        XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertEqual(promise.reason as NSError, error1)
+        
+        
+        waitForExpectationsWithTimeout(1) { println($0)}
+    }
+    
+    func test_catch_async()
+    {
+        let expectation0 = expectationWithDescription("catchAsync0")
+        let expectation1 = expectationWithDescription("catchAsync1")
+        var time = 0
+        
+        let promise = APlusPromise { (resolve, reject) -> Void in
+            () ~> reject(reason: error1)
+        }
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error1)
+            XCTAssertEqual(time++, 0)
+            expectation0.fulfill()
+            return nil
+        }
+        promise.catch { (reason) -> Any? in
+            XCTAssertEqual(reason as NSError, error1)
+            XCTAssertEqual(time++, 1)
+            expectation1.fulfill()
+            return nil
+        }
+        
+        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertTrue(promise.reason == nil)
+        
+        
+        waitForExpectationsWithTimeout(1) { println($0)}
     }
     
     func test_chain()
