@@ -15,15 +15,15 @@ public class APlusPromise: Thenable
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
     
-    enum State {
+    public enum State {
         case Pending, Fulfilled, Rejected
     }
 
     // MAKR: ivars
     
-    var state: State
-    var value: Any?
-    var reason: Any?
+    public private(set) var state: State
+    public private(set) var value: Any?
+    public private(set) var reason: Any?
     var thens: [(resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise)] = []
     
     // MARK: - Initializers
@@ -31,23 +31,23 @@ public class APlusPromise: Thenable
     public required
     init()
     {
-        self.value = nil;
-        self.reason = nil;
+        self.value = nil
+        self.reason = nil
         self.state = .Pending
     }
     
     public required
     init(value: Any?)
     {
-        self.value = value;
-        self.reason = nil;
+        self.value = value
+        self.reason = nil
         self.state = .Fulfilled
     }
     
     public required
     init(reason: Any?)
     {
-        self.value = nil;
+        self.value = nil
         self.reason = reason
         self.state = .Rejected
     }
@@ -176,7 +176,7 @@ public class APlusPromise: Thenable
     public class func all(values: [Any?]) -> Self
     {
         let allPromise = self()
-        let count = values.count;
+        let count = values.count
         var results: [Any?] = []
 
         for value in values
@@ -235,7 +235,7 @@ public class APlusPromise: Thenable
         return self.then(
             onFulfilled: nil,
             onRejected: onRejected
-        );
+        )
     }
 
     // MARK: - Thenable

@@ -14,6 +14,14 @@ class APlusPromiseTests: XCTestCase
 {
     func test_init()
     {
+        let pendingPrms = APlusPromise()
+        pendingPrms.state
+        XCTAssertNotNil(pendingPrms, " ")
         
+        let fulfulledPrms = APlusPromise(value: "A value")
+        XCTAssertNotNil(fulfulledPrms, " ")
+        
+        let rejectedPrms = APlusPromise(reason: NSError())
+        XCTAssertNotNil(rejectedPrms, " ")
     }
 }
