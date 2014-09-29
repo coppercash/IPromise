@@ -69,11 +69,11 @@ class PromiseTests: XCTestCase
     {
         let actionPromise = Promise<String> { (resolve, reject) -> Void in
         }
-        
+        /*
         actionPromise.then { (value: String) -> Any? in
             
             return nil
         }
-
+        */
     }
 }

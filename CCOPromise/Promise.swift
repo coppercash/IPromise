@@ -11,12 +11,13 @@ import Foundation
 public class Promise<V>: APlusPromise
 {
     public typealias Resovler = (value: V) -> Void
-    public typealias Rejector = APlusRejector
+    public typealias Rejector = (reason: NSError?) -> Void
+    typealias ReturnType = Promise
 
     // MARK: - Initializers
 
-    public required
-    init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
+    required
+    public init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
     {
         super.init()
         resovler(
@@ -25,37 +26,35 @@ public class Promise<V>: APlusPromise
         )
     }
 
-    public required convenience
-    init(value: V)
+    required
+    public init(value: V)
     {
-        self.init(resovler: { (resolve: Resovler, reject: Rejector) -> Void in
-            resolve(value: value)
-        })
+        super.init(value: value)
     }
     
     
     // MARK: - Inherited Initializers
     
-    public required
-    init()
+    required
+    public init()
     {
         super.init()
     }
     
-    public required
-    init(value: Any?)
+    required
+    public init(value: Any?)
     {
         super.init(value: value)
     }
     
-    public required
-    init(reason: Any?)
+    required
+    public init(reason: Any?)
     {
         super.init(reason: reason)
     }
 
-    public required
-    init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
+    required
+    public init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
     {
         super.init()
         resovler(
@@ -64,8 +63,8 @@ public class Promise<V>: APlusPromise
         )
     }
 
-    public required convenience
-    init(thenable: Thenable)
+    required convenience
+    public init<T: Thenable>(thenable: T)
     {
         self.init()
         thenable.then(
@@ -80,14 +79,30 @@ public class Promise<V>: APlusPromise
 
     
     // MARK: - Public APIs
-
-    public
-    func then(onFulfilled: (value: V) -> Any?) -> Thenable
+    /*
+    public func then<N>(onFulfilled: (value: V) -> N) -> Promise<N>
     {
         return self.then(
-            onFulfilled: { (value) -> Any? in
-                onFulfilled(value: (value as V))
-            },
-            onRejected: nil)
+            onFulfilled: (onFulfilled as Resolution),
+            onRejected: nil
+        ) as Promise<N>
+    }
+    */
+    override
+    public func catch(onRejected: Rejection) -> Promise<Any?>
+    {
+        return self.then(
+            onFulfilled: nil,
+            onRejected: onRejected
+        )
+    }
+
+    
+    // MARK: - Thenable
+
+    override
+    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Promise<Any?>
+    {
+        return super.then(onFulfilled: onFulfilled, onRejected: onRejected) as Promise<Any?>
     }
 }

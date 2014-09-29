@@ -40,32 +40,32 @@ public class APlusPromise: Thenable
     
     // MARK: - Initializers
     
-    public required
-    init()
+    required
+    public init()
     {
         self.value = nil
         self.reason = nil
         self.state = .Pending
     }
     
-    public required
-    init(value: Any?)
+    required
+    public init(value: Any?)
     {
         self.value = value
         self.reason = nil
         self.state = .Fulfilled
     }
     
-    public required
-    init(reason: Any?)
+    required
+    public init(reason: Any?)
     {
         self.value = nil
         self.reason = reason
         self.state = .Rejected
     }
 
-    public required convenience
-    init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
+    required convenience
+    public init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
     {
         self.init()
         resovler(
@@ -74,8 +74,8 @@ public class APlusPromise: Thenable
         )
     }
     
-    public required convenience
-    init<T: Thenable>(thenable: T)
+    required convenience
+    public init<T: Thenable>(thenable: T)
     {
         self.init()
         thenable.then(
