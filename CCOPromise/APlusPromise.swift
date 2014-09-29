@@ -12,9 +12,20 @@ public class APlusPromise: Thenable
 {
     // MARK: - Type
     
+    typealias ReturnType = APlusPromise
+    typealias ValueType = Any?
+    typealias ReasonType = Any?
+    
+    public typealias APlusResolution = (value: Any?) -> Any?
+    public typealias APlusRejection = (reason: Any?) -> Any?
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
-    typealias ReturnType = APlusPromise
+    
+    typealias ThenType = (
+        resolution: APlusResolution?,
+        rejection: APlusRejection?,
+        subPromise: APlusPromise
+    )
     
     public enum State: Printable {
         case Pending, Fulfilled, Rejected
@@ -36,7 +47,7 @@ public class APlusPromise: Thenable
     public internal(set) var state: State
     public internal(set) var value: Any?
     public internal(set) var reason: Any?
-    var thens: [(resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise)] = []
+    var thens: [ThenType] = []
     
     // MARK: - Initializers
     
@@ -242,7 +253,7 @@ public class APlusPromise: Thenable
         return racePromise
     }
     
-    public func catch(onRejected: Rejection) -> APlusPromise
+    public func catch(onRejected: APlusRejection) -> APlusPromise
     {
         return self.then(
             onFulfilled: nil,
@@ -252,7 +263,7 @@ public class APlusPromise: Thenable
 
     // MARK: - Thenable
     
-    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> APlusPromise
+    public func then(onFulfilled: APlusResolution? = nil, onRejected: APlusRejection? = nil) -> APlusPromise
     {
         var subPromise: APlusPromise
         let state = self.state
@@ -268,7 +279,7 @@ public class APlusPromise: Thenable
             subPromise = self.dynamicType(reason: reason)
         }
         
-        let then: (resolution: Resolution?, rejection: Rejection?, subPromise: APlusPromise) = (onFulfilled, onRejected, subPromise)
+        let then: ThenType = (onFulfilled, onRejected, subPromise)
         self.thens.append(then)
         
         switch state {

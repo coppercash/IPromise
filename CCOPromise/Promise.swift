@@ -10,10 +10,19 @@ import Foundation
 
 public class Promise<V>: APlusPromise
 {
+    // MARK: - Type
+
+    typealias ReturnType = Promise
+    typealias ValueType = V
+    typealias ReasonType = NSError?
+
+    public typealias Resolution = (value: V) -> Any?
+    public typealias Rejection = (reason: NSError?) -> Any?
     public typealias Resovler = (value: V) -> Void
     public typealias Rejector = (reason: NSError?) -> Void
-    typealias ReturnType = Promise
 
+    public var value: V
+    
     // MARK: - Initializers
 
     required
@@ -88,7 +97,7 @@ public class Promise<V>: APlusPromise
         ) as Promise<N>
     }
     */
-    override
+    
     public func catch(onRejected: Rejection) -> Promise<Any?>
     {
         return self.then(
@@ -100,7 +109,7 @@ public class Promise<V>: APlusPromise
     
     // MARK: - Thenable
 
-    override
+    
     public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Promise<Any?>
     {
         return super.then(onFulfilled: onFulfilled, onRejected: onRejected) as Promise<Any?>
