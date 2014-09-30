@@ -91,6 +91,7 @@ public class APlusPromise: Thenable
         self.init()
         thenable.then(
             onFulfilled: { (value) -> Any? in
+                println(value)
                 self.onFulfilled(value)
                 return nil
             },
@@ -112,13 +113,16 @@ public class APlusPromise: Thenable
         self.value = value
         self.state = .Fulfilled
         
+        println(value)
+        println(self.value)
+        
         for then in self.thens
         {
             let subPromise = then.subPromise
             if let resolution = then.resolution?
             {
-                let value = resolution(value: value)
-                subPromise.resolve(value)
+                let output = resolution(value: value)
+                subPromise.resolve(output)
             }
             else
             {

@@ -9,10 +9,7 @@
 /* Begin PBXBuildFile section */
 		BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70119D386CA009C6326 /* APlusPromise.swift */; };
 		BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70319D39769009C6326 /* APlusPromiseTests.swift */; };
-		BEB8CDD519D8CFE600167231 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03019D23C8B005B4CE4 /* Promise.swift */; };
-		BEB8CDD619D8CFEF00167231 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE121ABE19D31880001A4473 /* PromiseTests.swift */; };
 		BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03219D23D79005B4CE4 /* Thenable.swift */; };
-		BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */; };
 		BEFE4CFF19D1C49C0086A00B /* CCOPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFE4D0819D1C49C0086A00B /* CCOPromiseTests.swift */; };
 		BEFE4D1419D1C4F60086A00B /* CCOPromise.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BEFE4CF919D1C49C0086A00B /* CCOPromise.framework */; };
@@ -227,7 +224,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEB8CDD519D8CFE600167231 /* Promise.swift in Sources */,
 				BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */,
 				BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */,
 			);
@@ -237,9 +233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEB8CDD619D8CFEF00167231 /* PromiseTests.swift in Sources */,
 				BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */,
-				BEE0A03519D23D96005B4CE4 /* ThenableTests.swift in Sources */,
 				BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
