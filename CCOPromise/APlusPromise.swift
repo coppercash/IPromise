@@ -13,8 +13,6 @@ public class APlusPromise: Thenable
     // MARK: - Type
     
     typealias ReturnType = APlusPromise
-    typealias ValueType = Any?
-    typealias ReasonType = Any?
     
     public typealias APlusResolution = (value: Any?) -> Any?
     public typealias APlusRejection = (reason: Any?) -> Any?

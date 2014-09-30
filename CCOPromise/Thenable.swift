@@ -14,8 +14,6 @@ public typealias Rejection = (reason: Any?) -> Any?
 public protocol Thenable
 {
     typealias ReturnType
-    typealias ValueType
-    typealias ReasonType
     
-    func then(#onFulfilled: ((value: ValueType) -> Any?)?, onRejected: ((reason: ReasonType) -> Any?)?) -> ReturnType
+    func then(#onFulfilled: ((value: Any?) -> Any?)?, onRejected: ((reason: Any?) -> Any?)?) -> ReturnType
 }
