@@ -12,14 +12,14 @@ public class APlusPromise: Thenable
 {
     // MARK: - Type
     
-    typealias ReturnType = APlusPromise
+    typealias ThenType = APlusPromise
     
     public typealias APlusResolution = (value: Any?) -> Any?
     public typealias APlusRejection = (reason: Any?) -> Any?
     public typealias APlusResovler = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
     
-    typealias ThenType = (
+    typealias ThenGroupType = (
         resolution: APlusResolution?,
         rejection: APlusRejection?,
         subPromise: APlusPromise
@@ -45,7 +45,7 @@ public class APlusPromise: Thenable
     public internal(set) var state: State
     public internal(set) var value: Any?
     public internal(set) var reason: Any?
-    var thens: [ThenType] = []
+    var thens: [ThenGroupType] = []
     
     // MARK: - Initializers
     
@@ -110,9 +110,6 @@ public class APlusPromise: Thenable
         
         self.value = value
         self.state = .Fulfilled
-        
-        println(value)
-        println(self.value)
         
         for then in self.thens
         {
@@ -281,7 +278,7 @@ public class APlusPromise: Thenable
             subPromise = self.dynamicType(reason: reason)
         }
         
-        let then: ThenType = (onFulfilled, onRejected, subPromise)
+        let then: ThenGroupType = (onFulfilled, onRejected, subPromise)
         self.thens.append(then)
         
         switch state {

@@ -12,7 +12,7 @@ public class Promise<V>: APlusPromise
 {
     // MARK: - Type
 
-    typealias ReturnType = Promise
+    typealias ThenType = Promise
     typealias ValueType = V
     typealias ReasonType = NSError?
 
