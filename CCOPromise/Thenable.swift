@@ -7,13 +7,13 @@
 //
 
 import Foundation
-/*
-public typealias Resolution = (value: Any?) -> Any?
-public typealias Rejection = (reason: Any?) -> Any?
-*/
+
 public protocol Thenable
 {
     typealias ThenType
+    typealias ValueType
+    typealias ReasonType
+    typealias ReturnType
     
-    func then(#onFulfilled: ((value: Any?) -> Any?)?, onRejected: ((reason: Any?) -> Any?)?) -> ThenType
+    func then(#onFulfilled: ((value: ValueType) -> ReturnType)?, onRejected: ((reason: ReasonType) -> ReturnType)?) -> ThenType
 }
