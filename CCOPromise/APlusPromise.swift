@@ -116,13 +116,10 @@ public class APlusPromise: Thenable
         for then in self.thens
         {
             let subPromise = then.subPromise
-            if let resolution = then.resolution?
-            {
-                let output = resolution(value: value)
-                subPromise.resolve(output)
+            if let resolution = then.resolution? {
+                subPromise.resolve(resolution(value: value))
             }
-            else
-            {
+            else {
                 subPromise.onFulfilled(value)
             }
         }
@@ -140,13 +137,10 @@ public class APlusPromise: Thenable
         for then in self.thens
         {
             let subPromise = then.subPromise
-            if let rejection = then.rejection?
-            {
-                let value = rejection(reason: reason)
-                subPromise.resolve(value)
+            if let rejection = then.rejection? {
+                subPromise.resolve(rejection(reason: reason))
             }
-            else
-            {
+            else {
                 subPromise.onRejected(value)
             }
         }
@@ -273,9 +267,19 @@ public class APlusPromise: Thenable
         
         switch self.state {
         case .Fulfilled:
-            subPromise.resolve(onFulfilled?(value: self.value))
+            if let resolution = onFulfilled? {
+                subPromise.resolve(resolution(value: self.value))
+            }
+            else {
+                subPromise.onFulfilled(self.value)
+            }
         case .Rejected:
-            subPromise.resolve(onRejected?(reason: self.reason))
+            if let rejection = onRejected? {
+                subPromise.resolve(rejection(reason: self.reason))
+            }
+            else {
+                subPromise.onRejected(self.reason)
+            }
         default:
             break
         }

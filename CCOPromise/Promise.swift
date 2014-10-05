@@ -137,6 +137,35 @@ public class Promise<V>: Thenable
 */
     }
     
+    func resolve(value: V)
+    {
+        if self.state != .Pending {
+            return
+        }
+        
+        switch value {
+        case let promise as APlusPromise:
+            if promise === self {
+                self.onRejected(NSError.aPlusPromiseTypeError())
+            }
+            else {
+                promise.then(
+                    onFulfilled: { (value) -> Any? in
+                        self.onFulfilled(value)
+                        return nil
+                    },
+                    onRejected: { (reason) -> Any? in
+                        self.onRejected(reason)
+                        return nil
+                    }
+                )
+            }
+        default:
+            self.onFulfilled(value)
+        }
+    }
+
+    
     
     // MARK: - Thenable
 
@@ -145,49 +174,47 @@ public class Promise<V>: Thenable
         onRejected: Optional<(reason: NSError) -> Promise<N>> = nil
         ) -> Promise<N> {
             
-            /*
-            var subPromise: Promise
-            let state = self.state
-            let value = self.value
-            let reason = self.reason
+            let subPromise = Promise<N>()
             
-            switch state {
-            case .Pending:
-                subPromise = self.dynamicType()
-            case .Fulfilled:
-                subPromise = self.dynamicType(value: value!)
-            case .Rejected:
-                subPromise = self.dynamicType(reason: reason!)
-            }
-            
-            let then: ThenGroupType = (onFulfilled, onRejected, subPromise)
-            self.thens.append(then)
-            
-            switch state {
-            case .Fulfilled:
-                break
-                //subPromise.resolve(onFulfilled?(value: value))
-            case .Rejected:
-                break
-                //subPromise.resolve(onRejected?(reason: reason))
-            default:
-                break
-            }
             
             return subPromise
-            */
-            
-            
-        return Promise<N>()
     }
+    /*
+    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == T>(
+        onFulfilled: Optional<(value: V) -> T> = nil,
+        onRejected: Optional<(reason: NSError) -> T> = nil
+        ) -> T {
+            
+            let subPromise = Promise<N>()
+            
+            
+            return subPromise
+    }
+    */
     
     // MARK: - Thenable enhance
     
     public func then<N>(
         onFulfilled: Optional<(value: V) -> N> = nil,
         onRejected: Optional<(reason: NSError) -> N> = nil
-        ) -> Promise<N> {
-        return Promise<N>()
+        ) -> Promise<N>
+    {
+        let subPromise = Promise<N>()
+        
+        switch self.state {
+        case .Fulfilled:
+            let output = onFulfilled?(value: self.value!)
+            
+                subPromise.resolve(output!)
+        case .Rejected:
+            if let onRejected = onRejected {
+                subPromise.resolve(onRejected(reason: self.reason!))
+            }
+        default:
+            break
+        }
+
+        return subPromise
     }
     
     public func then(
