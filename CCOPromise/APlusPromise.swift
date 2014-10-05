@@ -254,7 +254,7 @@ public class APlusPromise: Thenable
         return racePromise
     }
     
-    public func catch(onRejected: APlusRejection) -> APlusPromise
+    public func catch(onRejected: APlusRejection) -> Self
     {
         return self.then(
             onFulfilled: nil,
@@ -264,30 +264,18 @@ public class APlusPromise: Thenable
 
     // MARK: - Thenable
     
-    public func then(onFulfilled: APlusResolution? = nil, onRejected: APlusRejection? = nil) -> APlusPromise
+    public func then(onFulfilled: APlusResolution? = nil, onRejected: APlusRejection? = nil) -> Self
     {
-        var subPromise: APlusPromise
-        let state = self.state
-        let value = self.value
-        let reason = self.reason
-        
-        switch state {
-        case .Pending:
-            subPromise = self.dynamicType()
-        case .Fulfilled:
-            subPromise = self.dynamicType(value: value)
-        case .Rejected:
-            subPromise = self.dynamicType(reason: reason)
-        }
+        let subPromise = self.dynamicType()
         
         let then: ThenGroupType = (onFulfilled, onRejected, subPromise)
         self.thens.append(then)
         
-        switch state {
+        switch self.state {
         case .Fulfilled:
-            subPromise.resolve(onFulfilled?(value: value))
+            subPromise.resolve(onFulfilled?(value: self.value))
         case .Rejected:
-            subPromise.resolve(onRejected?(reason: reason))
+            subPromise.resolve(onRejected?(reason: self.reason))
         default:
             break
         }

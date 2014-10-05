@@ -17,11 +17,16 @@ public class Promise<V>: Thenable
     public typealias ReasonType = NSError
     public typealias ReturnType = Promise
 
-    public typealias Resolution = (value: V) -> Any?
-    public typealias Rejection = (reason: NSError?) -> Any?
+    public typealias FulfillClosure = (value: V) -> Any?
+    public typealias RejectClosure = (reason: NSError?) -> Any?
     public typealias Resovler = (value: V) -> Void
     public typealias Rejector = (reason: NSError) -> Void
-
+    
+    typealias ThenGroupType = (
+        resolution: FulfillClosure?,
+        rejection: RejectClosure?,
+        subPromise: Promise
+    )
     
     // MARK: - ivars
     
@@ -30,14 +35,18 @@ public class Promise<V>: Thenable
     public var reason: NSError? = nil
     
     // MARK: - Initializers
+    
+    required
     public init() {}
     
+    required
     public init(value: V)
     {
         self.value = value
         self.state = .Fulfilled
     }
     
+    required
     public init(reason: NSError)
     {
         self.reason = reason
@@ -128,116 +137,63 @@ public class Promise<V>: Thenable
 */
     }
     
-/*
-    required
-    public init(resovler: (resolve: Resovler, reject: Rejector) -> Void)
-    {
-        super.init()
-        resovler(
-            resolve: self.onFulfilled,
-            reject: self.onRejected
-        )
-    }
-
-    required
-    public init(value: V)
-    {
-        super.init(value: value)
-    }
-    
-    
-    // MARK: - Inherited Initializers
-    
-    required
-    public init()
-    {
-        super.init()
-    }
-    
-    required
-    public init(value: Any?)
-    {
-        super.init(value: value)
-    }
-    
-    required
-    public init(reason: Any?)
-    {
-        super.init(reason: reason)
-    }
-
-    required
-    public init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
-    {
-        super.init()
-        resovler(
-            resolve: self.onFulfilled,
-            reject: self.onRejected
-        )
-    }
-
-    required convenience
-    public init<T: Thenable>(thenable: T)
-    {
-        self.init()
-        thenable.then(
-            onFulfilled: { (value) -> Any? in
-                self.onFulfilled(value)
-            },
-            onRejected: { (reason) -> Any? in
-                self.onRejected(reason)
-            }
-        )
-    }
-*/
-    
-    // MARK: - Public APIs
-    /*
-    public func then<N>(onFulfilled: (value: V) -> N) -> Promise<N>
-    {
-        return self.then(
-            onFulfilled: (onFulfilled as Resolution),
-            onRejected: nil
-        ) as Promise<N>
-    }
-    */
-    /*
-    public func catch(onRejected: Rejection) -> Promise<Any?>
-    {
-        return self.then(
-            onFulfilled: nil,
-            onRejected: onRejected
-        )
-    }
-*/
     
     // MARK: - Thenable
 
-    public func then<T>(
-        onFulfilled: Optional<(value: V) -> Promise<T>> = nil,
-        onRejected: Optional<(reason: NSError) -> Promise<T>> = nil
-        ) -> Promise<T> {
-        return Promise<T>()
+    public func then<N>(
+        onFulfilled: Optional<(value: V) -> Promise<N>> = nil,
+        onRejected: Optional<(reason: NSError) -> Promise<N>> = nil
+        ) -> Promise<N> {
+            
+            /*
+            var subPromise: Promise
+            let state = self.state
+            let value = self.value
+            let reason = self.reason
+            
+            switch state {
+            case .Pending:
+                subPromise = self.dynamicType()
+            case .Fulfilled:
+                subPromise = self.dynamicType(value: value!)
+            case .Rejected:
+                subPromise = self.dynamicType(reason: reason!)
+            }
+            
+            let then: ThenGroupType = (onFulfilled, onRejected, subPromise)
+            self.thens.append(then)
+            
+            switch state {
+            case .Fulfilled:
+                break
+                //subPromise.resolve(onFulfilled?(value: value))
+            case .Rejected:
+                break
+                //subPromise.resolve(onRejected?(reason: reason))
+            default:
+                break
+            }
+            
+            return subPromise
+            */
+            
+            
+        return Promise<N>()
     }
     
-    public func then<T>(
-        onFulfilled: Optional<(value: V) -> T> = nil,
-        onRejected: Optional<(reason: NSError) -> T> = nil
-        ) -> Promise<T> {
-        return Promise<T>()
+    // MARK: - Thenable enhance
+    
+    public func then<N>(
+        onFulfilled: Optional<(value: V) -> N> = nil,
+        onRejected: Optional<(reason: NSError) -> N> = nil
+        ) -> Promise<N> {
+        return Promise<N>()
     }
     
-    public func then<V>(
+    public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
         onRejected: Optional<(reason: NSError) -> Void> = nil
         ) -> Promise<V> {
             return Promise<V>()
     }
-
-    /*
-    public func then(onFulfilled: Resolution? = nil, onRejected: Rejection? = nil) -> Promise<Any?>
-    {
-        return super.then(onFulfilled: onFulfilled, onRejected: onRejected) as Promise<Any?>
-    }
-*/
 }
