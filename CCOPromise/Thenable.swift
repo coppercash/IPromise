@@ -10,10 +10,10 @@ import Foundation
 
 public protocol Thenable
 {
-    typealias ThenType
+    typealias NextType
     typealias ValueType
     typealias ReasonType
     typealias ReturnType
     
-    func then(#onFulfilled: ((value: ValueType) -> ReturnType)?, onRejected: ((reason: ReasonType) -> ReturnType)?) -> ThenType
+    func then(#onFulfilled: ((value: ValueType) -> ReturnType)?, onRejected: ((reason: ReasonType) -> ReturnType)?) -> NextType
 }

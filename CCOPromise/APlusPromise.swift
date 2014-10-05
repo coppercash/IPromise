@@ -12,7 +12,7 @@ public class APlusPromise: Thenable
 {
     // MARK: - Type
     
-    typealias ThenType = APlusPromise
+    typealias NextType = APlusPromise
     typealias ValueType = Any?
     typealias ReasonType = Any?
     typealias ReturnType = Any?
