@@ -13,7 +13,6 @@ public protocol Thenable
     typealias NextType
     typealias ValueType
     typealias ReasonType
-    typealias ReturnType
     
-    func then(#onFulfilled: ((value: ValueType) -> ReturnType)?, onRejected: ((reason: ReasonType) -> ReturnType)?) -> NextType
+    func then(#onFulfilled: ((value: ValueType) -> Any?)?, onRejected: ((reason: ReasonType) -> Any?)?) -> NextType
 }

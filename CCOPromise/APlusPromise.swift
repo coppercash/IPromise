@@ -15,7 +15,6 @@ public class APlusPromise: Thenable
     typealias NextType = APlusPromise
     typealias ValueType = Any?
     typealias ReasonType = Any?
-    typealias ReturnType = Any?
     
     public typealias APlusResolution = (value: Any?) -> Any?
     public typealias APlusRejection = (reason: Any?) -> Any?
@@ -87,7 +86,7 @@ public class APlusPromise: Thenable
     }
     
     required convenience
-    public init<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(thenable: T)
+    public init<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>>(thenable: T)
     {
         self.init()
         thenable.then(

@@ -12,10 +12,9 @@ public class Promise<V>: Thenable
 {
     // MARK: - Type
 
-    public typealias NextType = Promise
+    public typealias NextType = Promise<Any>
     public typealias ValueType = V
     public typealias ReasonType = NSError
-    public typealias ReturnType = Void
 
     public typealias FulfillClosure = (value: V) -> Any?
     public typealias RejectClosure = (reason: NSError?) -> Any?
@@ -65,14 +64,7 @@ public class Promise<V>: Thenable
     }
 
     convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(voidThenable: T)
-    {
-        self.init()
-        self.resolve(voidThenable: voidThenable)
-    }
-    
-    convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Optional<Any>>(thenable: T)
+    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError>(thenable: T)
     {
         self.init()
         self.resolve(thenable: thenable)
@@ -141,7 +133,7 @@ public class Promise<V>: Thenable
 
         switch some {
         case let promise as Promise<V>:
-            self.resolve(voidThenable: promise)
+            self.resolve(thenable: promise)
         case let value as V:
             self.resolve(value: value)
         default:
@@ -179,28 +171,8 @@ public class Promise<V>: Thenable
         }
     }
     */
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(#voidThenable: T)
-    {
-        if self.state != .Pending {
-            return
-        }
-
-        if (voidThenable as? Promise<V> === self) {
-            self.onRejected(NSError.aPlusPromiseTypeError())    // TODO: Replace aPlusPromiseTypeError
-        }
-        else {
-            voidThenable.then(
-                onFulfilled: { (value: V) -> Void in
-                    self.onFulfilled(value)
-                },
-                onRejected: { (reason: NSError) -> Void in
-                    self.onRejected(reason)
-                }
-            )
-        }
-    }
     
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Optional<Any>>(#thenable: T)
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError>(#thenable: T)
     {
         if self.state != .Pending {
             return
@@ -233,6 +205,36 @@ public class Promise<V>: Thenable
     
     // MARK: - Thenable
 
+    public func then(
+        onFulfilled: Optional<(value: V) -> Any?> = nil,
+        onRejected: Optional<(reason: NSError) -> Any?> = nil
+        ) -> Promise<Any> {
+            
+            let subPromise = Promise<Any>()
+            
+            switch self.state {
+            case .Fulfilled:
+                if let resolution = onFulfilled? {
+                    subPromise.resolve(some: resolution(value: self.value!))
+                }
+                else {
+                    subPromise.onFulfilled(self.value)
+                }
+            case .Rejected:
+                if let rejection = onRejected? {
+                    subPromise.resolve(some: rejection(reason: self.reason!))
+                }
+                else {
+                    subPromise.onRejected(self.reason!)
+                }
+            default:
+                break
+            }
+            
+            return subPromise
+    }
+
+    
     public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
         onRejected: Optional<(reason: NSError) -> Void> = nil
@@ -300,9 +302,9 @@ public class Promise<V>: Thenable
         
         switch self.state {
         case .Fulfilled:
-            subPromise.resolve(voidThenable: onFulfilled(value: self.value!))
+            subPromise.resolve(thenable: onFulfilled(value: self.value!))
         case .Rejected:
-            subPromise.resolve(voidThenable: onRejected(reason: self.reason!))
+            subPromise.resolve(thenable: onRejected(reason: self.reason!))
         default:
             break
         }
@@ -318,7 +320,7 @@ public class Promise<V>: Thenable
         
         switch self.state {
         case .Fulfilled:
-            subPromise.resolve(voidThenable: onFulfilled(value: self.value!))
+            subPromise.resolve(thenable: onFulfilled(value: self.value!))
         case .Rejected:
             subPromise.onRejected(self.reason!)
         default:
@@ -335,8 +337,8 @@ public class Promise<V>: Thenable
         return self.then(onFulfilled: nil, onRejected: onRejected)
     }
 
-    // TODO: Implement this with then and voidThen, and remove promiseThen
-    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
+
+    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError>(
         onFulfilled: (value: V) -> T,
         onRejected: (reason: NSError) -> T
         ) -> Promise<N>
