@@ -19,8 +19,6 @@ public class Promise<V>: Thenable
 
     public typealias FulfillClosure = (value: V) -> Any?
     public typealias RejectClosure = (reason: NSError?) -> Any?
-    public typealias Resovler = (value: V) -> Void
-    public typealias Rejector = (reason: NSError) -> Void
     
     typealias ThenGroupType = (
         resolution: FulfillClosure?,
@@ -220,6 +218,19 @@ public class Promise<V>: Thenable
         )
     }
 
+    // MARK: - Public APIs
+    
+    public class func resolve(value: Any) -> Promise<Any>
+    {
+        switch value {
+        case let promise as Promise<Any>:
+            return promise
+        default:
+            return Promise<Any>(value: value)
+        }
+    }
+
+    
     // MARK: - Thenable
 
     public func then(
@@ -240,19 +251,6 @@ public class Promise<V>: Thenable
             
             return subPromise
     }
-    
-    /*
-    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == T>(
-        onFulfilled: Optional<(value: V) -> T> = nil,
-        onRejected: Optional<(reason: NSError) -> T> = nil
-        ) -> T {
-            
-            let subPromise = Promise<N>()
-            
-            
-            return subPromise
-    }
-    */
     
     // MARK: - Thenable enhance
     
@@ -330,7 +328,6 @@ public class Promise<V>: Thenable
         return subPromise
     }
 
-    
     public func catch(
         onRejected: (reason: NSError) -> Void
         ) -> Self
@@ -338,4 +335,15 @@ public class Promise<V>: Thenable
         return self.then(onFulfilled: nil, onRejected: onRejected)
     }
 
+    // TODO: Implement this with then and voidThen, and remove promiseThen
+    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
+        onFulfilled: (value: V) -> T,
+        onRejected: (reason: NSError) -> T
+        ) -> Promise<N>
+    {
+        let subPromise = Promise<N>()
+        
+        
+        return subPromise
+    }
 }
