@@ -154,7 +154,7 @@ public class APlusPromise: Thenable
         switch value {
         case let promise as APlusPromise:
             if promise === self {
-                self.onRejected(NSError.aPlusPromiseTypeError())
+                self.onRejected(NSError.promiseTypeError())
             }
             else {
                 promise.then(
@@ -286,7 +286,7 @@ public class APlusPromise: Thenable
         return subPromise
     }
 }
-
+/* Remove
 public let APlusPromiseTypeError = 1000
 public extension NSError {
     class func aPlusPromiseTypeError() -> Self {
@@ -297,6 +297,7 @@ public extension NSError {
         )
     }
 }
+*/
 /* Remove
 internal extension NSException {
     class func aPlusPromiseStateTransitionException() -> Self {

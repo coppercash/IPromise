@@ -672,7 +672,8 @@ class APlusPromiseTests: XCTestCase
         promiseRefer = promise
         
         promise.catch { (reason) -> Any? in
-            XCTAssertEqual(reason as NSError, NSError.aPlusPromiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
             expectation.fulfill()
             return nil
         }
@@ -697,7 +698,8 @@ class APlusPromiseTests: XCTestCase
         promiseRefer = promise
         
         promise.catch { (reason) -> Any? in
-            XCTAssertEqual(reason as NSError, NSError.aPlusPromiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
             expectation.fulfill()
             return nil
         }
