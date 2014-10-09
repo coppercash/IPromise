@@ -16,28 +16,19 @@ public class Promise<V>: Thenable
     public typealias ValueType = V
     public typealias ReasonType = NSError
     
-    typealias FulfilledClosure = (value: V) -> Void
-    typealias RejectedClosure = (reason: NSError) -> Void
+    typealias FulfillClosure = (value: V) -> Void
+    typealias RejectClosure = (reason: NSError) -> Void
     
-    /* Remove
-    typealias NextPromiseType = Promise<Any?>
-    typealias FulfillValueClosure = (value: V) -> Any?
-    typealias RejectValueClosure = (reason: NSError) -> Any?
-    */
+    
     // MARK: - ivars
     
     public var state: PromiseState = .Pending
     public var value: V? = nil
     public var reason: NSError? = nil
     
-    var fulfilledCallbacks: [FulfilledClosure] = []
-    var rejectedCallbacks: [RejectedClosure] = []
+    var fulfillCallbacks: [FulfillClosure] = []
+    var rejectCallbacks: [RejectClosure] = []
     
-    /* Remove
-    let signleNextPromises: [NextPromiseType] = []
-    let FulfillValueThenGroups: [(NextPromiseType, FulfillValueClosure)] = []
-    let RejectValueThenGroups: [(NextPromiseType, RejectValueClosure)] = []
-    */
     
     // MARK: - Initializers
     
@@ -81,16 +72,16 @@ public class Promise<V>: Thenable
     
     // MARK: - Private APIs
     
-    func bindCallbacks(#fulfilledCallback: FulfilledClosure, rejectedCallback: RejectedClosure)
+    func bindCallbacks(#fulfillCallback: FulfillClosure, rejectCallback: RejectClosure)
     {
-        self.fulfilledCallbacks.append(fulfilledCallback)
-        self.rejectedCallbacks.append(rejectedCallback)
+        self.fulfillCallbacks.append(fulfillCallback)
+        self.rejectCallbacks.append(rejectCallback)
         
         switch self.state {
         case .Fulfilled:
-            fulfilledCallback(value: self.value!)
+            fulfillCallback(value: self.value!)
         case .Rejected:
-            rejectedCallback(reason: self.reason!)
+            rejectCallback(reason: self.reason!)
         default:
             break
         }
@@ -105,7 +96,7 @@ public class Promise<V>: Thenable
         self.value = value
         self.state = .Fulfilled
         
-        for callback in self.fulfilledCallbacks {
+        for callback in self.fulfillCallbacks {
             callback(value: value)
         }
     }
@@ -119,7 +110,7 @@ public class Promise<V>: Thenable
         self.reason = reason
         self.state = .Rejected
         
-        for callback in self.rejectedCallbacks {
+        for callback in self.rejectCallbacks {
             callback(reason: reason)
         }
     }
@@ -250,7 +241,7 @@ public class Promise<V>: Thenable
         let subPromise = Promise<Any?>()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 if let resolution = onFulfilled? {
                     subPromise.resolve(some: resolution(value: value))
                 }
@@ -258,7 +249,7 @@ public class Promise<V>: Thenable
                     subPromise.onFulfilled(value)
                 }
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 if let rejection = onRejected? {
                     subPromise.resolve(some: rejection(reason: reason))
                 }
@@ -281,11 +272,11 @@ public class Promise<V>: Thenable
         let subPromise = self.dynamicType()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 onFulfilled?(value: value)
                 subPromise.onFulfilled(value)
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 onRejected?(reason: reason)
                 subPromise.onRejected(reason)
             }
@@ -301,11 +292,11 @@ public class Promise<V>: Thenable
         let subPromise = self.dynamicType()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 onFulfilled(value: value)
                 subPromise.onFulfilled(value)
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 subPromise.onRejected(reason)
             }
         );
@@ -321,10 +312,10 @@ public class Promise<V>: Thenable
         let subPromise = Promise<N>()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 subPromise.resolve(value: onFulfilled(value: value))
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 subPromise.resolve(value: onRejected(reason: reason))
             }
         );
@@ -339,10 +330,10 @@ public class Promise<V>: Thenable
         let subPromise = Promise<N>()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 subPromise.resolve(value: onFulfilled(value: value))
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 subPromise.onRejected(reason)
             }
         );
@@ -358,10 +349,10 @@ public class Promise<V>: Thenable
         let subPromise = Promise<N>()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 subPromise.resolve(thenable: onFulfilled(value: value))
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 subPromise.resolve(thenable: onRejected(reason: reason))
             }
         );
@@ -376,10 +367,10 @@ public class Promise<V>: Thenable
         let subPromise = Promise<N>()
         
         self.bindCallbacks(
-            fulfilledCallback: { (value) -> Void in
+            fulfillCallback: { (value) -> Void in
                 subPromise.resolve(thenable: onFulfilled(value: value))
             },
-            rejectedCallback: { (reason) -> Void in
+            rejectCallback: { (reason) -> Void in
                 subPromise.onRejected(reason)
             }
         );
