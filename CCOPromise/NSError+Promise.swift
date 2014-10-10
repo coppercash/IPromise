@@ -19,7 +19,7 @@ extension NSError {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseTypeError,
-            userInfo: [NSLocalizedDescriptionKey: "TypeError"]
+            userInfo: [NSLocalizedDescriptionKey: "TypeError",]
         )
     }
     
@@ -27,7 +27,28 @@ extension NSError {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseResultTypeError,
-            userInfo: [NSLocalizedDescriptionKey: "ResultTypeError"]
+            userInfo: [NSLocalizedDescriptionKey: "ResultTypeError",]
+        )
+    }
+    
+    class func promiseReasonWrapperError(reason: Any?) -> Self {
+        var reasonValue: AnyObject? = nil
+        if let validReason = reason? {
+            if let reasonObject = validReason as? NSObject {
+                reasonValue = reasonObject
+            }
+            else {
+                reasonValue = "\(validReason)"
+            }
+        }
+        else {
+            reasonValue = NSNull()
+        }
+        
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseResultTypeError,
+            userInfo: [NSLocalizedDescriptionKey: "ReasonWrapperError", ("reason" as NSString): reasonValue!,]
         )
     }
 }

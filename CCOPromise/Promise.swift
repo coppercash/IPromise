@@ -148,10 +148,10 @@ public class Promise<V>: Thenable
         }
         else {
             thenable.then(
-                onFulfilled: { (value) -> Void in
+                onFulfilled: { (value: V) -> Void in
                     self.onFulfilled(value)
                 },
-                onRejected: { (reason) -> Void in
+                onRejected: { (reason: NSError) -> Void in
                     self.onRejected(reason)
                 }
             );
@@ -159,6 +159,24 @@ public class Promise<V>: Thenable
         
     }
 
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(#anyThenable: T)
+    {
+        if self.state != .Pending {
+            return
+        }
+
+        anyThenable.then(
+            onFulfilled: { (value: V) -> Any? in
+                self.onFulfilled(value)
+                return nil
+            },
+            onRejected: { (reason: Any?) -> Any? in
+                self.onRejected(NSError.promiseReasonWrapperError(reason))
+                return nil
+            }
+        );
+    }
+    
     /*
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Optional<Any>>(#thenable: T)
     {
@@ -184,29 +202,6 @@ public class Promise<V>: Thenable
         )
     }
     */
-    
-    
-    func resolve(#promise: Promise<V>) {
-        if self.state != .Pending {
-            return
-        }
-        
-        // TODO: Check Return cycle
-        
-        if promise === self {
-            self.onRejected(NSError.promiseTypeError())
-        }
-        else {
-            promise.then(
-                onFulfilled: { (value) -> Void in
-                    self.onFulfilled(value)
-                },
-                onRejected: { (reason) -> Void in
-                    self.onRejected(reason)
-                }
-            );
-        }
-    }
     
     // MARK: - Public APIs
     
