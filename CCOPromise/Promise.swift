@@ -157,7 +157,12 @@ public class Promise<V>: Thenable
                 return nil
             },
             onRejected: { (reason: Any?) -> Any? in
-                self.onRejected(NSError.promiseReasonWrapperError(reason))
+                if let reasonObject = reason as? NSError {
+                    self.onRejected(reasonObject)
+                }
+                else {
+                    self.onRejected(NSError.promiseReasonWrapperError(reason))
+                }
                 return nil
             }
         );

@@ -536,8 +536,110 @@ class PromiseTests: XCTestCase
 
     // MARK: - init(:thenable)
     
+    func test_init_thenable() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let superPromise = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_0)
+        }
+        
+        let promise = Promise(thenable: superPromise)
+        promise.then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertEqual(value, STRING_VALUE_0)
+                    expt.fulfill()
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertFalse(true)
+                }
+        )
+        
+        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertNil(promise.value)
+        XCTAssertNil(promise.reason)
+
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.value!, STRING_VALUE_0)
+            XCTAssertNil(promise.reason)
+        })
+    }
+    
     // MARK: - init(:anyThenable)
 
+    func test_init_anyThenable_fulfill() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let superPromise = APlusPromise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_0)
+        }
+        
+        let promise = Promise<Any?>(anyThenable: superPromise)
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertEqual(value as String, STRING_VALUE_0)
+                expt.fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+            }
+        )
+        
+        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertNil(promise.reason)
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.value as String, STRING_VALUE_0)
+            XCTAssertNil(promise.reason)
+        })
+    }
+
+    
+    func test_init_anyThenable_rejectNSError() {
+        let expt = expectationWithDescription(__FUNCTION__)
+
+        let superPromise = APlusPromise { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_0)
+        }
+        
+        let promise = Promise<Any?>(anyThenable: superPromise)
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertEqual(reason, ERROR_0)
+                expt.fulfill()
+            }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_init_anyThenable_rejectAny() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let superPromise = APlusPromise { (resolve, reject) -> Void in
+            0 ~> reject(reason: STRING_VALUE_0)
+        }
+        
+        let promise = Promise<Any?>(anyThenable: superPromise)
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertEqual(reason, NSError.promiseReasonWrapperError(STRING_VALUE_0))
+                expt.fulfill()
+            }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+
+    
     // MARK: - resolve(_)
     
     // MARK: - all
