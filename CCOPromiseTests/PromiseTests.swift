@@ -113,4 +113,95 @@ class PromiseTests: XCTestCase
             XCTAssertNil(promise.value)
         })
     }
+    
+    // MARK: - 2.2.1
+    
+    func test_then_onFulfilled() {
+        
+        var counter = 0
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 2...7 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        
+        let promise = Promise<String> { (resolve, reject) -> Void in
+            0 ~> {
+                XCTAssertEqual(++counter, 1)
+                
+                resolve(value: STRING_VALUE_0)
+
+                resolve(value: STRING_VALUE_1)
+                reject(reason: ERROR_1)
+                
+                XCTAssertEqual(++counter, 8)
+                }()
+        }
+        
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                XCTAssertEqual(++counter, 2)
+                expts[2]!.fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+            }
+        )
+        
+        promise.then { (value) -> Void in
+            XCTAssertEqual(value, STRING_VALUE_0)
+            XCTAssertEqual(++counter, 3)
+            expts[3]!.fulfill()
+        }
+
+        promise.catch { (reason) -> Void in
+            XCTAssertFalse(true)
+        }
+        
+        promise.then(
+            onFulfilled: { (value) -> String in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                XCTAssertEqual(++counter, 4)
+                expts[4]!.fulfill()
+                return STRING_VALUE_2
+            },
+            onRejected: { (reason) -> String in
+                XCTAssertFalse(true)
+                return STRING_VALUE_2
+            }
+        )
+        
+        promise.then { (value) -> String in
+            XCTAssertEqual(value, STRING_VALUE_0)
+            XCTAssertEqual(++counter, 5)
+            expts[5]!.fulfill()
+            return STRING_VALUE_2
+        }
+        
+        promise.then(
+            onFulfilled: { (value) -> Promise<String> in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                XCTAssertEqual(++counter, 6)
+                expts[6]!.fulfill()
+                return Promise(value: STRING_VALUE_2)
+            },
+            onRejected: { (reason) -> Promise<String> in
+                XCTAssertFalse(true)
+                return Promise(value: STRING_VALUE_2)
+            }
+        )
+        
+        promise.then { (value) -> Promise<String> in
+            XCTAssertEqual(value, STRING_VALUE_0)
+            XCTAssertEqual(++counter, 7)
+            expts[7]!.fulfill()
+            return Promise(value: STRING_VALUE_2)
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+            
+        })
+    }
+
+    
 }
