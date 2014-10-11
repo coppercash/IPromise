@@ -18,14 +18,6 @@ let error1 = NSError(domain: "error 1", code: 0, userInfo: nil)
 let error2 = NSError(domain: "error 2", code: 1, userInfo: nil)
 let error3 = NSError(domain: "error 3", code: 2, userInfo: nil)
 
-infix operator ~> {}
-func ~> (lhs: @autoclosure () -> Any, rhs: @autoclosure () -> ())
-{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-        lhs();
-        dispatch_sync(dispatch_get_main_queue(), rhs)
-    })
-}
 
 
 class APlusPromiseTests: XCTestCase

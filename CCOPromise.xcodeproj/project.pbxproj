@@ -11,10 +11,11 @@
 		BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70319D39769009C6326 /* APlusPromiseTests.swift */; };
 		BE4D90F619E4B6CD008CCF59 /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4D90F519E4B6CD008CCF59 /* NSError+Promise.swift */; };
 		BEC9025A19E176120063BC8A /* PromiseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC9025919E176120063BC8A /* PromiseState.swift */; };
+		BED2083E19E90C09008CEE3C /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE121ABE19D31880001A4473 /* PromiseTests.swift */; };
+		BED2084019E90C31008CEE3C /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED2083F19E90C31008CEE3C /* Utilities.swift */; };
 		BEDF442E19DF6DFA00CEEEE1 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03019D23C8B005B4CE4 /* Promise.swift */; };
 		BEE0A03319D23D79005B4CE4 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE0A03219D23D79005B4CE4 /* Thenable.swift */; };
 		BEFE4CFF19D1C49C0086A00B /* CCOPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFE4D0819D1C49C0086A00B /* CCOPromiseTests.swift */; };
 		BEFE4D1419D1C4F60086A00B /* CCOPromise.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BEFE4CF919D1C49C0086A00B /* CCOPromise.framework */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,7 @@
 		BE46E70319D39769009C6326 /* APlusPromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusPromiseTests.swift; sourceTree = "<group>"; };
 		BE4D90F519E4B6CD008CCF59 /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
 		BEC9025919E176120063BC8A /* PromiseState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseState.swift; sourceTree = "<group>"; };
+		BED2083F19E90C31008CEE3C /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		BEE0A03019D23C8B005B4CE4 /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		BEE0A03219D23D79005B4CE4 /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
 		BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThenableTests.swift; sourceTree = "<group>"; };
@@ -42,7 +44,6 @@
 		BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCOPromise.h; sourceTree = "<group>"; };
 		BEFE4D0419D1C49C0086A00B /* CCOPromiseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCOPromiseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEFE4D0719D1C49C0086A00B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BEFE4D0819D1C49C0086A00B /* CCOPromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCOPromiseTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,7 +108,7 @@
 		BEFE4D0519D1C49C0086A00B /* CCOPromiseTests */ = {
 			isa = PBXGroup;
 			children = (
-				BEFE4D0819D1C49C0086A00B /* CCOPromiseTests.swift */,
+				BED2083F19E90C31008CEE3C /* Utilities.swift */,
 				BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */,
 				BE121ABE19D31880001A4473 /* PromiseTests.swift */,
 				BE46E70319D39769009C6326 /* APlusPromiseTests.swift */,
@@ -243,8 +244,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BED2084019E90C31008CEE3C /* Utilities.swift in Sources */,
 				BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */,
-				BEFE4D0919D1C49C0086A00B /* CCOPromiseTests.swift in Sources */,
+				BED2083E19E90C09008CEE3C /* PromiseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

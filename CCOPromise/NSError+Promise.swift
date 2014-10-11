@@ -23,14 +23,6 @@ extension NSError {
         )
     }
     
-    class func promiseResultTypeError() -> Self {
-        return self(
-            domain: PromiseErrorDomain,
-            code: PromiseResultTypeError,
-            userInfo: [NSLocalizedDescriptionKey: "ResultTypeError",]
-        )
-    }
-    
     class func promiseReasonWrapperError(reason: Any?) -> Self {
         var reasonValue: AnyObject? = nil
         if let validReason = reason? {
