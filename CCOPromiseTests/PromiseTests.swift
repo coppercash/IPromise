@@ -13,10 +13,12 @@ import CCOPromise
 let STRING_VALUE_0 = "STRING_VALUE_0"
 let STRING_VALUE_1 = "STRING_VALUE_1"
 let STRING_VALUE_2 = "STRING_VALUE_2"
+let STRING_VALUE_3 = "STRING_VALUE_3"
 
 let ERROR_0 = NSError.errorWithDomain(" ", code: 0, userInfo: nil)
 let ERROR_1 = NSError.errorWithDomain(" ", code: 1, userInfo: nil)
 let ERROR_2 = NSError.errorWithDomain(" ", code: 2, userInfo: nil)
+let ERROR_3 = NSError.errorWithDomain(" ", code: 3, userInfo: nil)
 
 class PromiseTests: XCTestCase
 {
@@ -395,8 +397,66 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
         })
     }
-
     
+    // MARK: - 2.3.2; chain
+    
+    func test_chain_promise() {
+        
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 1...5 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        var counter = 0
+        
+        let toFulfill = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_2)
+        }
+        let toReject = Promise<String> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_2)
+        }
+        
+        Promise<Void>(reason: ERROR_0)
+            .then(
+                onFulfilled: { (value) -> Promise<String> in
+                    XCTAssertFalse(true)
+                    return Promise(value: STRING_VALUE_0)
+                },
+                onRejected: { (reason) -> Promise<String> in
+                    XCTAssertEqual(reason, ERROR_0)
+                    XCTAssertEqual(++counter, 1)
+                    expts[1]!.fulfill()
+                    return Promise(value: STRING_VALUE_0)
+                }
+            ).then { (value) -> Promise<String> in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                XCTAssertEqual(++counter, 2)
+                expts[2]!.fulfill()
+                return Promise<String>(reason: ERROR_1)
+            }.then(
+                onFulfilled: { (value) -> Promise<String> in
+                    XCTAssertFalse(true)
+                    return toFulfill
+                },
+                onRejected: { (reason) -> Promise<String> in
+                    XCTAssertEqual(reason, ERROR_1)
+                    XCTAssertEqual(++counter, 3)
+                    expts[3]!.fulfill()
+                    return toFulfill
+            }).then { (value) -> Promise<String> in
+                XCTAssertEqual(value, STRING_VALUE_2)
+                XCTAssertEqual(++counter, 4)
+                expts[4]!.fulfill()
+                return toReject
+            }.catch { (reason) -> Void in
+                XCTAssertEqual(reason, ERROR_2)
+                XCTAssertEqual(++counter, 5)
+                expts[5]!.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+        })
+    }
+
     // MARK: - init(:anyThenable)
     
     // MARK: - init(:thenable)
