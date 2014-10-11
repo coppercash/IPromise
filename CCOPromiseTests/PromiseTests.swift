@@ -205,6 +205,8 @@ class PromiseTests: XCTestCase
         })
     }
 
+    // MARK: - 2.2.3 2.2.6
+
     func test_then_onRejected() {
         
         var counter = 0
@@ -287,4 +289,55 @@ class PromiseTests: XCTestCase
             
         })
     }
+    
+    // MARK: - 2.2.1; 2.2.7.3; init(value:)
+    
+    func test_optional_onFulfilled() {
+        let promise = Promise(value: STRING_VALUE_0)
+        XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+        XCTAssertNil(promise.reason)
+        
+        promise
+            .then(
+                onFulfilled: nil,
+                onRejected: nil
+            )
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertEqual(value as String, STRING_VALUE_0)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertFalse(true)
+                }
+        )
+    }
+    
+    // MARK: - 2.2.1; 2.2.7.4; init(reason:)
+
+    func test_optional_onRejected() {
+        let promise = Promise<String>(reason: ERROR_0)
+        XCTAssertEqual(promise.state, PromiseState.Rejected)
+        XCTAssertNil(promise.value)
+
+        promise
+            .then(
+                onFulfilled: nil,
+                onRejected: nil
+            )
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertFalse(true)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertEqual(reason, ERROR_0)
+                }
+        )
+    }
+    
+    
+    // MARK: - init(:anyThenable)
+    
+    // MARK: - init(:thenable)
+    
+    // MARK: - resolve(_)
 }
