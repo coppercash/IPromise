@@ -122,9 +122,9 @@ class PromiseTests: XCTestCase
         })
     }
     
-    // MARK: - 2.2.4 2.2.5
+    // MARK: - 2.2.4; 2.2.5
     
-    // MARK: - 2.2.2 2.2.6
+    // MARK: - 2.2.2; 2.2.6
     
     func test_then_onFulfilled() {
         
@@ -213,7 +213,7 @@ class PromiseTests: XCTestCase
         })
     }
 
-    // MARK: - 2.2.3 2.2.6
+    // MARK: - 2.2.3; 2.2.6
 
     func test_then_onRejected() {
         
@@ -457,9 +457,91 @@ class PromiseTests: XCTestCase
         })
     }
 
-    // MARK: - init(:anyThenable)
+    // MARK: - 2.3.3
     
+    // MARK: - 2.3.4; chain
+    
+    func test_chain_value() {
+        
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 0...3 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+
+        Promise<Any?>(reason: ERROR_0)
+            .then(
+                onFulfilled: { (value) -> String in
+                    XCTAssertFalse(true)
+                    return STRING_VALUE_0
+                },
+                onRejected: { (reason) -> String in
+                    XCTAssertEqual(reason, ERROR_0)
+                    expts[0]!.fulfill()
+                    return STRING_VALUE_0
+            }).then(
+                onFulfilled: { (value) -> String in
+                    XCTAssertEqual(value, STRING_VALUE_0)
+                    expts[1]!.fulfill()
+                    return STRING_VALUE_1
+                },
+                onRejected: { (reason) -> String in
+                    XCTAssertFalse(true)
+                    return STRING_VALUE_1
+            }).then { (value) -> String in
+                XCTAssertEqual(value, STRING_VALUE_1)
+                expts[2]!.fulfill()
+                return STRING_VALUE_2
+            }.then { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_2)
+                expts[3]!.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+        })
+    }
+    
+    func test_chain_void() {
+        
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 0...3 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+
+        Promise<Any?>(reason: ERROR_0)
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertFalse(true)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertEqual(reason, ERROR_0)
+                    expts[0]!.fulfill()
+            }).then(
+                onFulfilled: { (value: Any?) -> Void in
+                    XCTAssertTrue(value == nil)
+                    expts[1]!.fulfill()
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertFalse(true)
+            }).then { (value: Any?) -> Void in
+                XCTAssertTrue(value == nil)
+                expts[2]!.fulfill()
+            }.then { (value: Any?) -> Void in
+                XCTAssertTrue(value == nil)
+                expts[3]!.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+        })
+    }
+
     // MARK: - init(:thenable)
     
+    // MARK: - init(:anyThenable)
+
     // MARK: - resolve(_)
+    
+    // MARK: - all
+    
+    // MARK: - race
+
 }
