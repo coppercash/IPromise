@@ -193,17 +193,15 @@ public class Promise<V>: Thenable
             let promise = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Void in
-                    if .Pending == allPromise.state {
-                        results.append(value)
-                        if results.count >= count {
-                            allPromise.onFulfilled(results)
-                        }
+                    results.append(value)
+                    if results.count >= count {
+                        allPromise.onFulfilled(results)
                     }
-                }, onRejected: { (reason) -> Void in
-                    if .Pending == allPromise.state {
-                        allPromise.onRejected(reason)
-                    }
-            })
+                },
+                onRejected: { (reason) -> Void in
+                    allPromise.onRejected(reason)
+                }
+            )
         }
         
         return allPromise
@@ -218,14 +216,10 @@ public class Promise<V>: Thenable
             let promise = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Void in
-                    if .Pending == racePromise.state {
-                        racePromise.onFulfilled(value)
-                    }
+                    racePromise.onFulfilled(value)
                 },
                 onRejected: { (reason) -> Void in
-                    if .Pending == racePromise.state {
-                        racePromise.onRejected(reason)
-                    }
+                    racePromise.onRejected(reason)
                 }
             )
         }

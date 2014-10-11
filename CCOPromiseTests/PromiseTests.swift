@@ -642,7 +642,39 @@ class PromiseTests: XCTestCase
     
     // MARK: - resolve(_)
     
+    func test_init_resolve() {
+        // Can't test. Compiler keeps crashing.
+
+        let a0 = Promise<Any?>.resolve(STRING_VALUE_0)
+        a0.then { (value) -> Void in
+            XCTAssertEqual(value as String, STRING_VALUE_0)
+        }
+        XCTAssertEqual(a0.value as String, STRING_VALUE_0)
+        
+        let a1 = Promise<Any?>.resolve(nil)
+        a1.then { (value) -> Void in
+            XCTAssertTrue(value == nil)
+        }
+        XCTAssertTrue(a1.value! == nil)
+        
+        let q2 = Promise(value: STRING_VALUE_0)
+        let a2 = Promise<Any?>.resolve(q2)
+        XCTAssertTrue(a2 === q2)
+    }
+    
     // MARK: - all
+    
+    func test_init_all_fulfill() {
+
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise(value: STRING_VALUE_0)
+        let prms2 = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: value1)
+        }
+
+
+    }
     
     // MARK: - race
 
