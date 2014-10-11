@@ -12,8 +12,8 @@ public class Promise<V>: Thenable
 {
     // MARK: - Type
     
-    typealias FulfillClosure = (value: V) -> Void
-    typealias RejectClosure = (reason: NSError) -> Void
+    public typealias FulfillClosure = (value: V) -> Void
+    public typealias RejectClosure = (reason: NSError) -> Void
     
     // MARK: - ivars
     
@@ -21,14 +21,13 @@ public class Promise<V>: Thenable
     public var value: V? = nil
     public var reason: NSError? = nil
     
-    var fulfillCallbacks: [FulfillClosure] = []
-    var rejectCallbacks: [RejectClosure] = []
+    lazy var fulfillCallbacks: [FulfillClosure] = []
+    lazy var rejectCallbacks: [RejectClosure] = []
     
     
     // MARK: - Initializers
     
-    required
-    public init() {}
+    init() {}
     
     required
     public init(value: V)
@@ -45,10 +44,7 @@ public class Promise<V>: Thenable
     }
     
     required convenience
-    public init(resovler: (
-        resolve: (value: V) -> Void,
-        reject: (reason: NSError) -> Void
-        ) -> Void)
+    public init(resovler: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
         resovler(
@@ -71,7 +67,7 @@ public class Promise<V>: Thenable
         self.resolve(anyThenable: anyThenable)
     }
     
-    // MARK: - Private APIs
+    // MARK: - Callback
     
     func bindCallbacks(#fulfillCallback: FulfillClosure, rejectCallback: RejectClosure)
     {
@@ -116,23 +112,7 @@ public class Promise<V>: Thenable
         }
     }
     
-    func resolve(#some: Any?)
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        // TODO: Cast to thenable
-        
-        switch some {
-        case let promise as Promise<V>:
-            self.resolve(thenable: promise)
-        case let value as V:
-            self.resolve(value: value)
-        default:
-            self.onRejected(NSError.promiseResultTypeError())
-        }
-    }
+    // MARK: - Resolve
     
     func resolve(#value: V)
     {
@@ -187,7 +167,7 @@ public class Promise<V>: Thenable
     
     public class func resolve(value: Any?) -> Promise<Any?>
     {
-        // TODO: Cast to thenable
+        // TODO: Downcast to thenable and resolve it
         
         switch value {
         case let promise as Promise<Any?>:
@@ -273,7 +253,6 @@ public class Promise<V>: Thenable
                 }
             },
             rejectCallback: { (reason) -> Void in
-                
                 if let rejection = onRejected? {
                     rejection(reason: reason)
                     subPromise.resolve(value: nil)
