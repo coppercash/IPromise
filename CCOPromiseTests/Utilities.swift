@@ -9,10 +9,17 @@
 import Foundation
 
 infix operator ~> {}
-func ~> (lhs: @autoclosure () -> Any, rhs: @autoclosure () -> ())
+func ~> (lhs: @autoclosure () -> Void, rhs: @autoclosure () -> Void)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
         lhs();
+        dispatch_sync(dispatch_get_main_queue(), rhs)
+    })
+}
+func ~> (lhs: NSTimeInterval, rhs: @autoclosure () -> Void)
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+        NSThread.sleepForTimeInterval(lhs)
         dispatch_sync(dispatch_get_main_queue(), rhs)
     })
 }

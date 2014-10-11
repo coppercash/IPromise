@@ -17,9 +17,9 @@ public class Promise<V>: Thenable
     
     // MARK: - ivars
     
-    public var state: PromiseState = .Pending
-    public var value: V? = nil
-    public var reason: NSError? = nil
+    public internal(set) var state: PromiseState = .Pending
+    public internal(set) var value: V? = nil
+    public internal(set) var reason: NSError? = nil
     
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []

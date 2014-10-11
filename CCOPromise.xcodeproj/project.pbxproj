@@ -110,8 +110,8 @@
 			children = (
 				BED2083F19E90C31008CEE3C /* Utilities.swift */,
 				BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */,
-				BE121ABE19D31880001A4473 /* PromiseTests.swift */,
 				BE46E70319D39769009C6326 /* APlusPromiseTests.swift */,
+				BE121ABE19D31880001A4473 /* PromiseTests.swift */,
 				BEFE4D0619D1C49C0086A00B /* Supporting Files */,
 			);
 			path = CCOPromiseTests;
