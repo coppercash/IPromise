@@ -44,10 +44,10 @@ public class Promise<V>: Thenable
     }
     
     required convenience
-    public init(resovler: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
+    public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
-        resovler(
+        resolver(
             resolve: self.onFulfilled,
             reject: self.onRejected
         )
@@ -344,7 +344,7 @@ public class Promise<V>: Thenable
     }
 
     public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
-        onFulfilled: (value: V) -> T,
+        #onFulfilled: (value: V) -> T,
         onRejected: (reason: NSError) -> T
         ) -> Promise<N>
     {

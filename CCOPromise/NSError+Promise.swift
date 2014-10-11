@@ -13,9 +13,9 @@ public let PromiseTypeError = 1000
 public let PromiseResultTypeError = 1001
 
 
-extension NSError {
+public extension NSError {
     
-    class func promiseTypeError() -> Self {
+    public class func promiseTypeError() -> Self {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseTypeError,
@@ -23,7 +23,7 @@ extension NSError {
         )
     }
     
-    class func promiseReasonWrapperError(reason: Any?) -> Self {
+    public class func promiseReasonWrapperError(reason: Any?) -> Self {
         var reasonValue: AnyObject? = nil
         if let validReason = reason? {
             if let reasonObject = validReason as? NSObject {

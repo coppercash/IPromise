@@ -165,7 +165,7 @@ class APlusPromiseTests: XCTestCase
     
     func test_init_thenable_fulfill()
     {
-        var resolver: APlusPromise.APlusResovler? = nil
+        var resolver: APlusPromise.APlusResolver? = nil
         var rejecter: APlusPromise.APlusRejector? = nil
         
         let thenObject = APlusPromise { (resolve, reject) -> Void in
@@ -186,7 +186,7 @@ class APlusPromiseTests: XCTestCase
 
     func test_initThenable_reject()
     {
-        var resolver: APlusPromise.APlusResovler? = nil
+        var resolver: APlusPromise.APlusResolver? = nil
         var rejecter: APlusPromise.APlusRejector? = nil
         
         let thenObject = APlusPromise { (resolve, reject) -> Void in
@@ -739,7 +739,7 @@ class APlusPromiseTests: XCTestCase
         }).catch { (reason) -> Any? in
             XCTAssertEqual(reason as NSError, error2)
             expectation6.fulfill()
-            return APlusPromise(resovler: { (resolve, reject) -> Void in
+            return APlusPromise(resolver: { (resolve, reject) -> Void in
                 () ~> reject(reason: error3)
             })
         }.catch { (reason) -> Any? in

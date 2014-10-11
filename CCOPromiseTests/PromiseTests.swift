@@ -20,7 +20,7 @@ let ERROR_2 = NSError.errorWithDomain(" ", code: 2, userInfo: nil)
 
 class PromiseTests: XCTestCase
 {
-    // MARK: - 2.1.1
+    // MARK: - 2.1.1; init(resolver)
     
     func test_state_pendingToFulfill(){
         let expt = expectationWithDescription(__FUNCTION__)
@@ -33,9 +33,13 @@ class PromiseTests: XCTestCase
         }
         
         XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertNil(promise.value)
+        XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
             XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.value!, STRING_VALUE_0)
+            XCTAssertNil(promise.reason)
         })
     }
     
@@ -50,9 +54,11 @@ class PromiseTests: XCTestCase
         }
         
         XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertNil(promise.reason)
 
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
             XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.reason!, ERROR_0)
         })
     }
     
@@ -292,7 +298,7 @@ class PromiseTests: XCTestCase
     
     // MARK: - 2.2.1; 2.2.7.3; init(value:)
     
-    func test_optional_onFulfilled() {
+    func test_optional_fulfill() {
         let promise = Promise(value: STRING_VALUE_0)
         XCTAssertEqual(promise.state, PromiseState.Fulfilled)
         XCTAssertNil(promise.reason)
@@ -314,7 +320,7 @@ class PromiseTests: XCTestCase
     
     // MARK: - 2.2.1; 2.2.7.4; init(reason:)
 
-    func test_optional_onRejected() {
+    func test_optional_reject() {
         let promise = Promise<String>(reason: ERROR_0)
         XCTAssertEqual(promise.state, PromiseState.Rejected)
         XCTAssertNil(promise.value)
@@ -334,6 +340,62 @@ class PromiseTests: XCTestCase
         )
     }
     
+    // MARK: 2.3.1
+    
+    func test_typeError_fulfill() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        var subPromise: Promise<String>? = nil
+        
+        let promise = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_0)
+            }
+            .then(
+                onFulfilled: { (value) -> Promise<String> in
+                    return subPromise!
+                },
+                onRejected: { (reason) -> Promise<String> in
+                    return subPromise!
+                }
+        )
+        subPromise = promise
+        
+        promise.catch { (reason) -> Void in
+            XCTAssertEqual(reason, NSError.promiseTypeError())
+            expt.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+        })
+    }
+    
+    func test_typeError_reject() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        var subPromise: Promise<String>? = nil
+        
+        let promise = Promise<String> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_0)
+            }
+            .then(
+                onFulfilled: { (value) -> Promise<String> in
+                    return subPromise!
+                },
+                onRejected: { (reason) -> Promise<String> in
+                    return subPromise!
+                }
+        )
+        subPromise = promise
+        
+        promise.catch { (reason) -> Void in
+            XCTAssertEqual(reason, NSError.promiseTypeError())
+            expt.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+        })
+    }
+
     
     // MARK: - init(:anyThenable)
     

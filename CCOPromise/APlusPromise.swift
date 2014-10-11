@@ -19,7 +19,7 @@ public class APlusPromise: Thenable
     
     public typealias APlusResolution = (value: Any?) -> Any?
     public typealias APlusRejection = (reason: Any?) -> Any?
-    public typealias APlusResovler = (value: Any?) -> Void
+    public typealias APlusResolver = (value: Any?) -> Void
     public typealias APlusRejector = (reason: Any?) -> Void
     
     typealias ThenGroupType = (
@@ -77,10 +77,10 @@ public class APlusPromise: Thenable
     }
 
     required convenience
-    public init(resovler: (resolve: APlusResovler, reject: APlusRejector) -> Void)
+    public init(resolver: (resolve: APlusResolver, reject: APlusRejector) -> Void)
     {
         self.init()
-        resovler(
+        resolver(
             resolve: self.onFulfilled,
             reject: self.onRejected
         )
