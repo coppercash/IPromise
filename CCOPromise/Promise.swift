@@ -64,6 +64,12 @@ public class Promise<V>: Thenable
         self.resolve(thenable: thenable)
     }
     
+    convenience
+    public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(anyThenable: T)
+    {
+        self.init()
+        self.resolve(anyThenable: anyThenable)
+    }
     
     // MARK: - Private APIs
     
@@ -177,32 +183,6 @@ public class Promise<V>: Thenable
         );
     }
     
-    /*
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Optional<Any>>(#thenable: T)
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        if let promise = thenable as? Promise<V> {
-            if promise === self {
-                self.onRejected(NSError.promiseTypeError())
-            }
-        }
-        
-        thenable.then(
-            onFulfilled: { (value: V) -> Any? in
-                self.onFulfilled(value)
-                return nil
-            },
-            onRejected: { (reason: NSError) -> Any? in
-                self.onRejected(reason)
-                return nil
-            }
-        )
-    }
-    */
-    
     // MARK: - Public APIs
     
     public class func resolve(value: Any?) -> Promise<Any?>
@@ -307,37 +287,6 @@ public class Promise<V>: Thenable
         return subPromise
     }
 
-    
-    /*
-    public func then(
-        onFulfilled: Optional<(value: V) -> Any?> = nil,
-        onRejected: Optional<(reason: NSError) -> Any?> = nil
-        ) -> Promise<Any?>
-    {
-        let subPromise = Promise<Any?>()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                if let resolution = onFulfilled? {
-                    subPromise.resolve(some: resolution(value: value))
-                }
-                else {
-                    subPromise.onFulfilled(value)
-                }
-            },
-            rejectCallback: { (reason) -> Void in
-                if let rejection = onRejected? {
-                    subPromise.resolve(some: rejection(reason: reason))
-                }
-                else {
-                    subPromise.onRejected(reason)
-                }
-            }
-        );
-        
-        return subPromise
-    }
-    */
     // MARK: - Thenable enhance
     
     public func then(
