@@ -691,18 +691,17 @@ class APlusPromiseTests: XCTestCase
     
     // MARK: - race
 
-    /*
     func test_race_fulfill_sync()
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise(value: value1)
-        let prms2 = APlusPromise(reason: error1)
-        let promise = APlusPromise.race(prms1, value2, prms2)
+        let prms1 = APlusPromise(value: STRING_VALUE_1)
+        let prms2 = APlusPromise(reason: ERROR_2)
+        let promise = APlusPromise.race(prms1, STRING_VALUE_2, prms2)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
-                XCTAssertEqual(value as String, value1)
+                XCTAssertEqual(value as String, STRING_VALUE_1)
                 expectation.fulfill()
                 return nil
             },
@@ -712,21 +711,17 @@ class APlusPromiseTests: XCTestCase
             }
         )
         
-        XCTAssertNotNil(promise)
-        XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
-        XCTAssertEqual(promise.value as String, value1)
-        XCTAssertTrue(promise.reason == nil)
+        XCTAssertEqual(promise.value as String, STRING_VALUE_1)
 
-        
         waitForExpectationsWithTimeout(7) { println($0) }
     }
-    
+
     func test_race_fulfill_async()
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = APlusPromise { (resolve, reject) -> Void in
-            () ~> resolve(value: value1)
+            0 ~> resolve(value: STRING_VALUE_1)
         }
         let prms2 = APlusPromise()
         let prms3 = APlusPromise()
@@ -734,13 +729,10 @@ class APlusPromiseTests: XCTestCase
         let promise = APlusPromise.race(prms1, prms2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
-                XCTAssertEqual(value as String, value1)
+                XCTAssertEqual(value as String, STRING_VALUE_1)
                 
                 expectation.fulfill()
 
-                XCTAssertEqual(promise.state, APlusPromise.State.Fulfilled)
-                XCTAssertEqual(promise.value as String, value1)
-                XCTAssertTrue(promise.reason == nil)
                 return nil
             },
             onRejected: { (reason) -> Any? in
@@ -749,10 +741,7 @@ class APlusPromiseTests: XCTestCase
             }
         )
         
-        XCTAssertNotNil(promise)
-        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
         XCTAssertTrue(promise.value == nil)
-        XCTAssertTrue(promise.reason == nil)
         
         waitForExpectationsWithTimeout(7) { println($0) }
     }
@@ -762,8 +751,8 @@ class APlusPromiseTests: XCTestCase
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = APlusPromise()
-        let prms2 = APlusPromise(reason: error1)
-        let promise = APlusPromise.race(prms1, prms2, value1)
+        let prms2 = APlusPromise(reason: ERROR_2)
+        let promise = APlusPromise.race(prms1, prms2, STRING_VALUE_3)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -771,28 +760,24 @@ class APlusPromiseTests: XCTestCase
                 return nil
             },
             onRejected: { (reason) -> Any? in
-                XCTAssertEqual(reason as NSError, error1)
+                XCTAssertEqual(reason as NSError, ERROR_2)
                 expectation.fulfill()
                 return nil
             }
         )
         
-        XCTAssertNotNil(promise)
-        XCTAssertEqual(promise.state, APlusPromise.State.Rejected)
-        XCTAssertTrue(promise.value == nil)
-        XCTAssertEqual(promise.reason as NSError, error1)
-        
+        XCTAssertEqual(promise.reason as NSError, ERROR_2)
         
         waitForExpectationsWithTimeout(7) { println($0) }
     }
-    
+
     func test_race_reject_async()
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = APlusPromise()
         let prms2 = APlusPromise { (resolve, reject) -> Void in
-            () ~> reject(reason: error1)
+            0 ~> reject(reason: ERROR_2)
         }
         let prms3 = APlusPromise()
         let promise = APlusPromise.race(prms1, prms2, prms3)
@@ -803,20 +788,14 @@ class APlusPromiseTests: XCTestCase
                 return nil
             },
             onRejected: { (reason) -> Any? in
-                XCTAssertEqual(reason as NSError, error1)
+                XCTAssertEqual(reason as NSError, ERROR_2)
                 expectation.fulfill()
                 return nil
             }
         )
         
-        XCTAssertNotNil(promise)
-        XCTAssertEqual(promise.state, APlusPromise.State.Pending)
-        XCTAssertTrue(promise.value == nil)
         XCTAssertTrue(promise.reason == nil)
-        
         
         waitForExpectationsWithTimeout(7) { println($0) }
     }
-    
-*/
 }
