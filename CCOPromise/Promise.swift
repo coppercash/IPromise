@@ -182,6 +182,11 @@ public class Promise<V>: Thenable
         }
     }
     
+    public class func reject(reason: NSError) -> Promise<Any?>
+    {
+        return Promise<Any?>(reason: reason)
+    }
+    
     public class func all(values: Any?...) -> Promise<Any?>
     {
         let allPromise = Promise<Any?>()

@@ -662,6 +662,9 @@ class PromiseTests: XCTestCase
         //XCTAssertTrue(a2 === q2)
     }
     
+    // MARK: - reject(_)
+
+    
     // MARK: - all
     
     func test_init_all_fulfill() {
