@@ -526,7 +526,7 @@ class PromiseTests: XCTestCase
 
     // MARK: - init(:thenable)
     
-    func test_init_thenable() {
+    func test_init_thenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let superPromise = Promise { (resolve, reject) -> Void in
@@ -555,6 +555,35 @@ class PromiseTests: XCTestCase
         })
     }
     
+    func test_init_thenable_reject() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let superPromise = Promise<Any?> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_0)
+        }
+        
+        let promise = Promise(thenable: superPromise)
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertEqual(reason, ERROR_0)
+                expt.fulfill()
+            }
+        )
+        
+        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertTrue(promise.value == nil)
+        XCTAssertNil(promise.reason)
+        
+        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
+            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertTrue(promise.value == nil)
+            XCTAssertEqual(promise.reason!, ERROR_0)
+        })
+    }
+
     // MARK: - init(:anyThenable)
 
     func test_init_anyThenable_fulfill() {
@@ -632,8 +661,7 @@ class PromiseTests: XCTestCase
     
     // MARK: - resolve(_)
     
-    func test_init_resolve() {
-        // Can't test. Compiler keeps crashing.
+    func test_resolve() {
 
         let a0 = Promise<Any?>.resolve(STRING_VALUE_0)
         a0.then { (value) -> Void in
@@ -657,7 +685,7 @@ class PromiseTests: XCTestCase
     
     // MARK: - all
     
-    func test_init_all_fulfill() {
+    func test_all_fulfill() {
 
         //let expectation = expectationWithDescription(__FUNCTION__)
         
