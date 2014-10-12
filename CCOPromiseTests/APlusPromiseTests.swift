@@ -435,7 +435,6 @@ class APlusPromiseTests: XCTestCase
         }
         
         APlusPromise(reason: ERROR_0)
-            .then()
             .then(
                 onFulfilled: { (value) -> Any? in
                     XCTAssertFalse(true)
@@ -538,7 +537,7 @@ class APlusPromiseTests: XCTestCase
     
     func test_resolve() {
         let q0 = APlusPromise()
-        let a0 = APlusPromise.resolve(q0)
+        let a0: APlusPromise = APlusPromise.resolve(q0)
         XCTAssertTrue(q0 === a0)
         
         let a1 = APlusPromise.resolve(STRING_VALUE_0)

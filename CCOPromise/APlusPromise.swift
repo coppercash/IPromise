@@ -48,8 +48,8 @@ public class APlusPromise: Thenable
     {
         self.init()
         resolver(
-            resolve: self.onFulfilled,
-            reject: self.onRejected
+            resolve: self.resolve,
+            reject: self.reject
         )
     }
     
@@ -59,11 +59,11 @@ public class APlusPromise: Thenable
         self.init()
         thenable.then(
             onFulfilled: { (value) -> Any? in
-                self.onFulfilled(value)
+                self.resolve(value)
                 return nil
             },
             onRejected: { (reason) -> Any? in
-                self.onRejected(reason)
+                self.reject(reason)
                 return nil
             }
         )
@@ -86,9 +86,30 @@ public class APlusPromise: Thenable
         }
     }
 
-    func onFulfilled(value: Any?) -> Void
+    // MARK: - Public APIs
+
+    public func resolve(value: Any?) -> Void
     {
         if self.state != .Pending {
+            return
+        }
+        
+        if let promise = value as? APlusPromise {
+            if promise === self {
+                self.reject(NSError.promiseTypeError())
+            }
+            else {
+                promise.then(
+                    onFulfilled: { (value) -> Any? in
+                        self.resolve(value)
+                        return nil
+                    },
+                    onRejected: { (reason) -> Any? in
+                        self.reject(reason)
+                        return nil
+                    }
+                )
+            }
             return
         }
         
@@ -99,8 +120,8 @@ public class APlusPromise: Thenable
             callback(value: value)
         }
     }
-    
-    func onRejected(reason: Any?) -> Void
+
+    public func reject(reason: Any?) -> Void
     {
         if self.state != .Pending {
             return
@@ -114,36 +135,8 @@ public class APlusPromise: Thenable
         }
     }
     
-    func resolve(value: Any?)
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        switch value {
-        case let promise as APlusPromise:
-            if promise === self {
-                self.onRejected(NSError.promiseTypeError())
-            }
-            else {
-                promise.then(
-                    onFulfilled: { (value) -> Any? in
-                        self.onFulfilled(value)
-                        return nil
-                    },
-                    onRejected: { (reason) -> Any? in
-                        self.onRejected(reason)
-                        return nil
-                    }
-                )
-            }
-        default:
-            self.onFulfilled(value)
-        }
-    }
-
-    // MARK: - Public APIs
-
+    // MARK: - Static APIs
+    
     public class func resolve(value: Any?) -> APlusPromise
     {
         switch value {
@@ -172,12 +165,12 @@ public class APlusPromise: Thenable
                 onFulfilled: { (value) -> Any? in
                     results.append(value)
                     if results.count >= count {
-                        allPromise.onFulfilled(results)
+                        allPromise.resolve(results)
                     }
                     return nil
                 },
                 onRejected: { (reason) -> Any? in
-                    allPromise.onRejected(reason)
+                    allPromise.reject(reason)
                     return nil
                 }
             )
@@ -195,11 +188,11 @@ public class APlusPromise: Thenable
             let promise = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Any? in
-                    racePromise.onFulfilled(value)
+                    racePromise.resolve(value)
                     return nil
                 },
                 onRejected: { (reason) -> Any? in
-                    racePromise.onRejected(reason)
+                    racePromise.reject(reason)
                     return nil
                 }
             )
@@ -225,7 +218,7 @@ public class APlusPromise: Thenable
                     subPromise.resolve(resolution(value: value))
                 }
                 else {
-                    subPromise.onFulfilled(value)
+                    subPromise.resolve(value)
                 }
             },
             rejectCallback: { (reason) -> Void in
@@ -233,7 +226,7 @@ public class APlusPromise: Thenable
                     subPromise.resolve(rejection(reason: reason))
                 }
                 else {
-                    subPromise.onRejected(reason)
+                    subPromise.reject(reason)
                 }
             }
         );
@@ -250,7 +243,7 @@ public class APlusPromise: Thenable
                 subPromise.resolve(onFulfilled(value: value))
             },
             rejectCallback: { (reason) -> Void in
-                subPromise.onRejected(reason)
+                subPromise.reject(reason)
             }
         );
         
@@ -263,7 +256,7 @@ public class APlusPromise: Thenable
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                subPromise.onFulfilled(value)
+                subPromise.resolve(value)
             },
             rejectCallback: { (reason) -> Void in
                 subPromise.resolve(onRejected(reason: reason))

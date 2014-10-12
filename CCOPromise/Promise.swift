@@ -68,7 +68,7 @@ public class Promise<V>: Thenable
         self.resolve(anyThenable: anyThenable)
     }
     
-    // MARK: - Callback
+    // MARK: - Private APIs
     
     func bindCallbacks(#fulfillCallback: FulfillClosure, rejectCallback: RejectClosure) -> Void
     {
@@ -84,8 +84,6 @@ public class Promise<V>: Thenable
             break
         }
     }
-
-    // MARK: - Resolve
     
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(#thenable: T) -> Void
     {
