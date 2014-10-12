@@ -8,14 +8,6 @@
 
 import Foundation
 
-infix operator ~> {}
-func ~> (lhs: @autoclosure () -> Void, rhs: @autoclosure () -> Void)
-{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-        lhs();
-        dispatch_sync(dispatch_get_main_queue(), rhs)
-    })
-}
 func ~> (lhs: NSTimeInterval, rhs: @autoclosure () -> Void)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
@@ -23,3 +15,13 @@ func ~> (lhs: NSTimeInterval, rhs: @autoclosure () -> Void)
         dispatch_sync(dispatch_get_main_queue(), rhs)
     })
 }
+
+let STRING_VALUE_0 = "STRING_VALUE_0"
+let STRING_VALUE_1 = "STRING_VALUE_1"
+let STRING_VALUE_2 = "STRING_VALUE_2"
+let STRING_VALUE_3 = "STRING_VALUE_3"
+
+let ERROR_0 = NSError.errorWithDomain(" ", code: 0, userInfo: nil)
+let ERROR_1 = NSError.errorWithDomain(" ", code: 1, userInfo: nil)
+let ERROR_2 = NSError.errorWithDomain(" ", code: 2, userInfo: nil)
+let ERROR_3 = NSError.errorWithDomain(" ", code: 3, userInfo: nil)

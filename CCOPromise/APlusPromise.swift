@@ -11,22 +11,10 @@ import Foundation
 public class APlusPromise: Thenable
 {
     // MARK: - Type
-    /*
-    public typealias APlusResolution = (value: Any?) -> Any?
-    public typealias APlusRejection = (reason: Any?) -> Any?
-    public typealias APlusResolver = (value: Any?) -> Void
-    public typealias APlusRejector = (reason: Any?) -> Void
-    */
+
     public typealias FulfillClosure = (value: Any?) -> Void
     public typealias RejectClosure = (reason: Any?) -> Void
 
-    /*
-    typealias ThenGroupType = (
-        resolution: APlusResolution?,
-        rejection: APlusRejection?,
-        subPromise: APlusPromise
-    )
-    */
     // MAKR: ivars
     
     public internal(set) var state: PromiseState = .Pending
@@ -36,7 +24,6 @@ public class APlusPromise: Thenable
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
 
-    
     // MARK: - Initializers
     
     required
