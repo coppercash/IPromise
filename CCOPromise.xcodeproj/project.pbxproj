@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		BE46E70219D386CA009C6326 /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70119D386CA009C6326 /* APlusPromise.swift */; };
-		BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE46E70319D39769009C6326 /* APlusPromiseTests.swift */; };
 		BE4D90F619E4B6CD008CCF59 /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4D90F519E4B6CD008CCF59 /* NSError+Promise.swift */; };
 		BEC9025A19E176120063BC8A /* PromiseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC9025919E176120063BC8A /* PromiseState.swift */; };
 		BED2083E19E90C09008CEE3C /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE121ABE19D31880001A4473 /* PromiseTests.swift */; };
@@ -245,7 +244,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BED2084019E90C31008CEE3C /* Utilities.swift in Sources */,
-				BE46E70419D39769009C6326 /* APlusPromiseTests.swift in Sources */,
 				BED2083E19E90C09008CEE3C /* PromiseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
