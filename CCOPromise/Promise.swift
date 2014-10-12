@@ -159,6 +159,19 @@ public class Promise<V>: Thenable
         }
     }
     
+    public func toAnyPromise() -> APlusPromise {
+        let promise = APlusPromise()
+        self.then(
+            onFulfilled: { (value) -> Void in
+                promise.resolve(value)
+            },
+            onRejected: { (reason) -> Void in
+                promise.reject(reason)
+            }
+        )
+        return promise;
+    }
+    
     // MARK: - Static APIs
     
     public class func resolve(value: Any?) -> Promise<Any?>
@@ -166,16 +179,14 @@ public class Promise<V>: Thenable
         // TODO: Downcast to thenable and follow it
         // TODO: Downcast to Promise and return it directly
         
-        if let validValue = value {
-            if let anyOptPromise = validValue as? Promise<Any?> {
-                return anyOptPromise
-            }
-            else if let aPlusPromise = validValue as? APlusPromise {
-                return Promise<Any?>(anyThenable: aPlusPromise)
-            }
+        switch value {
+        case let anyOptPromise as Promise<Any?>:
+            return anyOptPromise
+        case let aPlusPromise as APlusPromise:
+            return Promise<Any?>(anyThenable: aPlusPromise)
+        default:
+            return Promise<Any?>(value: value)
         }
-    
-        return Promise<Any?>(value: value)
     }
     
     public class func reject(reason: NSError) -> Promise<Any?>

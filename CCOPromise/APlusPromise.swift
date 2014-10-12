@@ -140,8 +140,8 @@ public class APlusPromise: Thenable
     public class func resolve(value: Any?) -> APlusPromise
     {
         switch value {
-        case let promise as APlusPromise:
-            return promise
+        case let aPlusPromise as APlusPromise:
+            return aPlusPromise
         default:
             return self(value: value)
         }

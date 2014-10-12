@@ -467,9 +467,9 @@ class APlusPromiseTests: XCTestCase
         })
     }
     
-    // MARK: - init(:thenable)
+    // MARK: - init(thenable:)
     
-    func test_init_thenable() {
+    func test_init_thenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let superPromise = APlusPromise { (resolve, reject) -> Void in
@@ -531,7 +531,12 @@ class APlusPromiseTests: XCTestCase
         })
     }
     
-    // MARK: - init(:genericThenable)
+    // MARK: - init(promise:)
+    
+    func test_oo() {
+        let a = Promise<String?>()
+        let b = APlusPromise(promise: a)
+    }
     
     // MARK: - resolve(_)
     
