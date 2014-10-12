@@ -675,9 +675,9 @@ class PromiseTests: XCTestCase
         }
         XCTAssertTrue(a1.value! == nil)
         
-        let q2 = Promise(value: STRING_VALUE_0)
+        let q2 = Promise<Any?>(value: STRING_VALUE_0)
         let a2 = Promise<Any?>.resolve(q2)
-        //XCTAssertTrue(a2 === q2)
+        XCTAssertTrue(a2 === q2)
     }
     
     // MARK: - reject(_)

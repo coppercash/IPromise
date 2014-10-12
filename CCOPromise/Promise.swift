@@ -24,7 +24,6 @@ public class Promise<V>: Thenable
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
     
-    
     // MARK: - Initializers
     
     required
@@ -164,14 +163,19 @@ public class Promise<V>: Thenable
     
     public class func resolve(value: Any?) -> Promise<Any?>
     {
-        // TODO: Downcast to thenable and resolve it
+        // TODO: Downcast to thenable and follow it
+        // TODO: Downcast to Promise and return it directly
         
-        switch value {
-        case let promise as Promise<Any?>:
-            return promise
-        default:
-            return Promise<Any?>(value: value)
+        if let validValue = value {
+            if let anyOptPromise = validValue as? Promise<Any?> {
+                return anyOptPromise
+            }
+            else if let aPlusPromise = validValue as? APlusPromise {
+                return Promise<Any?>(anyThenable: aPlusPromise)
+            }
         }
+    
+        return Promise<Any?>(value: value)
     }
     
     public class func reject(reason: NSError) -> Promise<Any?>
