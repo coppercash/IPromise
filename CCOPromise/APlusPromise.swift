@@ -18,8 +18,8 @@ public class APlusPromise: Thenable
     // MAKR: ivars
     
     public internal(set) var state: PromiseState = .Pending
-    public internal(set) var value: Any? = nil
-    public internal(set) var reason: Any? = nil
+    public internal(set) var value: Any?? = nil
+    public internal(set) var reason: Any?? = nil
 
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
@@ -267,7 +267,6 @@ public class APlusPromise: Thenable
             },
             rejectCallback: { (reason) -> Void in
                 subPromise.resolve(onRejected(reason: reason))
-                
             }
         );
         
