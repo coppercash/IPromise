@@ -10,17 +10,14 @@ import Foundation
 
 public class APlusPromise: Thenable
 {
-    // MARK: - Type
-
-    public typealias FulfillClosure = (value: Any?) -> Void
-    public typealias RejectClosure = (reason: Any?) -> Void
-
     // MAKR: ivars
     
     public internal(set) var state: PromiseState = .Pending
     public internal(set) var value: Any?? = nil
     public internal(set) var reason: Any?? = nil
 
+    public typealias FulfillClosure = (value: Any?) -> Void
+    public typealias RejectClosure = (reason: Any?) -> Void
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
 
@@ -264,5 +261,30 @@ public class APlusPromise: Thenable
         );
         
         return subPromise
+    }
+}
+
+public extension APlusPromise {
+    convenience
+    public init<V>(promise: Promise<V>)
+    {
+        self.init()
+        self.resolve(promise: promise)
+    }
+
+    func resolve<V>(#promise: Promise<V>) -> Void
+    {
+        if self.state != .Pending {
+            return
+        }
+
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                self.resolve(value)
+            },
+            onRejected: { (reason) -> Void in
+                self.reject(reason)
+            }
+        )
     }
 }

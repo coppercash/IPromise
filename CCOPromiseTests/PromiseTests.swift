@@ -583,9 +583,43 @@ class PromiseTests: XCTestCase
             XCTAssertEqual(promise.reason!, ERROR_0)
         })
     }
+    
+    // MARK: - resolve(_)
+    
+    func test_resolve() {
+
+        let a0: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
+        a0.then { (value) -> Void in
+            XCTAssertEqual(value as String, STRING_VALUE_0)
+        }
+        XCTAssertEqual(a0.value! as String, STRING_VALUE_0)
+        
+        let q2 = Promise<String>(value: STRING_VALUE_0)
+        let a2: Promise<String> = Promise<String>.resolve(q2)
+        XCTAssertTrue(a2 === q2)
+    }
+    
+    // MARK: - reject(_)
+
+    
+    // MARK: - all
+    
+    func test_all_fulfill() {
+
+        //let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise(value: STRING_VALUE_0)
+        let prms2 = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_0)
+        }
+
+
+    }
+    
+    // MARK: - race
 
     // MARK: - init(:anyThenable)
-
+    
     func test_init_anyThenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
@@ -614,11 +648,10 @@ class PromiseTests: XCTestCase
             XCTAssertNil(promise.reason)
         })
     }
-
     
     func test_init_anyThenable_rejectNSError() {
         let expt = expectationWithDescription(__FUNCTION__)
-
+        
         let superPromise = APlusPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
@@ -657,46 +690,4 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
-    
-    // MARK: - resolve(_)
-    
-    func test_resolve() {
-
-        let a0 = Promise<Any?>.resolve(STRING_VALUE_0)
-        a0.then { (value) -> Void in
-            XCTAssertEqual(value as String, STRING_VALUE_0)
-        }
-        XCTAssertEqual(a0.value as String, STRING_VALUE_0)
-        
-        let a1 = Promise<Any?>.resolve(nil)
-        a1.then { (value) -> Void in
-            XCTAssertTrue(value == nil)
-        }
-        XCTAssertTrue(a1.value! == nil)
-        
-        let q2 = Promise<Any?>(value: STRING_VALUE_0)
-        let a2 = Promise<Any?>.resolve(q2)
-        XCTAssertTrue(a2 === q2)
-    }
-    
-    // MARK: - reject(_)
-
-    
-    // MARK: - all
-    
-    func test_all_fulfill() {
-
-        //let expectation = expectationWithDescription(__FUNCTION__)
-        
-        let prms1 = Promise(value: STRING_VALUE_0)
-        let prms2 = Promise { (resolve, reject) -> Void in
-            0 ~> resolve(value: STRING_VALUE_0)
-        }
-
-
-    }
-    
-    // MARK: - race
-
 }

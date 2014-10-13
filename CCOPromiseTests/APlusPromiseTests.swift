@@ -531,13 +531,6 @@ class APlusPromiseTests: XCTestCase
         })
     }
     
-    // MARK: - init(promise:)
-    
-    func test_oo() {
-        let a = Promise<String?>()
-        let b = APlusPromise(promise: a)
-    }
-    
     // MARK: - resolve(_)
     
     func test_resolve() {
@@ -801,5 +794,25 @@ class APlusPromiseTests: XCTestCase
         XCTAssertTrue(promise.reason == nil)
         
         waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    // MARK: - init(promise:)
+    
+    func test_init_promise() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let superPromise = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_0)
+        }
+        let promise = APlusPromise(promise: superPromise)
+        promise.then { (value) -> Any? in
+            XCTAssertEqual(value as String, STRING_VALUE_0)
+            expt.fulfill()
+            return nil
+        }
+        
+        XCTAssertTrue(promise.value == nil)
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
 }
