@@ -353,7 +353,8 @@ class PromiseTests: XCTestCase
         subPromise = promise
         
         promise.catch { (reason) -> Void in
-            XCTAssertEqual(reason, NSError.promiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
             expt.fulfill()
         }
         
@@ -380,7 +381,8 @@ class PromiseTests: XCTestCase
         subPromise = promise
         
         promise.catch { (reason) -> Void in
-            XCTAssertEqual(reason, NSError.promiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
             expt.fulfill()
         }
         
@@ -683,7 +685,10 @@ class PromiseTests: XCTestCase
                 XCTAssertFalse(true)
             },
             onRejected: { (reason) -> Void in
-                XCTAssertEqual(reason, NSError.promiseReasonWrapperError(STRING_VALUE_0))
+                XCTAssertEqual(reason.domain, PromiseErrorDomain)
+                XCTAssertEqual(reason.code, PromiseReasonWrapperError)
+                XCTAssertEqual(reason.userInfo![PromiseErrorReasonKey]! as String, STRING_VALUE_0)
+
                 expt.fulfill()
             }
         )

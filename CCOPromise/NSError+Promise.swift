@@ -10,12 +10,13 @@ import Foundation
 
 public let PromiseErrorDomain = "PromiseErrorDomain"
 public let PromiseTypeError = 1000
-public let PromiseResultTypeError = 1001
+public let PromiseReasonWrapperError = 1001
 
+public let PromiseErrorReasonKey = "reason"
 
-public extension NSError {
+extension NSError {
     
-    public class func promiseTypeError() -> Self {
+    class func promiseTypeError() -> Self {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseTypeError,
@@ -23,7 +24,7 @@ public extension NSError {
         )
     }
     
-    public class func promiseReasonWrapperError(reason: Any?) -> Self {
+    class func promiseReasonWrapperError(reason: Any?) -> Self {
         var reasonValue: AnyObject? = nil
         if let validReason = reason? {
             if let reasonObject = validReason as? NSObject {
@@ -39,8 +40,8 @@ public extension NSError {
         
         return self(
             domain: PromiseErrorDomain,
-            code: PromiseResultTypeError,
-            userInfo: [NSLocalizedDescriptionKey: "ReasonWrapperError", ("reason" as NSString): reasonValue!,]
+            code: PromiseReasonWrapperError,
+            userInfo: [NSLocalizedDescriptionKey: PromiseErrorReasonKey, ("reason" as NSString): reasonValue!,]
         )
     }
 }

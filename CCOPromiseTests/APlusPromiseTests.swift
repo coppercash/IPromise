@@ -286,7 +286,9 @@ class APlusPromiseTests: XCTestCase
         subPromise = promise
         
         promise.catch { (reason) -> Any? in
-            XCTAssertEqual(reason as NSError, NSError.promiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
+
             expt.fulfill()
             return nil
         }
@@ -314,7 +316,9 @@ class APlusPromiseTests: XCTestCase
         subPromise = promise
         
         promise.catch { (reason) -> Any? in
-            XCTAssertEqual(reason as NSError, NSError.promiseTypeError())
+            XCTAssertEqual((reason as NSError).domain, PromiseErrorDomain)
+            XCTAssertEqual((reason as NSError).code, PromiseTypeError)
+            
             expt.fulfill()
             return nil
         }
