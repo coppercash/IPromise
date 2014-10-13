@@ -590,15 +590,53 @@ class PromiseTests: XCTestCase
     
     func test_resolve() {
 
+        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let a0: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
         a0.then { (value) -> Void in
             XCTAssertEqual(value as String, STRING_VALUE_0)
+            expt0.fulfill()
         }
         XCTAssertEqual(a0.value! as String, STRING_VALUE_0)
+        
+        let a1: Promise<Any> = Promise<String>.resolve(STRING_VALUE_0)
+        XCTAssertEqual(a1.value as String, STRING_VALUE_0)
         
         let q2 = Promise<String>(value: STRING_VALUE_0)
         let a2: Promise<String> = Promise<String>.resolve(q2)
         XCTAssertTrue(a2 === q2)
+        
+        // This does not behave as expect
+        let q3 = Promise<String>(value: STRING_VALUE_0)
+        let a3: Promise<Any> = Promise<Any>.resolve(q3)
+        XCTAssertTrue(a3.value as Promise<String> === q3)
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func skip_test_resolve_valueTypeError() {
+        
+        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
+        let a1: Promise<String> = Promise<String>.resolve(1)
+        a1.catch { (reason) -> Void in
+            XCTAssertEqual(reason.domain, PromiseErrorDomain)
+            XCTAssertEqual(reason.code, PromiseValueTypeError)
+            println(reason.localizedDescription)
+            expt1.fulfill()
+        }
+        XCTAssertEqual(a1.state, PromiseState.Rejected)
+
+        let expt3 = expectationWithDescription("\(__FUNCTION__)_3")
+        let q3 = Promise<Int>(value: 3)
+        let a3: Promise<String> = Promise<String>.resolve(q3)
+        a3.catch { (reason) -> Void in
+            XCTAssertEqual(reason.domain, PromiseErrorDomain)
+            XCTAssertEqual(reason.code, PromiseValueTypeError)
+            println(reason.localizedDescription)
+            expt3.fulfill()
+        }
+        XCTAssertEqual(a3.state, PromiseState.Rejected)
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
     
     // MARK: - reject(_)
@@ -616,6 +654,10 @@ class PromiseTests: XCTestCase
         }
 
 
+    }
+    
+    func test_all_reject_sync() {
+        // TODO: Test value type error
     }
     
     // MARK: - race

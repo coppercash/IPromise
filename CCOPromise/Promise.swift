@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class Promise<V>: Thenable
+public class Promise<V: Any>: Thenable
 {
     // MARK: - ivars
     
@@ -144,13 +144,14 @@ public class Promise<V>: Thenable
     public class func resolve<V>(value: Any) -> Promise<V>
     {
         switch value {
-        case let value as V:
-            return Promise<V>(value: value)
         case let promise as Promise<V>:
             return promise
+        case let value as V:
+            return Promise<V>(value: value)
         default:
-            NSLog("Expect value of V or Promise<V>, but find \(reflect(value).summary).")
-            return value as Promise<V>  // abort()
+            let error = NSError.promiseValueTypeError(expectType: "V", value: value)
+            println(error)
+            abort()
         }
     }
     

@@ -11,6 +11,7 @@ import Foundation
 public let PromiseErrorDomain = "PromiseErrorDomain"
 public let PromiseTypeError = 1000
 public let PromiseReasonWrapperError = 1001
+public let PromiseValueTypeError = 1002
 
 public let PromiseErrorReasonKey = "reason"
 
@@ -24,6 +25,14 @@ extension NSError {
         )
     }
     
+    class func promiseValueTypeError(#expectType: Any, value: Any) -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseValueTypeError,
+            userInfo: [NSLocalizedDescriptionKey: "Expect value of \(expectType) or Promise<\(expectType)>, but found \(reflect(value).summary)",]
+        )
+    }
+
     class func promiseReasonWrapperError(reason: Any?) -> Self {
         var reasonValue: AnyObject? = nil
         if let validReason = reason? {
