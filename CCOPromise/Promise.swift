@@ -160,15 +160,14 @@ public class Promise<V: Any>: Thenable
         return Promise<V>(reason: reason)
     }
     
-    public class func all<V>(values: Any...) -> Promise<[V]>
+    public class func all<V>(promises: Promise<V>...) -> Promise<[V]>
     {
         let allPromise = Promise<[V]>()
-        let count = values.count
+        let count = promises.count
         var results: [V] = []
         
-        for value in values
+        for promise in promises
         {
-            let promise: Promise<V> = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Void in
                     results.append(value)
@@ -185,13 +184,12 @@ public class Promise<V: Any>: Thenable
         return allPromise
     }
     
-    public class func race<V>(values: Any...) -> Promise<V>
+    public class func race<V>(promises: Promise<V>...) -> Promise<V>
     {
         let racePromise = Promise<V>()
         
-        for value in values
+        for promise in promises
         {
-            let promise: Promise<V> = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Void in
                     racePromise.resolve(value)

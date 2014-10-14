@@ -570,7 +570,7 @@ class APlusPromiseTests: XCTestCase
         
         let prms0 = APlusPromise(value: nil)
         let prms2 = APlusPromise { (resolve, reject) -> Void in
-            0 ~> resolve(value: STRING_VALUE_0)
+            0 ~> resolve(value: STRING_VALUE_2)
         }
         
         let promise = APlusPromise.all(prms0, STRING_VALUE_1, prms2)
@@ -581,7 +581,7 @@ class APlusPromiseTests: XCTestCase
                 
                 XCTAssertTrue((results[0] as Any?) == nil)
                 XCTAssertEqual(results[1] as String, STRING_VALUE_1)
-                XCTAssertEqual(results[2] as String, STRING_VALUE_0)
+                XCTAssertEqual(results[2] as String, STRING_VALUE_2)
                 
                 expectation.fulfill()
                 return nil

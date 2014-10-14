@@ -644,20 +644,117 @@ class PromiseTests: XCTestCase
     
     // MARK: - all
     
-    func test_all_fulfill() {
+    func test_all_fulfill_async() {
 
-        //let expectation = expectationWithDescription(__FUNCTION__)
+        let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = Promise(value: STRING_VALUE_0)
-        let prms2 = Promise { (resolve, reject) -> Void in
-            0 ~> resolve(value: STRING_VALUE_0)
-        }
+        let prms0 = Promise(value: STRING_VALUE_0 as Any?)
+        let prms1 = Promise(value: STRING_VALUE_1 as Any?)
+        let prms2 = Promise<Any?>(anyThenable:
+            APlusPromise { (resolve, reject) -> Void in
+                0 ~> resolve(value: STRING_VALUE_2)
+            })
+        
+        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                
+                let results = value as [Any?]
+                
+                XCTAssertEqual(results[0] as String, STRING_VALUE_0)
+                XCTAssertEqual(results[1] as String, STRING_VALUE_1)
+                XCTAssertEqual(results[2] as String, STRING_VALUE_2)
+                
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertTrue(promise.value == nil)
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    func test_all_fulfill_sync() {
+        
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms0 = Promise(value: STRING_VALUE_0)
+        let prms1 = Promise(value: STRING_VALUE_1)
+        let prms2 = Promise(value: STRING_VALUE_2)
+        
+        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertEqual(value, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertEqual(promise.value!, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
 
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
 
+    func test_all_reject_aync() {
+        
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms0 = Promise(value: STRING_VALUE_0 as Any?)
+        let prms1 = Promise(value: STRING_VALUE_1 as Any?)
+        let prms2 = Promise<Any?>(anyThenable:
+            APlusPromise { (resolve, reject) -> Void in
+                0 ~> reject(reason: ERROR_2)
+            })
+        
+        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual(reason, ERROR_2)
+                expectation.fulfill()
+                return nil
+            }
+        )
+        
+        XCTAssertTrue(promise.reason == nil)
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     func test_all_reject_sync() {
-        // TODO: Test value type error
+        
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms0 = Promise(value: STRING_VALUE_0)
+        let prms1 = Promise<String>(reason: ERROR_1)
+        let prms2 = Promise<String>(reason: ERROR_2)
+        
+        let promise = Promise<String>.all(prms0, prms1, prms2)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual(reason, ERROR_1)
+                expectation.fulfill()
+                return nil
+            }
+        )
+        
+        XCTAssertEqual(promise.reason!, ERROR_1)
+        waitForExpectationsWithTimeout(7) { println($0) }
     }
     
     // MARK: - race
