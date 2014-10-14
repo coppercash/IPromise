@@ -556,10 +556,10 @@ class APlusPromiseTests: XCTestCase
     // MARK: - reject(_)
     
     func test_reject() {
-        let a0 = APlusPromise.reject(ERROR_0)
+        let a0: Promise<String> = Promise<String>.reject(ERROR_0)
         XCTAssertEqual(a0.state, PromiseState.Rejected)
         XCTAssertTrue(a0.value == nil)
-        XCTAssertEqual(a0.reason as NSError, ERROR_0)
+        XCTAssertEqual(a0.reason!, ERROR_0)
     }
     
     // MARK: - all
