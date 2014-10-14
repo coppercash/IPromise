@@ -766,6 +766,115 @@ class PromiseTests: XCTestCase
     
     // MARK: - race
 
+    func test_race_fulfill_sync()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise(value: STRING_VALUE_1)
+        let prms2 = Promise<String>(reason: ERROR_2)
+        let prms3 = Promise<String>(reason: ERROR_3)
+        
+        let promise = Promise<String>.race(prms1, prms2, prms3)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertEqual(value, STRING_VALUE_1)
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertEqual(promise.value!, STRING_VALUE_1)
+        
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    func test_race_fulfill_async()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_1)
+        }
+        let prms2 = Promise<String>()
+        let prms3 = Promise<String>()
+        
+        let promise = Promise<String>.race(prms1, prms2, prms3)
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertEqual(value, STRING_VALUE_1)
+                expectation.fulfill()
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            }
+        )
+        
+        XCTAssertTrue(promise.value == nil)
+        
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    func test_race_reject_sync()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise<String>()
+        let prms2 = Promise<String>(reason: ERROR_2)
+        let prms3 = Promise(value: STRING_VALUE_3)
+        let promise = Promise<String>.race(prms1, prms2, prms3)
+        
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual(reason as NSError, ERROR_2)
+                expectation.fulfill()
+                return nil
+            }
+        )
+        
+        XCTAssertEqual(promise.reason!, ERROR_2)
+        
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+    func test_race_reject_async()
+    {
+        let expectation = expectationWithDescription(__FUNCTION__)
+        
+        let prms1 = Promise<String>()
+        let prms2 = Promise<String> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_2)
+        }
+        let prms3 = Promise<String>()
+        let promise = Promise<String>.race(prms1, prms2, prms3)
+        
+        promise.then(
+            onFulfilled: { (value) -> Any? in
+                XCTAssertFalse(true)
+                return nil
+            },
+            onRejected: { (reason) -> Any? in
+                XCTAssertEqual(reason, ERROR_2)
+                expectation.fulfill()
+                return nil
+            }
+        )
+        
+        XCTAssertTrue(promise.reason == nil)
+        
+        waitForExpectationsWithTimeout(7) { println($0) }
+    }
+    
+
     // MARK: - init(:anyThenable)
     
     func test_init_anyThenable_fulfill() {
