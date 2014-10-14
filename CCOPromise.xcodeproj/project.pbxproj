@@ -38,7 +38,6 @@
 		BED2083F19E90C31008CEE3C /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		BEE0A03019D23C8B005B4CE4 /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		BEE0A03219D23D79005B4CE4 /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
-		BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThenableTests.swift; sourceTree = "<group>"; };
 		BEFE4CF919D1C49C0086A00B /* CCOPromise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CCOPromise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEFE4CFD19D1C49C0086A00B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BEFE4CFE19D1C49C0086A00B /* CCOPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCOPromise.h; sourceTree = "<group>"; };
@@ -109,7 +108,6 @@
 			isa = PBXGroup;
 			children = (
 				BED2083F19E90C31008CEE3C /* Utilities.swift */,
-				BEE0A03419D23D96005B4CE4 /* ThenableTests.swift */,
 				BE46E70319D39769009C6326 /* APlusPromiseTests.swift */,
 				BE121ABE19D31880001A4473 /* PromiseTests.swift */,
 				BEFE4D0619D1C49C0086A00B /* Supporting Files */,

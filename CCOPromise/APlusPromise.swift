@@ -136,6 +136,8 @@ public class APlusPromise: Thenable
     
     public class func resolve(value: Any?) -> APlusPromise
     {
+        // TODO: - Downcast to Thenable
+        
         switch value {
         case let aPlusPromise as APlusPromise:
             return aPlusPromise
