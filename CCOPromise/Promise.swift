@@ -125,20 +125,7 @@ public class Promise<V: Any>: Thenable
             callback(reason: reason)
         }
     }
-    
-    public func toAnyPromise() -> APlusPromise {
-        let promise = APlusPromise()
-        self.then(
-            onFulfilled: { (value) -> Void in
-                promise.resolve(value)
-            },
-            onRejected: { (reason) -> Void in
-                promise.reject(reason)
-            }
-        )
-        return promise;
-    }
-    
+
     // MARK: - Static APIs
     
     public class func resolve<V>(value: Any) -> Promise<V>
