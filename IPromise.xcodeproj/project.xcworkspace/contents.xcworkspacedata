@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:CCOPromise.xcodeproj">
+      location = "self:IPromise.xcodeproj">
    </FileRef>
 </Workspace>

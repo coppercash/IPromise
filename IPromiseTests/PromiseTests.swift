@@ -1,6 +1,6 @@
 //
 //  PromiseTests.swift
-//  CCOPromise
+//  IPromise
 //
 //  Created by William Remaerd on 9/24/14.
 //  Copyright (c) 2014 CopperCash. All rights reserved.
@@ -8,7 +8,7 @@
 
 import UIKit
 import XCTest
-import CCOPromise
+import IPromise
 
 class PromiseTests: XCTestCase
 {
@@ -657,7 +657,7 @@ class PromiseTests: XCTestCase
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(anyThenable:
+        let prms2 = Promise<Any?>(vagueThenable:
             APlusPromise { (resolve, reject) -> Void in
                 0 ~> resolve(value: STRING_VALUE_2)
             })
@@ -717,7 +717,7 @@ class PromiseTests: XCTestCase
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(anyThenable:
+        let prms2 = Promise<Any?>(vagueThenable:
             APlusPromise { (resolve, reject) -> Void in
                 0 ~> reject(reason: ERROR_2)
             })
@@ -875,16 +875,16 @@ class PromiseTests: XCTestCase
     }
     
 
-    // MARK: - init(:anyThenable)
+    // MARK: - init(:vagueThenable)
     
-    func test_init_anyThenable_fulfill() {
+    func test_init_vagueThenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let superPromise = APlusPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
         
-        let promise = Promise<Any?>(anyThenable: superPromise)
+        let promise = Promise<Any?>(vagueThenable: superPromise)
         promise.then(
             onFulfilled: { (value) -> Void in
                 XCTAssertEqual(value as String, STRING_VALUE_0)
@@ -906,14 +906,14 @@ class PromiseTests: XCTestCase
         })
     }
     
-    func test_init_anyThenable_rejectNSError() {
+    func test_init_vagueThenable_rejectNSError() {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let superPromise = APlusPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
         
-        let promise = Promise<Any?>(anyThenable: superPromise)
+        let promise = Promise<Any?>(vagueThenable: superPromise)
         promise.then(
             onFulfilled: { (value) -> Void in
                 XCTAssertFalse(true)
@@ -927,14 +927,14 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
-    func test_init_anyThenable_rejectAny() {
+    func test_init_vagueThenable_rejectAny() {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let superPromise = APlusPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: STRING_VALUE_0)
         }
         
-        let promise = Promise<Any?>(anyThenable: superPromise)
+        let promise = Promise<Any?>(vagueThenable: superPromise)
         promise.then(
             onFulfilled: { (value) -> Void in
                 XCTAssertFalse(true)

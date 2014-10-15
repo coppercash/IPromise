@@ -1,6 +1,6 @@
 //
 //  NSError+Promise.swift
-//  CCOPromise
+//  IPromise
 //
 //  Created by William Remaerd on 10/8/14.
 //  Copyright (c) 2014 CopperCash. All rights reserved.

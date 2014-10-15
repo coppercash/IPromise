@@ -1,6 +1,6 @@
 //
 //  Promise.swift
-//  CCOPromise
+//  IPromise
 //
 //  Created by William Remaerd on 9/24/14.
 //  Copyright (c) 2014 CopperCash. All rights reserved.
@@ -345,19 +345,19 @@ public class Promise<V: Any>: Thenable
 
 public extension Promise {
     convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(anyThenable: T)
+    public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(vagueThenable: T)
     {
         self.init()
-        self.resolve(anyThenable: anyThenable)
+        self.resolve(vagueThenable: vagueThenable)
     }
     
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(#anyThenable: T) -> Void
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(#vagueThenable: T) -> Void
     {
         if self.state != .Pending {
             return
         }
         
-        anyThenable.then(
+        vagueThenable.then(
             onFulfilled: { (value: V) -> Any? in
                 self.resolve(value)
                 return nil
