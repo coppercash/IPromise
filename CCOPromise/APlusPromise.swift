@@ -40,7 +40,7 @@ public class APlusPromise: Thenable
         self.state = .Rejected
     }
 
-    required convenience
+    convenience
     public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
