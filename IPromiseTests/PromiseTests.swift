@@ -302,7 +302,7 @@ class PromiseTests: XCTestCase
             )
             .then(
                 onFulfilled: { (value) -> Void in
-                    XCTAssertEqual(value as String, STRING_VALUE_0)
+                    XCTAssertEqual(value!, STRING_VALUE_0)
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertFalse(true)
@@ -508,7 +508,7 @@ class PromiseTests: XCTestCase
                     XCTAssertEqual(reason, ERROR_0)
                     expts[0]!.fulfill()
             }).then(
-                onFulfilled: { (value: Any?) -> Void in
+                onFulfilled: { (value: Any??) -> Void in
                     XCTAssertTrue(value == nil)
                     expts[1]!.fulfill()
                 },
