@@ -460,7 +460,7 @@ class PromiseTests: XCTestCase
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
 
-        Promise<Any?>(reason: ERROR_0)
+        Promise<Void>(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> String in
                     XCTAssertFalse(true)
@@ -488,44 +488,67 @@ class PromiseTests: XCTestCase
                 expts[3]!.fulfill()
         }
         
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-        })
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
     
-    func test_chain_void() {
+    func test_chain_void_reject() {
         
         var expts: [Int: XCTestExpectation] = [:]
         for index in 0...3 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
 
-        Promise<Any?>(reason: ERROR_0)
+        Promise<Void>(reason: ERROR_0)
             .then(
-                onFulfilled: { (value) -> Void in
+                onFulfilled: { (value: Void) -> Void in
                     XCTAssertFalse(true)
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertEqual(reason, ERROR_0)
                     expts[0]!.fulfill()
             }).then(
-                onFulfilled: { (value: Any??) -> Void in
+                onFulfilled: { (value: Void?) -> Void in
                     XCTAssertTrue(value == nil)
                     expts[1]!.fulfill()
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertFalse(true)
-            }).then { (value: Any?) -> Void in
-                XCTAssertTrue(value == nil)
+            }).then { (value: Void??) -> Void in
+                XCTAssertTrue(value! == nil)
                 expts[2]!.fulfill()
-            }.then { (value: Any?) -> Void in
-                XCTAssertTrue(value == nil)
+            }.then { (value: Void???) -> Void in
+                XCTAssertTrue(value!! == nil)
                 expts[3]!.fulfill()
         }
         
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-        })
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
 
+    func test_chain_void_fulfill() {
+
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 0...2 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        
+        Promise<String>(value: STRING_VALUE_0)
+        .then { (value) -> Void in
+            XCTAssertEqual(value, STRING_VALUE_0)
+            expts[0]!.fulfill()
+        }.catch { (reason) -> Void in
+            XCTAssertFalse(true)
+        }.then { (value) -> String in
+            XCTAssertEqual(value!!, STRING_VALUE_0)
+            expts[1]!.fulfill()
+            return STRING_VALUE_1
+        }.then { (value) -> Void in
+            XCTAssertEqual(value, STRING_VALUE_1)
+            expts[2]!.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
     // MARK: - init(:thenable)
     
     func test_init_thenable_fulfill() {
