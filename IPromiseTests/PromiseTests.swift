@@ -302,7 +302,7 @@ class PromiseTests: XCTestCase
             )
             .then(
                 onFulfilled: { (value) -> Void in
-                    XCTAssertEqual(value!, STRING_VALUE_0)
+                    XCTAssertEqual("\(value)", VOID_SUMMARY)
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertFalse(true)
@@ -507,17 +507,17 @@ class PromiseTests: XCTestCase
                     XCTAssertEqual(reason, ERROR_0)
                     expts[0]!.fulfill()
             }).then(
-                onFulfilled: { (value: Void?) -> Void in
-                    XCTAssertTrue(value == nil)
+                onFulfilled: { (value) -> Void in
+                    XCTAssertEqual("\(value)", VOID_SUMMARY)
                     expts[1]!.fulfill()
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertFalse(true)
-            }).then { (value: Void??) -> Void in
-                XCTAssertTrue(value! == nil)
+            }).then { (value: Void) -> Void in
+                XCTAssertEqual("\(value)", VOID_SUMMARY)
                 expts[2]!.fulfill()
-            }.then { (value: Void???) -> Void in
-                XCTAssertTrue(value!! == nil)
+            }.then { (value: Void) -> Void in
+                XCTAssertEqual("\(value)", VOID_SUMMARY)
                 expts[3]!.fulfill()
         }
         
@@ -538,7 +538,7 @@ class PromiseTests: XCTestCase
         }.catch { (reason) -> Void in
             XCTAssertFalse(true)
         }.then { (value) -> String in
-            XCTAssertEqual(value!!, STRING_VALUE_0)
+            XCTAssertEqual("\(value)", VOID_SUMMARY)
             expts[1]!.fulfill()
             return STRING_VALUE_1
         }.then { (value) -> Void in

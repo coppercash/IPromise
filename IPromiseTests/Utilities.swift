@@ -25,3 +25,5 @@ let ERROR_0 = NSError.errorWithDomain(" ", code: 0, userInfo: nil)
 let ERROR_1 = NSError.errorWithDomain(" ", code: 1, userInfo: nil)
 let ERROR_2 = NSError.errorWithDomain(" ", code: 2, userInfo: nil)
 let ERROR_3 = NSError.errorWithDomain(" ", code: 3, userInfo: nil)
+
+let VOID_SUMMARY = "()"

@@ -192,7 +192,7 @@ public class Promise<V: Any>: Thenable
     
     // MARK: - Thenable
     
-    public typealias NextType = Promise<V?>
+    public typealias NextType = Promise<Void>
     public typealias ValueType = V
     public typealias ReasonType = NSError
     public typealias ReturnType = Void
@@ -200,24 +200,24 @@ public class Promise<V: Any>: Thenable
     public func then(
         #onFulfilled: Optional<(value: V) -> Void>,
         onRejected: Optional<(reason: NSError) -> Void>
-        ) -> Promise<V?>
+        ) -> Promise<Void>
     {
-        let subPromise = Promise<V?>()
+        let subPromise = Promise<Void>()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 if let resolution = onFulfilled? {
                     resolution(value: value)
-                    subPromise.resolve(value)
+                    subPromise.resolve()
                 }
                 else {
-                    subPromise.resolve(value)
+                    subPromise.resolve()
                 }
             },
             rejectCallback: { (reason) -> Void in
                 if let rejection = onRejected? {
                     rejection(reason: reason)
-                    subPromise.resolve(nil)
+                    subPromise.resolve()
                 }
                 else {
                     subPromise.reject(reason)
@@ -232,14 +232,14 @@ public class Promise<V: Any>: Thenable
     
     public func then(
         onFulfilled: (value: V) -> Void
-        ) -> Promise<V?>
+        ) -> Promise<Void>
     {
-        let subPromise = Promise<V?>()
+        let subPromise = Promise<Void>()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 onFulfilled(value: value)
-                subPromise.resolve(value)
+                subPromise.resolve()
             },
             rejectCallback: { (reason) -> Void in
                 subPromise.reject(reason)
@@ -251,17 +251,17 @@ public class Promise<V: Any>: Thenable
     
     public func catch(
         onRejected: (reason: NSError) -> Void
-        ) -> Promise<V?>
+        ) -> Promise<Void>
     {
-        let subPromise = Promise<V?>()
+        let subPromise = Promise<Void>()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                subPromise.resolve(value)
+                subPromise.resolve()
             },
             rejectCallback: { (reason) -> Void in
                 onRejected(reason: reason)
-                subPromise.resolve(nil)
+                subPromise.resolve()
             }
         );
 
@@ -277,7 +277,8 @@ public class Promise<V: Any>: Thenable
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                subPromise.resolve(onFulfilled(value: value))
+                let output = onFulfilled(value: value)
+                subPromise.resolve(output)
             },
             rejectCallback: { (reason) -> Void in
                 subPromise.resolve(onRejected(reason: reason))
