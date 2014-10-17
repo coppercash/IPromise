@@ -17,6 +17,7 @@
 		BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12019EDFCA400DA957D /* Utilities.swift */; };
 		BEBDD12419EDFD3500DA957D /* IPromise.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BEBDD0FD19EDFC3C00DA957D /* IPromise.framework */; };
 		BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */; };
+		BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED1735619F1623B00D0E10B /* ReadMeTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		BEBDD12019EDFCA400DA957D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
+		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReadMeTests.swift; path = IPromiseTests/ReadMeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 		BEBDD0F319EDFC3C00DA957D = {
 			isa = PBXGroup;
 			children = (
+				BED1735619F1623B00D0E10B /* ReadMeTests.swift */,
 				BEBDD0FF19EDFC3C00DA957D /* IPromise */,
 				BEBDD10919EDFC3C00DA957D /* IPromiseTests */,
 				BEBDD0FE19EDFC3C00DA957D /* Products */,
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEBDD12219EDFCA400DA957D /* PromiseTests.swift in Sources */,
+				BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */,
 				BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */,
 				BEBDD12119EDFCA400DA957D /* APlusPromiseTests.swift in Sources */,
 			);
@@ -407,6 +411,7 @@
 				BEBDD11219EDFC3C00DA957D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BEBDD11319EDFC3C00DA957D /* Build configuration list for PBXNativeTarget "IPromiseTests" */ = {
 			isa = XCConfigurationList;
@@ -415,6 +420,7 @@
 				BEBDD11519EDFC3C00DA957D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
