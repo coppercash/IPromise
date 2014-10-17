@@ -209,60 +209,60 @@ public class APlusPromise: Thenable
 
     public func then(onFulfilled: Optional<(value: Any?) -> Any?> = nil, onRejected: Optional<(reason: Any?) -> Any?> = nil) -> Self
     {
-        let subPromise = self.dynamicType()
+        let nextPromise = self.dynamicType()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 if let resolution = onFulfilled? {
-                    subPromise.resolve(resolution(value: value))
+                    nextPromise.resolve(resolution(value: value))
                 }
                 else {
-                    subPromise.resolve(value)
+                    nextPromise.resolve(value)
                 }
             },
             rejectCallback: { (reason) -> Void in
                 if let rejection = onRejected? {
-                    subPromise.resolve(rejection(reason: reason))
+                    nextPromise.resolve(rejection(reason: reason))
                 }
                 else {
-                    subPromise.reject(reason)
+                    nextPromise.reject(reason)
                 }
             }
         );
         
-        return subPromise
+        return nextPromise
     }
     
     public func then(onFulfilled: (value: Any?) -> Any?) -> Self
     {
-        let subPromise = self.dynamicType()
+        let nextPromise = self.dynamicType()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                subPromise.resolve(onFulfilled(value: value))
+                nextPromise.resolve(onFulfilled(value: value))
             },
             rejectCallback: { (reason) -> Void in
-                subPromise.reject(reason)
+                nextPromise.reject(reason)
             }
         );
         
-        return subPromise
+        return nextPromise
     }
     
     public func catch(onRejected: (reason: Any?) -> Any?) -> Self
     {
-        let subPromise = self.dynamicType()
+        let nextPromise = self.dynamicType()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                subPromise.resolve(value)
+                nextPromise.resolve(value)
             },
             rejectCallback: { (reason) -> Void in
-                subPromise.resolve(onRejected(reason: reason))
+                nextPromise.resolve(onRejected(reason: reason))
             }
         );
         
-        return subPromise
+        return nextPromise
     }
 }
 
