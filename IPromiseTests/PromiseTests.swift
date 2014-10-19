@@ -716,7 +716,7 @@ class PromiseTests: XCTestCase
         let prms1 = Promise(value: STRING_VALUE_1)
         let prms2 = Promise(value: STRING_VALUE_2)
         
-        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        let promise = Promise<Any>.all([prms0, prms1, prms2])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
@@ -745,7 +745,7 @@ class PromiseTests: XCTestCase
                 0 ~> reject(reason: ERROR_2)
             })
         
-        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        let promise = Promise<Any>.all([prms0, prms1, prms2])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -797,7 +797,7 @@ class PromiseTests: XCTestCase
         let prms2 = Promise<String>(reason: ERROR_2)
         let prms3 = Promise<String>(reason: ERROR_3)
         
-        let promise = Promise<String>.race(prms1, prms2, prms3)
+        let promise = Promise<String>.race([prms1, prms2, prms3])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value, STRING_VALUE_1)
@@ -850,7 +850,7 @@ class PromiseTests: XCTestCase
         let prms1 = Promise<String>()
         let prms2 = Promise<String>(reason: ERROR_2)
         let prms3 = Promise(value: STRING_VALUE_3)
-        let promise = Promise<String>.race(prms1, prms2, prms3)
+        let promise = Promise<String>.race([prms1, prms2, prms3])
         
         promise.then(
             onFulfilled: { (value) -> Any? in

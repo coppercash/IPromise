@@ -147,7 +147,7 @@ public class Promise<V: Any>: Thenable
         return Promise<V>(reason: reason)
     }
     
-    public class func all<V>(promises: Promise<V>...) -> Promise<[V]>
+    public class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
     {
         let allPromise = Promise<[V]>()
         let count = promises.count
@@ -171,7 +171,12 @@ public class Promise<V: Any>: Thenable
         return allPromise
     }
     
-    public class func race<V>(promises: Promise<V>...) -> Promise<V>
+    public class func all<V>(promises: Promise<V>...) -> Promise<[V]>
+    {
+        return self.all(promises)
+    }
+    
+    public class func race<V>(promises: [Promise<V>]) -> Promise<V>
     {
         let racePromise = Promise<V>()
         
@@ -188,6 +193,11 @@ public class Promise<V: Any>: Thenable
         }
         
         return racePromise
+    }
+    
+    public class func race<V>(promises: Promise<V>...) -> Promise<V>
+    {
+        return self.race(promises)
     }
     
     // MARK: - Thenable

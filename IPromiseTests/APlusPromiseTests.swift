@@ -601,7 +601,7 @@ class APlusPromiseTests: XCTestCase
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = APlusPromise(value: STRING_VALUE_0)
-        let promise = APlusPromise.all(nil, STRING_VALUE_1, prms1)
+        let promise = APlusPromise.all([nil, STRING_VALUE_1, prms1])
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -669,7 +669,7 @@ class APlusPromiseTests: XCTestCase
             0 ~> reject(reason: ERROR_3)
         }
         
-        let promise = APlusPromise.all(prms1, STRING_VALUE_2, prms3)
+        let promise = APlusPromise.all([prms1, STRING_VALUE_2, prms3])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -698,7 +698,7 @@ class APlusPromiseTests: XCTestCase
         
         let prms1 = APlusPromise(value: STRING_VALUE_1)
         let prms2 = APlusPromise(reason: ERROR_2)
-        let promise = APlusPromise.race(prms1, STRING_VALUE_2, prms2)
+        let promise = APlusPromise.race([prms1, STRING_VALUE_2, prms2])
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -753,7 +753,7 @@ class APlusPromiseTests: XCTestCase
         
         let prms1 = APlusPromise()
         let prms2 = APlusPromise(reason: ERROR_2)
-        let promise = APlusPromise.race(prms1, prms2, STRING_VALUE_3)
+        let promise = APlusPromise.race([prms1, prms2, STRING_VALUE_3])
         
         promise.then(
             onFulfilled: { (value) -> Any? in

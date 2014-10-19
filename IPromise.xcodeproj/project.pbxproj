@@ -34,7 +34,7 @@
 		BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		BEBDD12019EDFCA400DA957D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
-		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReadMeTests.swift; path = IPromiseTests/ReadMeTests.swift; sourceTree = "<group>"; };
+		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadMeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +59,6 @@
 		BEBDD0F319EDFC3C00DA957D = {
 			isa = PBXGroup;
 			children = (
-				BED1735619F1623B00D0E10B /* ReadMeTests.swift */,
 				BEBDD0FF19EDFC3C00DA957D /* IPromise */,
 				BEBDD10919EDFC3C00DA957D /* IPromiseTests */,
 				BEBDD0FE19EDFC3C00DA957D /* Products */,
@@ -100,6 +99,7 @@
 		BEBDD10919EDFC3C00DA957D /* IPromiseTests */ = {
 			isa = PBXGroup;
 			children = (
+				BED1735619F1623B00D0E10B /* ReadMeTests.swift */,
 				BEBDD11E19EDFCA400DA957D /* APlusPromiseTests.swift */,
 				BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */,
 				BEBDD12019EDFCA400DA957D /* Utilities.swift */,

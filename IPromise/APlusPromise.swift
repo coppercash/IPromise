@@ -151,12 +151,12 @@ public class APlusPromise: Thenable
         return self(reason: reason)
     }
     
-    public class func all(values: Any?...) -> Self
+    public class func all(values: [Any?]) -> Self
     {
         let allPromise = self()
         let count = values.count
         var results: [Any?] = []
-
+        
         for value in values
         {
             let promise = self.resolve(value)
@@ -178,7 +178,12 @@ public class APlusPromise: Thenable
         return allPromise
     }
     
-    public class func race(values: Any?...) -> Self
+    public class func all(values: Any?...) -> Self
+    {
+        return self.all(values)
+    }
+    
+    public class func race(values: [Any?]) -> Self
     {
         let racePromise = self()
         
@@ -196,8 +201,14 @@ public class APlusPromise: Thenable
                 }
             )
         }
-
+        
         return racePromise
+    }
+
+    
+    public class func race(values: Any?...) -> Self
+    {
+        return self.race(values)
     }
     
     // MARK: - Thenable
