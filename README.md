@@ -75,7 +75,7 @@ promise.then { (value) -> Void in
 Following aggregate methods are supported for now
 
 | Method | Fulfill condition | Reject condition | Promise | APlusPromise |
-| :-:  | :- | :- | :-: | :-: |
+| :--:  | :-- | :-- | :--: | :--: |
 | `all` | When every item in the array fulfils | If (and when) any item rejects | √ | √ |
 | `race` | As soon as any item fulfills | As soon as any item rejects | √ | √ |
 
