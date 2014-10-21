@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE60265D19F5D6A200FED245 /* ScenarioTests.swift */; };
 		BEBDD10319EDFC3C00DA957D /* IPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEBDD10219EDFC3C00DA957D /* IPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEBDD11A19EDFC8300DA957D /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11619EDFC8300DA957D /* APlusPromise.swift */; };
 		BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11719EDFC8300DA957D /* Promise.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BE60265D19F5D6A200FED245 /* ScenarioTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScenarioTests.swift; sourceTree = "<group>"; };
 		BEBDD0FD19EDFC3C00DA957D /* IPromise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IPromise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEBDD10119EDFC3C00DA957D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BEBDD10219EDFC3C00DA957D /* IPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPromise.h; sourceTree = "<group>"; };
@@ -99,10 +101,11 @@
 		BEBDD10919EDFC3C00DA957D /* IPromiseTests */ = {
 			isa = PBXGroup;
 			children = (
+				BEBDD12019EDFCA400DA957D /* Utilities.swift */,
 				BED1735619F1623B00D0E10B /* ReadMeTests.swift */,
 				BEBDD11E19EDFCA400DA957D /* APlusPromiseTests.swift */,
 				BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */,
-				BEBDD12019EDFCA400DA957D /* Utilities.swift */,
+				BE60265D19F5D6A200FED245 /* ScenarioTests.swift */,
 				BEBDD10A19EDFC3C00DA957D /* Supporting Files */,
 			);
 			path = IPromiseTests;
@@ -234,6 +237,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */,
 				BEBDD12219EDFCA400DA957D /* PromiseTests.swift in Sources */,
 				BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */,
 				BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */,
