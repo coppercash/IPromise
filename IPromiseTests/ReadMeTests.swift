@@ -107,4 +107,25 @@ class ReadMeTests: XCTestCase {
                 println(reason)
         }
     }
+    
+    func test_thenable() {
+        
+        class ThenableObject: Thenable {
+            
+            typealias ValueType = NSData
+            typealias ReasonType = NSError
+            typealias ReturnType = Void
+            typealias NextType = Void
+            
+            func then(
+                #onFulfilled: Optional<(value: NSData) -> Void>,
+                onRejected: Optional<(reason: NSError) -> Void>)
+                -> Void {
+                // Implement
+            }
+        }
+        
+        let thenableObject = ThenableObject()
+        let promise = Promise(thenable: thenableObject);
+    }
 }
