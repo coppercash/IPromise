@@ -21,9 +21,9 @@ let STRING_VALUE_1 = "STRING_VALUE_1"
 let STRING_VALUE_2 = "STRING_VALUE_2"
 let STRING_VALUE_3 = "STRING_VALUE_3"
 
-let ERROR_0 = NSError.errorWithDomain(" ", code: 0, userInfo: nil)
-let ERROR_1 = NSError.errorWithDomain(" ", code: 1, userInfo: nil)
-let ERROR_2 = NSError.errorWithDomain(" ", code: 2, userInfo: nil)
-let ERROR_3 = NSError.errorWithDomain(" ", code: 3, userInfo: nil)
+let ERROR_0 = NSError(domain: " ", code: 0, userInfo: nil)
+let ERROR_1 = NSError(domain: " ", code: 1, userInfo: nil)
+let ERROR_2 = NSError(domain: " ", code: 2, userInfo: nil)
+let ERROR_3 = NSError(domain: " ", code: 3, userInfo: nil)
 
 let VOID_SUMMARY = "()"

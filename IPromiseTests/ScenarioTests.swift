@@ -17,7 +17,7 @@ class ScenarioTests: XCTestCase {
         let expt = expectationWithDescription(__FUNCTION__)
         
         let promise = Promise<String> { (resolve, reject) -> Void in
-            let url = NSURL(string: "http://posttestserver.com/post.php")
+            let url: NSURL! = NSURL(string: "http://posttestserver.com/post.php")
             let request = NSMutableURLRequest(URL: url)
             request.HTTPMethod = "POST"
             NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
@@ -25,7 +25,7 @@ class ScenarioTests: XCTestCase {
                     reject(reason: error)
                     return
                 }
-                resolve(value: NSString(data: data, encoding: NSUTF8StringEncoding))
+                resolve(value: NSString(data: data, encoding: NSUTF8StringEncoding)!)
             }
         }
         
