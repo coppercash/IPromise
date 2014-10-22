@@ -109,3 +109,7 @@ Promise { (resolve, reject) -> Void in
        println(reason)
 }
 ```
+
+## Licence
+
+[MIT](https://github.com/coppercash/IPromise/blob/master/LICENSE)
