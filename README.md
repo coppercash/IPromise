@@ -81,7 +81,7 @@ Following aggregate methods are supported for now
 
 ## Chain
 
-Broad return value types and number of closures of method `then` are supported。
+Broad return value types and number of closures of method `then` are supported.
 
 ```Swift
 Promise { (resolve, reject) -> Void in
@@ -108,6 +108,30 @@ Promise { (resolve, reject) -> Void in
    .catch { (reason) -> Void in
        println(reason)
 }
+```
+
+## Thenable support
+
+**Thenable** is supported via protocal.
+
+```Swift
+class ThenableObject: Thenable {
+    
+    typealias ValueType = NSData
+    typealias ReasonType = NSError
+    typealias ReturnType = Void
+    typealias NextType = Void
+    
+    func then(
+        #onFulfilled: Optional<(value: NSData) -> Void>,
+        onRejected: Optional<(reason: NSError) -> Void>)
+        -> Void {
+        // Implement
+    }
+}
+
+let thenableObject = ThenableObject()
+let promise = Promise(thenable: thenableObject);
 ```
 
 ## Licence
