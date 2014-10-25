@@ -98,7 +98,7 @@ public class Promise<V: Any>: Thenable
 
     // MARK: - Public APIs
     
-    func resolve(value: V) -> Void
+    public func resolve(value: V) -> Void
     {
         if self.state != .Pending {
             return
