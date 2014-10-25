@@ -208,8 +208,8 @@ public class Promise<V: Any>: Thenable
     public typealias ReturnType = Void
     
     public func then(
-        #onFulfilled: Optional<(value: V) -> Void>,
-        onRejected: Optional<(reason: NSError) -> Void>
+        onFulfilled: Optional<(value: V) -> Void> = nil,
+        onRejected: Optional<(reason: NSError) -> Void> = nil
         ) -> Promise<Void>
     {
         let nextPromise = Promise<Void>()

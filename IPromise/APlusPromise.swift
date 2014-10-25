@@ -218,7 +218,10 @@ public class APlusPromise: Thenable
     typealias ReasonType = Any?
     typealias ReturnType = Any?
 
-    public func then(onFulfilled: Optional<(value: Any?) -> Any?> = nil, onRejected: Optional<(reason: Any?) -> Any?> = nil) -> Self
+    public func then(
+        onFulfilled: Optional<(value: Any?) -> Any?> = nil,
+        onRejected: Optional<(reason: Any?) -> Any?> = nil
+        ) -> Self
     {
         let nextPromise = self.dynamicType()
         
