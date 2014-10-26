@@ -91,7 +91,7 @@ public class Promise<V: Any>: Thenable
                 onRejected: { (reason: NSError) -> Void in
                     self.reject(reason)
                 }
-            );
+            )
         }
         
     }
@@ -233,7 +233,7 @@ public class Promise<V: Any>: Thenable
                     nextPromise.reject(reason)
                 }
             }
-        );
+        )
         
         return nextPromise
     }
@@ -254,7 +254,7 @@ public class Promise<V: Any>: Thenable
             rejectCallback: { (reason) -> Void in
                 nextPromise.reject(reason)
             }
-        );
+        )
         
         return nextPromise
     }
@@ -273,7 +273,7 @@ public class Promise<V: Any>: Thenable
                 onRejected(reason: reason)
                 nextPromise.resolve()
             }
-        );
+        )
 
         return nextPromise
     }
@@ -294,7 +294,7 @@ public class Promise<V: Any>: Thenable
                 let nextValue = onRejected(reason: reason)
                 nextPromise.resolve(nextValue)
             }
-        );
+        )
         
         return nextPromise
     }
@@ -313,7 +313,7 @@ public class Promise<V: Any>: Thenable
             rejectCallback: { (reason) -> Void in
                 nextPromise.reject(reason)
             }
-        );
+        )
 
         return nextPromise
     }
@@ -334,7 +334,7 @@ public class Promise<V: Any>: Thenable
                 let nextThenable = onRejected(reason: reason)
                 nextPromise.resolve(thenable: nextThenable)
             }
-        );
+        )
         
         return nextPromise
     }
@@ -353,7 +353,7 @@ public class Promise<V: Any>: Thenable
             rejectCallback: { (reason) -> Void in
                 nextPromise.reject(reason)
             }
-        );
+        )
         
         return nextPromise
     }
@@ -387,6 +387,6 @@ public extension Promise {
                 }
                 return nil
             }
-        );
+        )
     }
 }

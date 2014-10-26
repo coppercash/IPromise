@@ -66,9 +66,9 @@ class PromiseTests: XCTestCase
                 expt.fulfill()
                 }()
             
-            resolve(value: STRING_VALUE_0);
+            resolve(value: STRING_VALUE_0)
             
-            resolve(value: STRING_VALUE_2);
+            resolve(value: STRING_VALUE_2)
             reject(reason: ERROR_2)
         }
         
@@ -97,7 +97,7 @@ class PromiseTests: XCTestCase
             
             reject(reason: ERROR_0)
             
-            resolve(value: STRING_VALUE_2);
+            resolve(value: STRING_VALUE_2)
             reject(reason: ERROR_2)
         }
         

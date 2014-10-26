@@ -242,7 +242,7 @@ public class APlusPromise: Thenable
                     nextPromise.reject(reason)
                 }
             }
-        );
+        )
         
         return nextPromise
     }
@@ -258,7 +258,7 @@ public class APlusPromise: Thenable
             rejectCallback: { (reason) -> Void in
                 nextPromise.reject(reason)
             }
-        );
+        )
         
         return nextPromise
     }
@@ -274,7 +274,7 @@ public class APlusPromise: Thenable
             rejectCallback: { (reason) -> Void in
                 nextPromise.resolve(onRejected(reason: reason))
             }
-        );
+        )
         
         return nextPromise
     }

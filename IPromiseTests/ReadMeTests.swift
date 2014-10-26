@@ -18,7 +18,7 @@ class ReadMeTests: XCTestCase {
             return Promise(value: 42)
         }
         
-        let promise: Promise<Int> = answerToEverthing();
+        let promise: Promise<Int> = answerToEverthing()
         
         promise
             .then { (value: Int) -> Bool in
@@ -37,7 +37,7 @@ class ReadMeTests: XCTestCase {
     func test_typeFree() {
         
         func answerToUniverse() -> APlusPromise {
-            return APlusPromise(value: 42);
+            return APlusPromise(value: 42)
         }
         
         let typeFreePromise: APlusPromise = answerToUniverse()
@@ -45,10 +45,10 @@ class ReadMeTests: XCTestCase {
         typeFreePromise.then(
             onFulfilled: { (value: Any?) -> Any? in
                 let isItStill42 = (value as Int) == 42
-                return nil;
+                return nil
             },
             onRejected: { (reason: Any?) -> Any? in
-                return nil;
+                return nil
             }
         )
         
@@ -71,7 +71,7 @@ class ReadMeTests: XCTestCase {
         
         let promise = arrayOrVariadic ?
             Promise<[Int]>.all(promises) :
-            Promise<[Int]>.all(promiseA, promiseB, promiseC);
+            Promise<[Int]>.all(promiseA, promiseB, promiseC)
         
         promise.then { (value) -> Void in
             for number: Int in value {
@@ -126,6 +126,6 @@ class ReadMeTests: XCTestCase {
         }
         
         let thenableObject = ThenableObject()
-        let promise = Promise(thenable: thenableObject);
+        let promise = Promise(thenable: thenableObject)
     }
 }
