@@ -76,137 +76,12 @@ public class Promise<V>: Thenable
             break
         }
     }
-    /*
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(#thenable: T) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        if (thenable as? Promise<V>) === self {
-            self.reject(NSError.promiseTypeError())
-        }
-        else {
-            thenable.then(
-                onFulfilled: { (value: V) -> Void in
-                    self.resolve(value)
-                },
-                onRejected: { (reason: NSError) -> Void in
-                    self.reject(reason)
-                }
-            )
-        }
-        
-    }
-    
-    // MARK: - Public APIs
-    
-    public func resolve(value: V) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        self.value = value
-        self.state = .Fulfilled
-        
-        for callback in self.fulfillCallbacks {
-            callback(value: value)
-        }
-    }
-    
-    public func reject(reason: NSError) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        self.reason = reason
-        self.state = .Rejected
-        
-        for callback in self.rejectCallbacks {
-            callback(reason: reason)
-        }
-    }
-    */
+
     // MARK: - Static APIs
     
     public class func defer() -> (Deferred<V>, Promise<V>) {
         let deferred = Deferred<V>()
         return (deferred, deferred.promise)
-    }
-    
-    public class func resolve<V>(value: Any) -> Promise<V>
-    {
-        switch value {
-        case let promise as Promise<V>:
-            return promise
-        case let value as V:
-            return Promise<V>(value: value)
-        default:
-            let error = NSError.promiseValueTypeError(expectType: "V", value: value)
-            println(error)
-            abort()
-        }
-    }
-    
-    public class func reject<V>(reason: NSError) -> Promise<V>
-    {
-        return Promise<V>(reason: reason)
-    }
-    
-    public class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
-    {
-        let count = promises.count
-        var results: [V] = []
-        
-        let (allDeferred, allPromise) = Promise<[V]>.defer()
-
-        for promise in promises
-        {
-            promise.then(
-                onFulfilled: { (value) -> Void in
-                    results.append(value)
-                    if results.count >= count {
-                        allDeferred.resolve(results)
-                    }
-                },
-                onRejected: { (reason) -> Void in
-                    allDeferred.reject(reason)
-                }
-            )
-        }
-        
-        return allPromise
-    }
-    
-    public class func all<V>(promises: Promise<V>...) -> Promise<[V]>
-    {
-        return self.all(promises)
-    }
-    
-    public class func race<V>(promises: [Promise<V>]) -> Promise<V>
-    {
-        let (raceDeferred, racePromise) = Promise<V>.defer()
-        
-        for promise in promises
-        {
-            promise.then(
-                onFulfilled: { (value) -> Void in
-                    raceDeferred.resolve(value)
-                },
-                onRejected: { (reason) -> Void in
-                    raceDeferred.reject(reason)
-                }
-            )
-        }
-        
-        return racePromise
-    }
-    
-    public class func race<V>(promises: Promise<V>...) -> Promise<V>
-    {
-        return self.race(promises)
     }
     
     // MARK: - Thenable
@@ -369,6 +244,82 @@ public class Promise<V>: Thenable
 }
 
 public extension Promise {
+    
+    public class func resolve<V>(value: Any) -> Promise<V>
+    {
+        switch value {
+        case let promise as Promise<V>:
+            return promise
+        case let value as V:
+            return Promise<V>(value: value)
+        default:
+            let error = NSError.promiseValueTypeError(expectType: "V", value: value)
+            println(error)
+            abort()
+        }
+    }
+    
+    public class func reject<V>(reason: NSError) -> Promise<V>
+    {
+        return Promise<V>(reason: reason)
+    }
+    
+    public class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
+    {
+        let count = promises.count
+        var results: [V] = []
+        
+        let (allDeferred, allPromise) = Promise<[V]>.defer()
+        
+        for promise in promises
+        {
+            promise.then(
+                onFulfilled: { (value) -> Void in
+                    results.append(value)
+                    if results.count >= count {
+                        allDeferred.resolve(results)
+                    }
+                },
+                onRejected: { (reason) -> Void in
+                    allDeferred.reject(reason)
+                }
+            )
+        }
+        
+        return allPromise
+    }
+    
+    public class func all<V>(promises: Promise<V>...) -> Promise<[V]>
+    {
+        return self.all(promises)
+    }
+    
+    public class func race<V>(promises: [Promise<V>]) -> Promise<V>
+    {
+        let (raceDeferred, racePromise) = Promise<V>.defer()
+        
+        for promise in promises
+        {
+            promise.then(
+                onFulfilled: { (value) -> Void in
+                    raceDeferred.resolve(value)
+                },
+                onRejected: { (reason) -> Void in
+                    raceDeferred.reject(reason)
+                }
+            )
+        }
+        
+        return racePromise
+    }
+    
+    public class func race<V>(promises: Promise<V>...) -> Promise<V>
+    {
+        return self.race(promises)
+    }
+}
+
+public extension Promise {
     convenience
     public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(vagueThenable: T)
     {
@@ -376,28 +327,4 @@ public extension Promise {
         let deferred = Deferred<V>(promise: self)
         deferred.resolve(vagueThenable: vagueThenable)
     }
-    /*
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(#vagueThenable: T) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        vagueThenable.then(
-            onFulfilled: { (value: V) -> Any? in
-                self.resolve(value)
-                return nil
-            },
-            onRejected: { (reason: Any?) -> Any? in
-                if let reasonObject = reason as? NSError {
-                    self.reject(reasonObject)
-                }
-                else {
-                    self.reject(NSError.promiseReasonWrapperError(reason))
-                }
-                return nil
-            }
-        )
-    }
-*/
 }
