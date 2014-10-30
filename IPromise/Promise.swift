@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class Promise<V: Any>: Thenable
+public class Promise<V>: Thenable
 {
     // MARK: - ivars
     
@@ -23,8 +23,7 @@ public class Promise<V: Any>: Thenable
     
     // MARK: - Initializers
     
-    required
-    public init() {}
+    init() {}
     
     required
     public init(value: V)
@@ -44,9 +43,11 @@ public class Promise<V: Any>: Thenable
     public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
+        
+        let deferred = Deferred<V>(promise: self)
         resolver(
-            resolve: self.resolve,
-            reject: self.reject
+            resolve: deferred.resolve,
+            reject: deferred.reject
         )
     }
     
@@ -54,7 +55,9 @@ public class Promise<V: Any>: Thenable
     public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(thenable: T)
     {
         self.init()
-        self.resolve(thenable: thenable)
+        
+        let deferred = Deferred<V>(promise: self)
+        deferred.resolve(thenable: thenable)
     }
     
     // MARK: - Private APIs
@@ -73,7 +76,7 @@ public class Promise<V: Any>: Thenable
             break
         }
     }
-    
+    /*
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(#thenable: T) -> Void
     {
         if self.state != .Pending {
@@ -95,7 +98,7 @@ public class Promise<V: Any>: Thenable
         }
         
     }
-
+    
     // MARK: - Public APIs
     
     public func resolve(value: V) -> Void
@@ -125,8 +128,13 @@ public class Promise<V: Any>: Thenable
             callback(reason: reason)
         }
     }
-
+    */
     // MARK: - Static APIs
+    
+    public class func defer() -> (Deferred<V>, Promise<V>) {
+        let deferred = Deferred<V>()
+        return (deferred, deferred.promise)
+    }
     
     public class func resolve<V>(value: Any) -> Promise<V>
     {
@@ -149,21 +157,22 @@ public class Promise<V: Any>: Thenable
     
     public class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
     {
-        let allPromise = Promise<[V]>()
         let count = promises.count
         var results: [V] = []
         
+        let (allDeferred, allPromise) = Promise<[V]>.defer()
+
         for promise in promises
         {
             promise.then(
                 onFulfilled: { (value) -> Void in
                     results.append(value)
                     if results.count >= count {
-                        allPromise.resolve(results)
+                        allDeferred.resolve(results)
                     }
                 },
                 onRejected: { (reason) -> Void in
-                    allPromise.reject(reason)
+                    allDeferred.reject(reason)
                 }
             )
         }
@@ -178,16 +187,16 @@ public class Promise<V: Any>: Thenable
     
     public class func race<V>(promises: [Promise<V>]) -> Promise<V>
     {
-        let racePromise = Promise<V>()
+        let (raceDeferred, racePromise) = Promise<V>.defer()
         
         for promise in promises
         {
             promise.then(
                 onFulfilled: { (value) -> Void in
-                    racePromise.resolve(value)
+                    raceDeferred.resolve(value)
                 },
                 onRejected: { (reason) -> Void in
-                    racePromise.reject(reason)
+                    raceDeferred.reject(reason)
                 }
             )
         }
@@ -212,25 +221,25 @@ public class Promise<V: Any>: Thenable
         onRejected: Optional<(reason: NSError) -> Void> = nil
         ) -> Promise<Void>
     {
-        let nextPromise = Promise<Void>()
+        let (nextDeferred, nextPromise) = Promise<Void>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 if let resolution = onFulfilled? {
                     resolution(value: value)
-                    nextPromise.resolve()
+                    nextDeferred.resolve()
                 }
                 else {
-                    nextPromise.resolve()
+                    nextDeferred.resolve()
                 }
             },
             rejectCallback: { (reason) -> Void in
                 if let rejection = onRejected? {
                     rejection(reason: reason)
-                    nextPromise.resolve()
+                    nextDeferred.resolve()
                 }
                 else {
-                    nextPromise.reject(reason)
+                    nextDeferred.reject(reason)
                 }
             }
         )
@@ -244,15 +253,15 @@ public class Promise<V: Any>: Thenable
         onFulfilled: (value: V) -> Void
         ) -> Promise<Void>
     {
-        let nextPromise = Promise<Void>()
+        let (nextDeferred, nextPromise) = Promise<Void>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 onFulfilled(value: value)
-                nextPromise.resolve()
+                nextDeferred.resolve()
             },
             rejectCallback: { (reason) -> Void in
-                nextPromise.reject(reason)
+                nextDeferred.reject(reason)
             }
         )
         
@@ -263,15 +272,15 @@ public class Promise<V: Any>: Thenable
         onRejected: (reason: NSError) -> Void
         ) -> Promise<Void>
     {
-        let nextPromise = Promise<Void>()
+        let (nextDeferred, nextPromise) = Promise<Void>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                nextPromise.resolve()
+                nextDeferred.resolve()
             },
             rejectCallback: { (reason) -> Void in
                 onRejected(reason: reason)
-                nextPromise.resolve()
+                nextDeferred.resolve()
             }
         )
 
@@ -283,16 +292,16 @@ public class Promise<V: Any>: Thenable
         onRejected: (reason: NSError) -> N
         ) -> Promise<N>
     {
-        let nextPromise = Promise<N>()
+        let (nextDeferred, nextPromise) = Promise<N>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 let nextValue = onFulfilled(value: value)
-                nextPromise.resolve(nextValue)
+                nextDeferred.resolve(nextValue)
             },
             rejectCallback: { (reason) -> Void in
                 let nextValue = onRejected(reason: reason)
-                nextPromise.resolve(nextValue)
+                nextDeferred.resolve(nextValue)
             }
         )
         
@@ -303,15 +312,15 @@ public class Promise<V: Any>: Thenable
         onFulfilled: (value: V) -> N
         ) -> Promise<N>
     {
-        let nextPromise = Promise<N>()
+        let (nextDeferred, nextPromise) = Promise<N>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 let nextValue = onFulfilled(value: value)
-                nextPromise.resolve(nextValue)
+                nextDeferred.resolve(nextValue)
             },
             rejectCallback: { (reason) -> Void in
-                nextPromise.reject(reason)
+                nextDeferred.reject(reason)
             }
         )
 
@@ -323,16 +332,16 @@ public class Promise<V: Any>: Thenable
         onRejected: (reason: NSError) -> T
         ) -> Promise<N>
     {
-        let nextPromise = Promise<N>()
+        let (nextDeferred, nextPromise) = Promise<N>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 let nextThenable = onFulfilled(value: value)
-                nextPromise.resolve(thenable: nextThenable)
+                nextDeferred.resolve(thenable: nextThenable)
             },
             rejectCallback: { (reason) -> Void in
                 let nextThenable = onRejected(reason: reason)
-                nextPromise.resolve(thenable: nextThenable)
+                nextDeferred.resolve(thenable: nextThenable)
             }
         )
         
@@ -343,15 +352,15 @@ public class Promise<V: Any>: Thenable
         onFulfilled: (value: V) -> T
         ) -> Promise<N>
     {
-        let nextPromise = Promise<N>()
+        let (nextDeferred, nextPromise) = Promise<N>.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 let nextThenable = onFulfilled(value: value)
-                nextPromise.resolve(thenable: nextThenable)
+                nextDeferred.resolve(thenable: nextThenable)
             },
             rejectCallback: { (reason) -> Void in
-                nextPromise.reject(reason)
+                nextDeferred.reject(reason)
             }
         )
         
@@ -364,9 +373,10 @@ public extension Promise {
     public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(vagueThenable: T)
     {
         self.init()
-        self.resolve(vagueThenable: vagueThenable)
+        let deferred = Deferred<V>(promise: self)
+        deferred.resolve(vagueThenable: vagueThenable)
     }
-    
+    /*
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(#vagueThenable: T) -> Void
     {
         if self.state != .Pending {
@@ -389,4 +399,5 @@ public extension Promise {
             }
         )
     }
+*/
 }

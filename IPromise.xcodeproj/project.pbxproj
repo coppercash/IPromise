@@ -18,6 +18,7 @@
 		BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12019EDFCA400DA957D /* Utilities.swift */; };
 		BEBDD12419EDFD3500DA957D /* IPromise.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BEBDD0FD19EDFC3C00DA957D /* IPromise.framework */; };
 		BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */; };
+		BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC1A0751A01BF820088F675 /* Deferred.swift */; };
 		BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED1735619F1623B00D0E10B /* ReadMeTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 		BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		BEBDD12019EDFCA400DA957D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
+		BEC1A0751A01BF820088F675 /* Deferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deferred.swift; sourceTree = "<group>"; };
 		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadMeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -83,6 +85,7 @@
 				BEBDD11819EDFC8300DA957D /* PromiseState.swift */,
 				BEBDD11619EDFC8300DA957D /* APlusPromise.swift */,
 				BEBDD11719EDFC8300DA957D /* Promise.swift */,
+				BEC1A0751A01BF820088F675 /* Deferred.swift */,
 				BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */,
 				BEBDD10219EDFC3C00DA957D /* IPromise.h */,
 				BEBDD10019EDFC3C00DA957D /* Supporting Files */,
@@ -229,6 +232,7 @@
 				BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */,
 				BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */,
 				BEBDD11A19EDFC8300DA957D /* APlusPromise.swift in Sources */,
+				BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */,
 				BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

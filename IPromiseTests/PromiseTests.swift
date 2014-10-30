@@ -358,8 +358,7 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         }
         
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-        })
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
     
     func test_typeError_reject() {
@@ -386,8 +385,7 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         }
         
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-        })
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
     
     // MARK: - 2.3.2; chain
@@ -822,8 +820,8 @@ class PromiseTests: XCTestCase
         let prms1 = Promise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_1)
         }
-        let prms2 = Promise<String>()
-        let prms3 = Promise<String>()
+        let (deferred2, prms2) = Promise<String>.defer()
+        let (deferred3, prms3) = Promise<String>.defer()
         
         let promise = Promise<String>.race(prms1, prms2, prms3)
         promise.then(
@@ -847,7 +845,7 @@ class PromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = Promise<String>()
+        let (deferred1, prms1) = Promise<String>.defer()
         let prms2 = Promise<String>(reason: ERROR_2)
         let prms3 = Promise(value: STRING_VALUE_3)
         let promise = Promise<String>.race([prms1, prms2, prms3])
@@ -873,11 +871,11 @@ class PromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = Promise<String>()
+        let (deferred1, prms1) = Promise<String>.defer()
         let prms2 = Promise<String> { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_2)
         }
-        let prms3 = Promise<String>()
+        let (deferred3, prms3) = Promise<String>.defer()
         let promise = Promise<String>.race(prms1, prms2, prms3)
         
         promise.then(
