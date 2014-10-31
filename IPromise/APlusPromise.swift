@@ -23,8 +23,7 @@ public class APlusPromise: Thenable
 
     // MARK: - Initializers
     
-    required
-    public init() {}
+    init() {}
     
     required
     public init(value: Any?)
@@ -44,9 +43,10 @@ public class APlusPromise: Thenable
     public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
+        let deferred = APlusDeferred(promise: self)
         resolver(
-            resolve: self.resolve,
-            reject: self.reject
+            resolve: deferred.resolve,
+            reject: deferred.reject
         )
     }
     
@@ -54,13 +54,14 @@ public class APlusPromise: Thenable
     public init<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(thenable: T)
     {
         self.init()
+        let deferred = APlusDeferred(promise: self)
         thenable.then(
             onFulfilled: { (value) -> Any? in
-                self.resolve(value)
+                deferred.resolve(value)
                 return nil
             },
             onRejected: { (reason) -> Any? in
-                self.reject(reason)
+                deferred.reject(reason)
                 return nil
             }
         )
@@ -83,56 +84,13 @@ public class APlusPromise: Thenable
         }
     }
 
-    // MARK: - Public APIs
-
-    public func resolve(value: Any?) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        if let promise = value as? APlusPromise {
-            if promise === self {
-                self.reject(NSError.promiseTypeError())
-            }
-            else {
-                promise.then(
-                    onFulfilled: { (value) -> Any? in
-                        self.resolve(value)
-                        return nil
-                    },
-                    onRejected: { (reason) -> Any? in
-                        self.reject(reason)
-                        return nil
-                    }
-                )
-            }
-            return
-        }
-        
-        self.value = value
-        self.state = .Fulfilled
-        
-        for callback in self.fulfillCallbacks {
-            callback(value: value)
-        }
-    }
-
-    public func reject(reason: Any?) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-        
-        self.reason = reason
-        self.state = .Rejected
-        
-        for callback in self.rejectCallbacks {
-            callback(reason: reason)
-        }
-    }
-    
     // MARK: - Static APIs
+    
+    public class func defer() -> (APlusDeferred, APlusPromise)
+    {
+        let deferred = APlusDeferred();
+        return (deferred, deferred.promise)
+    }
     
     public class func resolve(value: Any?) -> APlusPromise
     {
@@ -146,69 +104,9 @@ public class APlusPromise: Thenable
         }
     }
     
-    public class func reject(reason: Any?) -> Self
+    public class func reject(reason: Any?) -> APlusPromise
     {
         return self(reason: reason)
-    }
-    
-    public class func all(values: [Any?]) -> Self
-    {
-        let allPromise = self()
-        let count = values.count
-        var results: [Any?] = []
-        
-        for value in values
-        {
-            let promise = self.resolve(value)
-            promise.then(
-                onFulfilled: { (value) -> Any? in
-                    results.append(value)
-                    if results.count >= count {
-                        allPromise.resolve(results)
-                    }
-                    return nil
-                },
-                onRejected: { (reason) -> Any? in
-                    allPromise.reject(reason)
-                    return nil
-                }
-            )
-        }
-        
-        return allPromise
-    }
-    
-    public class func all(values: Any?...) -> Self
-    {
-        return self.all(values)
-    }
-    
-    public class func race(values: [Any?]) -> Self
-    {
-        let racePromise = self()
-        
-        for value in values
-        {
-            let promise = self.resolve(value)
-            promise.then(
-                onFulfilled: { (value) -> Any? in
-                    racePromise.resolve(value)
-                    return nil
-                },
-                onRejected: { (reason) -> Any? in
-                    racePromise.reject(reason)
-                    return nil
-                }
-            )
-        }
-        
-        return racePromise
-    }
-
-    
-    public class func race(values: Any?...) -> Self
-    {
-        return self.race(values)
     }
     
     // MARK: - Thenable
@@ -221,25 +119,25 @@ public class APlusPromise: Thenable
     public func then(
         onFulfilled: Optional<(value: Any?) -> Any?> = nil,
         onRejected: Optional<(reason: Any?) -> Any?> = nil
-        ) -> Self
+        ) -> APlusPromise
     {
-        let nextPromise = self.dynamicType()
+        let (nextDeferred, nextPromise) = APlusPromise.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
                 if let resolution = onFulfilled? {
-                    nextPromise.resolve(resolution(value: value))
+                    nextDeferred.resolve(resolution(value: value))
                 }
                 else {
-                    nextPromise.resolve(value)
+                    nextDeferred.resolve(value)
                 }
             },
             rejectCallback: { (reason) -> Void in
                 if let rejection = onRejected? {
-                    nextPromise.resolve(rejection(reason: reason))
+                    nextDeferred.resolve(rejection(reason: reason))
                 }
                 else {
-                    nextPromise.reject(reason)
+                    nextDeferred.reject(reason)
                 }
             }
         )
@@ -247,32 +145,32 @@ public class APlusPromise: Thenable
         return nextPromise
     }
     
-    public func then(onFulfilled: (value: Any?) -> Any?) -> Self
+    public func then(onFulfilled: (value: Any?) -> Any?) -> APlusPromise
     {
-        let nextPromise = self.dynamicType()
+        let (nextDeferred, nextPromise) = APlusPromise.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                nextPromise.resolve(onFulfilled(value: value))
+                nextDeferred.resolve(onFulfilled(value: value))
             },
             rejectCallback: { (reason) -> Void in
-                nextPromise.reject(reason)
+                nextDeferred.reject(reason)
             }
         )
         
         return nextPromise
     }
     
-    public func catch(onRejected: (reason: Any?) -> Any?) -> Self
+    public func catch(onRejected: (reason: Any?) -> Any?) -> APlusPromise
     {
-        let nextPromise = self.dynamicType()
+        let (nextDeferred, nextPromise) = APlusPromise.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
-                nextPromise.resolve(value)
+                nextDeferred.resolve(value)
             },
             rejectCallback: { (reason) -> Void in
-                nextPromise.resolve(onRejected(reason: reason))
+                nextDeferred.resolve(onRejected(reason: reason))
             }
         )
         
@@ -281,26 +179,73 @@ public class APlusPromise: Thenable
 }
 
 public extension APlusPromise {
+    
+    public class func all(values: [Any?]) -> APlusPromise
+    {
+        let (allDeferred, allPromise) = APlusPromise.defer()
+        let count = values.count
+        var results: [Any?] = []
+        
+        for value in values
+        {
+            let promise = self.resolve(value)
+            promise.then(
+                onFulfilled: { (value) -> Any? in
+                    results.append(value)
+                    if results.count >= count {
+                        allDeferred.resolve(results)
+                    }
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    allDeferred.reject(reason)
+                    return nil
+                }
+            )
+        }
+        
+        return allPromise
+    }
+    
+    public class func all(values: Any?...) -> APlusPromise
+    {
+        return self.all(values)
+    }
+    
+    public class func race(values: [Any?]) -> APlusPromise
+    {
+        let (raceDeferred, racePromise) = APlusPromise.defer()
+        
+        for value in values
+        {
+            let promise = self.resolve(value)
+            promise.then(
+                onFulfilled: { (value) -> Any? in
+                    raceDeferred.resolve(value)
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    raceDeferred.reject(reason)
+                    return nil
+                }
+            )
+        }
+        
+        return racePromise
+    }
+    
+    public class func race(values: Any?...) -> APlusPromise
+    {
+        return self.race(values)
+    }
+}
+
+public extension APlusPromise {
     convenience
     public init<V>(promise: Promise<V>)
     {
         self.init()
-        self.resolve(promise: promise)
-    }
-
-    func resolve<V>(#promise: Promise<V>) -> Void
-    {
-        if self.state != .Pending {
-            return
-        }
-
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                self.resolve(value)
-            },
-            onRejected: { (reason) -> Void in
-                self.reject(reason)
-            }
-        )
+        let deferred = APlusDeferred(promise: self)
+        deferred.resolve(promise: promise)
     }
 }

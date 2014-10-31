@@ -538,7 +538,7 @@ class APlusPromiseTests: XCTestCase
     // MARK: - resolve(_)
     
     func test_resolve() {
-        let q0 = APlusPromise()
+        let (d, q0) = APlusPromise.defer()
         let a0: APlusPromise = APlusPromise.resolve(q0)
         XCTAssertTrue(q0 === a0)
         
@@ -724,8 +724,8 @@ class APlusPromiseTests: XCTestCase
         let prms1 = APlusPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_1)
         }
-        let prms2 = APlusPromise()
-        let prms3 = APlusPromise()
+        let (d2, prms2) = APlusPromise.defer()
+        let (d3, prms3) = APlusPromise.defer()
         
         let promise = APlusPromise.race(prms1, prms2, prms3)
         promise.then(
@@ -751,7 +751,7 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise()
+        let (d1, prms1) = APlusPromise.defer()
         let prms2 = APlusPromise(reason: ERROR_2)
         let promise = APlusPromise.race([prms1, prms2, STRING_VALUE_3])
         
@@ -776,11 +776,11 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise()
+        let (d1, prms1) = APlusPromise.defer()
         let prms2 = APlusPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_2)
         }
-        let prms3 = APlusPromise()
+        let (d3, prms3) = APlusPromise.defer()
         let promise = APlusPromise.race(prms1, prms2, prms3)
         
         promise.then(

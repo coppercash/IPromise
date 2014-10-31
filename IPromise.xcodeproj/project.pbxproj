@@ -20,6 +20,7 @@
 		BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */; };
 		BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC1A0751A01BF820088F675 /* Deferred.swift */; };
 		BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED1735619F1623B00D0E10B /* ReadMeTests.swift */; };
+		BEDF9D541A03042700DBD89C /* APlusDeferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDF9D531A03042700DBD89C /* APlusDeferred.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
 		BEC1A0751A01BF820088F675 /* Deferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deferred.swift; sourceTree = "<group>"; };
 		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadMeTests.swift; sourceTree = "<group>"; };
+		BEDF9D531A03042700DBD89C /* APlusDeferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusDeferred.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +86,7 @@
 				BEBDD11919EDFC8300DA957D /* Thenable.swift */,
 				BEBDD11819EDFC8300DA957D /* PromiseState.swift */,
 				BEBDD11619EDFC8300DA957D /* APlusPromise.swift */,
+				BEDF9D531A03042700DBD89C /* APlusDeferred.swift */,
 				BEBDD11719EDFC8300DA957D /* Promise.swift */,
 				BEC1A0751A01BF820088F675 /* Deferred.swift */,
 				BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */,
@@ -229,6 +232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEBDD11D19EDFC8300DA957D /* Thenable.swift in Sources */,
+				BEDF9D541A03042700DBD89C /* APlusDeferred.swift in Sources */,
 				BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */,
 				BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */,
 				BEBDD11A19EDFC8300DA957D /* APlusPromise.swift in Sources */,
