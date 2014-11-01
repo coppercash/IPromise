@@ -134,6 +134,34 @@ let thenableObject = ThenableObject()
 let promise = Promise(thenable: thenableObject);
 ```
 
+## Deferred
+Promise should be regarded as a wrapper for a future value. But to "resolve" or "reject" the value is not really its work. Under this situation, `Deferred` object is on call. It is useful when to offer a `Promise` to other part of the program.
+
+```Swift
+func someAwsomeData() -> Promise<NSString> {
+    let deferred = Deferred<NSString>()
+    
+    NSURLConnection.sendAsynchronousRequest(
+        NSURLRequest(URL: NSURL(string: "http://so.me/awsome/api")!),
+        queue: NSOperationQueue.mainQueue())
+        { (response, data, error) -> Void in
+            if error == nil {
+                deferred.resolve(NSString(data: data, encoding: NSUTF8StringEncoding)!)
+            }
+            else {
+                deferred.reject(error)
+            }
+    }
+    
+    return deferred.promise
+}
+```
+There is a short hand for getting `Deferred`:
+
+```Swift
+let (deferred, promise) = Promise<String>.defer()
+```
+
 ## Licence
 
 [MIT](https://github.com/coppercash/IPromise/blob/master/LICENSE)
