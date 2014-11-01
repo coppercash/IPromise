@@ -11,8 +11,8 @@ import XCTest
 import IPromise
 
 class ScenarioTests: XCTestCase {
-
-    func test_urlLoadingPost() {
+    
+    func test_urlLoadingPost_promiseBase() {
         
         let expt = expectationWithDescription(__FUNCTION__)
         
@@ -37,6 +37,45 @@ class ScenarioTests: XCTestCase {
             onRejected: { (reason) -> Void in
                 expt.fulfill()
             }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_urlLoadingPost_DeferredBase() {
+        
+        func request() -> Promise<String> {
+            let d = Deferred<String>()
+            
+            let url: NSURL! = NSURL(string: "http://posttestserver.com/post.php")
+            let request = NSMutableURLRequest(URL: url)
+            request.HTTPMethod = "POST"
+            
+            NSURLConnection.sendAsynchronousRequest(
+                request,
+                queue: NSOperationQueue.mainQueue())
+                { (response, data, error) -> Void in
+                    if let _ = error {
+                        d.reject(error)
+                        return
+                    }
+                    d.resolve(NSString(data: data, encoding: NSUTF8StringEncoding)!)
+            }
+            
+            return d.promise;
+        }
+        
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        request()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    println(value)
+                    expt.fulfill()
+                },
+                onRejected: { (reason) -> Void in
+                    expt.fulfill()
+                }
         )
         
         waitForExpectationsWithTimeout(7, handler: nil)

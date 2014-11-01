@@ -128,4 +128,27 @@ class ReadMeTests: XCTestCase {
         let thenableObject = ThenableObject()
         let promise = Promise(thenable: thenableObject)
     }
+    
+    func test_deferred() {
+        
+        func someAwsomeData() -> Promise<NSString> {
+            let deferred = Deferred<NSString>()
+            
+            NSURLConnection.sendAsynchronousRequest(
+                NSURLRequest(URL: NSURL(string: "http://so.me/awsome/api")!),
+                queue: NSOperationQueue.mainQueue())
+                { (response, data, error) -> Void in
+                    if error == nil {
+                        deferred.resolve(NSString(data: data, encoding: NSUTF8StringEncoding)!)
+                    }
+                    else {
+                        deferred.reject(error)
+                    }
+            }
+            
+            return deferred.promise
+        }
+        
+        let (deferred, promise) = Promise<String>.defer()
+     }
 }
