@@ -8,7 +8,7 @@ Promise library in Swift conforming to [Promises/A+](http://promises-aplus.githu
 
 The type of the value you get in `then` closure is guaranteed to be the same one with the type of `Promise`. No downcast is needed. 
 
-```Swift
+```swift
 let promise: Promise<Int> = answerToEverthing();
 
 promise
@@ -29,7 +29,7 @@ promise
 
 Promise with no type constraint is also supported as `APlusPromise`. Just like in **Javascript**, you are free to pass value of any type.
 
-```Swift
+```swift
 let typeFreePromise: APlusPromise = answerToUniverse()
 
 typeFreePromise.then(
@@ -45,7 +45,7 @@ typeFreePromise.then(
 
 And the 2 kinds of promises are bridgeable.
 
-```Swift
+```swift
 let fromTypeFree: Promise<Any?> = Promise(vagueThenable: typeFreePromise)
 let fromTypeSafe: APlusPromise = APlusPromise(promise: fromTypeFree)
 ```
@@ -54,7 +54,7 @@ let fromTypeSafe: APlusPromise = APlusPromise(promise: fromTypeFree)
 
 You can combine several promises as a new promise.
 
-```Swift
+```swift
 let promises: [Promise<Int>] = [
     promiseA,
     promiseB,
@@ -83,7 +83,7 @@ Following aggregate methods are supported for now
 
 Broad return value types and number of closures of method `then` are supported.
 
-```Swift
+```swift
 Promise { (resolve, reject) -> Void in
    resolve(value: "Something complex")
    }
@@ -114,7 +114,7 @@ Promise { (resolve, reject) -> Void in
 
 **Thenable** is supported via protocal.
 
-```Swift
+```swift
 class ThenableObject: Thenable {
     
     typealias ValueType = NSData
@@ -137,7 +137,7 @@ let promise = Promise(thenable: thenableObject);
 ## Deferred
 Promise should be regarded as a wrapper for a future value. But to "resolve" or "reject" the value is not really its work. Under this situation, `Deferred` object is on call. It is useful when to offer a `Promise` to other part of the program.
 
-```Swift
+```swift
 func someAwsomeData() -> Promise<NSString> {
     let deferred = Deferred<NSString>()
     
@@ -158,7 +158,7 @@ func someAwsomeData() -> Promise<NSString> {
 ```
 There is a short hand for getting `Deferred`:
 
-```Swift
+```swift
 let (deferred, promise) = Promise<String>.defer()
 ```
 
