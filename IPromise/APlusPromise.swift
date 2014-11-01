@@ -123,24 +123,21 @@ public class APlusPromise: Thenable
     {
         let (nextDeferred, nextPromise) = APlusPromise.defer()
         
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                if let resolution = onFulfilled? {
-                    nextDeferred.resolve(resolution(value: value))
-                }
-                else {
-                    nextDeferred.resolve(value)
-                }
-            },
-            rejectCallback: { (reason) -> Void in
-                if let rejection = onRejected? {
-                    nextDeferred.resolve(rejection(reason: reason))
-                }
-                else {
-                    nextDeferred.reject(reason)
-                }
-            }
-        )
+        let fulfillCallback: FulfillClosure = (onFulfilled != nil) ?
+            { (value: Any?) -> Void in
+                let nextValue: Any? = onFulfilled!(value: value)
+                nextDeferred.resolve(nextValue)
+            } :
+            { (value: Any?) -> Void in nextDeferred.resolve(value) }
+        
+        let rejectCallback: RejectClosure = (onRejected != nil) ?
+            { (reason: Any?) -> Void in
+                let nextReason: Any? = onRejected!(reason: reason)
+                nextDeferred.resolve(nextReason)
+            } :
+            { (reason: Any?) -> Void in nextDeferred.reject(reason) }
+        
+        self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
     }

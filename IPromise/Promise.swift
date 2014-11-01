@@ -98,26 +98,21 @@ public class Promise<V>: Thenable
     {
         let (nextDeferred, nextPromise) = Promise<Void>.defer()
         
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                if let resolution = onFulfilled? {
-                    resolution(value: value)
-                    nextDeferred.resolve()
-                }
-                else {
-                    nextDeferred.resolve()
-                }
-            },
-            rejectCallback: { (reason) -> Void in
-                if let rejection = onRejected? {
-                    rejection(reason: reason)
-                    nextDeferred.resolve()
-                }
-                else {
-                    nextDeferred.reject(reason)
-                }
-            }
-        )
+        let fulfillCallback: FulfillClosure = (onFulfilled != nil) ?
+            { (value: V) -> Void in
+                onFulfilled!(value: value)
+                nextDeferred.resolve()
+            } :
+            { (value: V) -> Void in nextDeferred.resolve() }
+        
+        let rejectCallback: RejectClosure = (onRejected != nil) ?
+            { (reason: NSError) -> Void in
+                onRejected!(reason: reason)
+                nextDeferred.resolve()
+            } :
+            { (reason: NSError) -> Void in nextDeferred.reject(reason) }
+        
+        self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
     }
