@@ -18,6 +18,7 @@ public class Promise<V>: Thenable
     
     public typealias FulfillClosure = (value: V) -> Void
     public typealias RejectClosure = (reason: NSError) -> Void
+    
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
     
@@ -76,12 +77,32 @@ public class Promise<V>: Thenable
             break
         }
     }
-
+    
     // MARK: - Static APIs
     
-    public class func defer() -> (Deferred<V>, Promise<V>) {
+    public class func defer() -> (Deferred<V>, Promise<V>)
+    {
         let deferred = Deferred<V>()
         return (deferred, deferred.promise)
+    }
+    
+    public class func resolve<V>(value: Any) -> Promise<V>
+    {
+        switch value {
+        case let promise as Promise<V>:
+            return promise
+        case let value as V:
+            return Promise<V>(value: value)
+        default:
+            let error = NSError.promiseValueTypeError(expectType: "V", value: value)
+            println(error)
+            abort()
+        }
+    }
+    
+    public class func reject<V>(reason: NSError) -> Promise<V>
+    {
+        return Promise<V>(reason: reason)
     }
     
     // MARK: - Thenable
@@ -116,8 +137,9 @@ public class Promise<V>: Thenable
         
         return nextPromise
     }
+}
 
-    // MARK: - Thenable enhance
+public extension Promise {
     
     public func then(
         onFulfilled: (value: V) -> Void
@@ -153,7 +175,7 @@ public class Promise<V>: Thenable
                 nextDeferred.resolve()
             }
         )
-
+        
         return nextPromise
     }
     
@@ -193,10 +215,10 @@ public class Promise<V>: Thenable
                 nextDeferred.reject(reason)
             }
         )
-
+        
         return nextPromise
     }
-
+    
     public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
         #onFulfilled: (value: V) -> T,
         onRejected: (reason: NSError) -> T
@@ -239,25 +261,6 @@ public class Promise<V>: Thenable
 }
 
 public extension Promise {
-    
-    public class func resolve<V>(value: Any) -> Promise<V>
-    {
-        switch value {
-        case let promise as Promise<V>:
-            return promise
-        case let value as V:
-            return Promise<V>(value: value)
-        default:
-            let error = NSError.promiseValueTypeError(expectType: "V", value: value)
-            println(error)
-            abort()
-        }
-    }
-    
-    public class func reject<V>(reason: NSError) -> Promise<V>
-    {
-        return Promise<V>(reason: reason)
-    }
     
     public class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
     {
@@ -315,6 +318,7 @@ public extension Promise {
 }
 
 public extension Promise {
+    
     convenience
     public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(vagueThenable: T)
     {
