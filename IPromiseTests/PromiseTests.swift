@@ -971,4 +971,26 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
+    
+    // MARK: - Progress
+    
+    func test_progress() {
+        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
+        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
+        let expt2 = expectationWithDescription("\(__FUNCTION__)_2")
+        let map: [Float: XCTestExpectation] = [0.0: expt0, 0.5: expt1, 1.0: expt2]
+
+        let deferred = Deferred<Void>()
+        
+        deferred.promise.progress { (progress) -> Void in
+            let expt = map[progress]
+            expt!.fulfill()
+        }
+        
+        deferred.progress(0.0)
+        deferred.progress(0.5)
+        deferred.progress(1.0)
+
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
 }

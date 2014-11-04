@@ -69,6 +69,17 @@ public class Deferred<V> {
             )
         }
     }
+    
+    public func progress(progress: Float) -> Void
+    {
+        if promise.state != .Pending {
+            return
+        }
+        
+        for callback in promise.progressCallbacks {
+            callback(progress: progress)
+        }
+    }
 }
 
 public extension Deferred {

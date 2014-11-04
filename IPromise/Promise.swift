@@ -18,9 +18,11 @@ public class Promise<V>: Thenable
     
     public typealias FulfillClosure = (value: V) -> Void
     public typealias RejectClosure = (reason: NSError) -> Void
+    public typealias ProgressClosure = (progress: Float) -> Void
     
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
+    lazy var progressCallbacks: [ProgressClosure] = []
     
     // MARK: - Initializers
     
@@ -76,6 +78,10 @@ public class Promise<V>: Thenable
         default:
             break
         }
+    }
+
+    func bindProgressCallback(callback: ProgressClosure) -> Void {
+        self.progressCallbacks.append(callback)
     }
     
     // MARK: - Static APIs
@@ -136,6 +142,16 @@ public class Promise<V>: Thenable
         self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
+    }
+    
+    // MARK: - Progress
+    
+    public func progress(onProgress: (progress: Float) -> Void) -> Promise<V>
+    {
+        self.bindProgressCallback { (progress) -> Void in
+            onProgress(progress: progress)
+        }
+        return self
     }
 }
 
