@@ -984,9 +984,10 @@ class PromiseTests: XCTestCase
 
         let deferred = Deferred<Void>()
         
-        deferred.promise.progress { (progress) -> Void in
+        deferred.promise.progress { (progress) -> Float in
             let expt = map[progress]
             expt!.fulfill()
+            return progress
         }
         
         deferred.progress(0.0)
@@ -995,7 +996,7 @@ class PromiseTests: XCTestCase
 
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-/*
+
     func test_progress_fraction() {
         let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
@@ -1008,7 +1009,7 @@ class PromiseTests: XCTestCase
             0.0: expt0,
             0.35: expt1,
             0.7: expt2,
-            0.7: expt3,
+            0.73: expt3,
             0.85: expt4,
             1.0: expt5,
         ]
@@ -1023,19 +1024,20 @@ class PromiseTests: XCTestCase
             onProgress: { (progress) -> Float in
                 return progress * 0.7
         })
-        .progress { (progress) -> Void in
+        .progress { (progress) -> Float in
             let expt = map[progress]
             expt!.fulfill()
+            return progress
         }
         
         deferred0.progress(0.0)
         deferred0.progress(0.5)
         deferred0.progress(1.0)
-        deferred1.progress(0.0)
+        deferred0.resolve()
+        deferred1.progress(0.1)
         deferred1.progress(0.5)
         deferred1.progress(1.0)
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-*/
 }

@@ -60,7 +60,7 @@ public class Promise<V>: Thenable
         self.init()
         
         let deferred = Deferred<V>(promise: self)
-        deferred.resolve(thenable: thenable)
+        deferred.resolve(thenable: thenable, fraction: 1.0)
     }
     
     // MARK: - Private APIs
@@ -140,6 +140,14 @@ public class Promise<V>: Thenable
         }
         self.bindCallbacks(fulfillCallback, rejectCallback)
         
+        let progressCallback: ProgressClosure = (onProgress == nil) ?
+            { (progress: Float) -> Void in nextDeferred.progress(progress) } :
+            { (progress: Float) -> Void in
+                let nextProgress = onProgress!(progress: progress)
+                nextDeferred.progress(nextProgress)
+        }
+        self.bindProgressCallback(progressCallback)
+        
         return nextPromise
     }
 
@@ -186,6 +194,14 @@ public extension Promise {
         }
         self.bindCallbacks(fulfillCallback, rejectCallback)
         
+        let progressCallback: ProgressClosure = (onProgress == nil) ?
+            { (progress: Float) -> Void in nextDeferred.progress(progress) } :
+            { (progress: Float) -> Void in
+                let nextProgress = onProgress!(progress: progress)
+                nextDeferred.progress(nextProgress)
+        }
+        self.bindProgressCallback(progressCallback)
+
         return nextPromise
     }
 }
@@ -199,29 +215,51 @@ public extension Promise {
         ) -> Promise<N>
     {
         let (nextDeferred, nextPromise) = Promise<N>.defer()
+        let fraction: Float = (onProgress == nil) ? 0.0 : 1.0 - onProgress!(progress: 1.0)
         
         let fulfillCallback: FulfillClosure = { (value) -> Void in
             let nextThenable = onFulfilled(value: value)
-            nextDeferred.resolve(thenable: nextThenable)
+            nextDeferred.resolve(thenable: nextThenable, fraction: fraction)
         }
         let rejectCallback: RejectClosure = (onRejected == nil) ?
             { (reason) -> Void in nextDeferred.reject(reason) } :
             { (reason) -> Void in
                 let nextThenable = onRejected!(reason: reason)
-                nextDeferred.resolve(thenable: nextThenable)
+                nextDeferred.resolve(thenable: nextThenable, fraction: fraction)
         }
         self.bindCallbacks(fulfillCallback, rejectCallback)
         
+        let progressCallback: ProgressClosure = (onProgress == nil) ?
+            { (progress: Float) -> Void in nextDeferred.progress(progress) } :
+            { (progress: Float) -> Void in
+                let nextProgress = onProgress!(progress: progress)
+                nextDeferred.progress(nextProgress)
+        }
+        self.bindProgressCallback(progressCallback)
+
         return nextPromise
     }
 }
 
 public extension Promise {
-    public func progress(onProgress: (progress: Float) -> Void) -> Promise<V>
+    public func progress(onProgress: (progress: Float) -> Float) -> Promise<V>
     {
-        self.bindProgressCallback { (progress) -> Void in
-            onProgress(progress: progress)
+        let (nextDeferred, nextPromise) = Promise<V>.defer()
+
+        let fulfillCallback: FulfillClosure = { (value) -> Void in
+            nextDeferred.resolve(value)
         }
+        let rejectCallback: RejectClosure = { (reason) -> Void in
+            nextDeferred.reject(reason)
+        }
+        self.bindCallbacks(fulfillCallback, rejectCallback)
+        
+        let progressCallback: ProgressClosure = { (progress) -> Void in
+            let nextProgress = onProgress(progress: progress)
+            nextDeferred.progress(nextProgress)
+        }
+        self.bindProgressCallback(progressCallback)
+
         return self
     }
 }

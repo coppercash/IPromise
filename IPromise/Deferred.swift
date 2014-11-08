@@ -49,33 +49,39 @@ public class Deferred<V> {
         }
     }
     
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(#thenable: T) -> Void
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(
+        #thenable: T,
+        fraction: Float
+        ) -> Void
     {
         if promise.state != .Pending {
             return
         }
-        
         if (thenable as? Promise<V>) === promise {
             self.reject(NSError.promiseTypeError())
+            return
         }
-        else {
-            thenable.then(
-                onFulfilled: { (value: V) -> Void in
-                    self.resolve(value)
-                },
-                onRejected: { (reason: NSError) -> Void in
-                    self.reject(reason)
-                },
-                onProgress: { (progress: Float) -> Float in
-                    return progress;
-                }
-            )
-        }
+
+        thenable.then(
+            onFulfilled: { (value: V) -> Void in
+                self.resolve(value)
+            },
+            onRejected: { (reason: NSError) -> Void in
+                self.reject(reason)
+            },
+            onProgress: { (progress: Float) -> Float in
+                self.progress((1 - fraction) + progress * fraction)
+                return progress;
+            }
+        )
     }
     
     public func progress(progress: Float) -> Void
     {
         if promise.state != .Pending {
+            return
+        }
+        if !(0.0 <= progress && progress <= 1.0) {
             return
         }
         
