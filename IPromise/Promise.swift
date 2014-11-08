@@ -120,7 +120,8 @@ public class Promise<V>: Thenable
     
     public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
-        onRejected: Optional<(reason: NSError) -> Void> = nil
+        onRejected: Optional<(reason: NSError) -> Void> = nil,
+        onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> Promise<Void>
     {
         let (nextDeferred, nextPromise) = Promise<Void>.defer()

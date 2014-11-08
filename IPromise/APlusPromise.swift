@@ -63,6 +63,9 @@ public class APlusPromise: Thenable
             onRejected: { (reason) -> Any? in
                 deferred.reject(reason)
                 return nil
+            },
+            onProgress: { (progress) -> Float in
+                return progress
             }
         )
     }
@@ -118,7 +121,8 @@ public class APlusPromise: Thenable
 
     public func then(
         onFulfilled: Optional<(value: Any?) -> Any?> = nil,
-        onRejected: Optional<(reason: Any?) -> Any?> = nil
+        onRejected: Optional<(reason: Any?) -> Any?> = nil,
+        onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> APlusPromise
     {
         let (nextDeferred, nextPromise) = APlusPromise.defer()

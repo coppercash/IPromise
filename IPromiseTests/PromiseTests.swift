@@ -993,4 +993,8 @@ class PromiseTests: XCTestCase
 
         waitForExpectationsWithTimeout(7, handler: nil)
     }
+
+    func test_progress_fraction() {
+        
+    }
 }

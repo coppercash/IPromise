@@ -15,5 +15,9 @@ public protocol Thenable
     typealias ReasonType
     typealias ReturnType
     
-    func then(#onFulfilled: Optional<(value: ValueType) -> ReturnType>, onRejected: Optional<(reason: ReasonType) -> ReturnType>) -> NextType
+    func then(
+        #onFulfilled: Optional<(value: ValueType) -> ReturnType>,
+        onRejected: Optional<(reason: ReasonType) -> ReturnType>,
+        onProgress: Optional<(progress: Float) -> Float>
+        ) -> NextType
 }

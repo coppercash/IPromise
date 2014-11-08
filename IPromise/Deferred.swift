@@ -65,6 +65,9 @@ public class Deferred<V> {
                 },
                 onRejected: { (reason: NSError) -> Void in
                     self.reject(reason)
+                },
+                onProgress: { (progress: Float) -> Float in
+                    return progress;
                 }
             )
         }
@@ -103,6 +106,9 @@ public extension Deferred {
                     self.reject(NSError.promiseReasonWrapperError(reason))
                 }
                 return nil
+            },
+            onProgress: { (progress: Float) -> Float in
+                return progress
             }
         )
     }
