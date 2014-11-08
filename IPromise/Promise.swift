@@ -126,57 +126,23 @@ public class Promise<V>: Thenable
     {
         let (nextDeferred, nextPromise) = Promise<Void>.defer()
         
-        let fulfillCallback: FulfillClosure = (onFulfilled != nil) ?
+        let fulfillCallback: FulfillClosure = (onFulfilled == nil) ?
+            { (value: V) -> Void in nextDeferred.resolve() } :
             { (value: V) -> Void in
                 onFulfilled!(value: value)
                 nextDeferred.resolve()
-            } :
-            { (value: V) -> Void in nextDeferred.resolve() }
-        
-        let rejectCallback: RejectClosure = (onRejected != nil) ?
+        }
+        let rejectCallback: RejectClosure = (onRejected == nil) ?
+            { (reason: NSError) -> Void in nextDeferred.reject(reason) } :
             { (reason: NSError) -> Void in
                 onRejected!(reason: reason)
                 nextDeferred.resolve()
-            } :
-            { (reason: NSError) -> Void in nextDeferred.reject(reason) }
-        
+        }
         self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
     }
-    
-    // MARK: - Progress
-    
-    public func progress(onProgress: (progress: Float) -> Void) -> Promise<V>
-    {
-        self.bindProgressCallback { (progress) -> Void in
-            onProgress(progress: progress)
-        }
-        return self
-    }
-}
 
-public extension Promise {
-    
-    public func then(
-        onFulfilled: (value: V) -> Void
-        ) -> Promise<Void>
-    {
-        let (nextDeferred, nextPromise) = Promise<Void>.defer()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                onFulfilled(value: value)
-                nextDeferred.resolve()
-            },
-            rejectCallback: { (reason) -> Void in
-                nextDeferred.reject(reason)
-            }
-        )
-        
-        return nextPromise
-    }
-    
     public func catch(
         onRejected: (reason: NSError) -> Void
         ) -> Promise<Void>
@@ -195,85 +161,68 @@ public extension Promise {
         
         return nextPromise
     }
-    
-    public func then<N: Any>(
-        #onFulfilled: (value: V) -> N,
-        onRejected: (reason: NSError) -> N
-        ) -> Promise<N>
-    {
-        let (nextDeferred, nextPromise) = Promise<N>.defer()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                let nextValue = onFulfilled(value: value)
-                nextDeferred.resolve(nextValue)
-            },
-            rejectCallback: { (reason) -> Void in
-                let nextValue = onRejected(reason: reason)
-                nextDeferred.resolve(nextValue)
-            }
-        )
-        
-        return nextPromise
-    }
+}
+
+public extension Promise {
     
     public func then<N>(
-        onFulfilled: (value: V) -> N
+        #onFulfilled: (value: V) -> N,
+        onRejected: Optional<(reason: NSError) -> N> = nil,
+        onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> Promise<N>
     {
         let (nextDeferred, nextPromise) = Promise<N>.defer()
         
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                let nextValue = onFulfilled(value: value)
+        let fulfillCallback: FulfillClosure =
+        { (value) -> Void in
+            let nextValue = onFulfilled(value: value)
+            nextDeferred.resolve(nextValue)
+        }
+        let rejectCallback: RejectClosure = (onRejected == nil) ?
+            { (reason) -> Void in nextDeferred.reject(reason) } :
+            { (reason) -> Void in
+                let nextValue = onRejected!(reason: reason)
                 nextDeferred.resolve(nextValue)
-            },
-            rejectCallback: { (reason) -> Void in
-                nextDeferred.reject(reason)
-            }
-        )
+        }
+        self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
     }
-    
+}
+
+public extension Promise {
+
     public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
         #onFulfilled: (value: V) -> T,
-        onRejected: (reason: NSError) -> T
+        onRejected: Optional<(reason: NSError) -> T> = nil,
+        onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> Promise<N>
     {
         let (nextDeferred, nextPromise) = Promise<N>.defer()
         
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                let nextThenable = onFulfilled(value: value)
+        let fulfillCallback: FulfillClosure = { (value) -> Void in
+            let nextThenable = onFulfilled(value: value)
+            nextDeferred.resolve(thenable: nextThenable)
+        }
+        let rejectCallback: RejectClosure = (onRejected == nil) ?
+            { (reason) -> Void in nextDeferred.reject(reason) } :
+            { (reason) -> Void in
+                let nextThenable = onRejected!(reason: reason)
                 nextDeferred.resolve(thenable: nextThenable)
-            },
-            rejectCallback: { (reason) -> Void in
-                let nextThenable = onRejected(reason: reason)
-                nextDeferred.resolve(thenable: nextThenable)
-            }
-        )
+        }
+        self.bindCallbacks(fulfillCallback, rejectCallback)
         
         return nextPromise
     }
-    
-    public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
-        onFulfilled: (value: V) -> T
-        ) -> Promise<N>
+}
+
+public extension Promise {
+    public func progress(onProgress: (progress: Float) -> Void) -> Promise<V>
     {
-        let (nextDeferred, nextPromise) = Promise<N>.defer()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                let nextThenable = onFulfilled(value: value)
-                nextDeferred.resolve(thenable: nextThenable)
-            },
-            rejectCallback: { (reason) -> Void in
-                nextDeferred.reject(reason)
-            }
-        )
-        
-        return nextPromise
+        self.bindProgressCallback { (progress) -> Void in
+            onProgress(progress: progress)
+        }
+        return self
     }
 }
 
