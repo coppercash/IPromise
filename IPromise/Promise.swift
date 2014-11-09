@@ -167,6 +167,10 @@ public class Promise<V>: Thenable
             }
         )
         
+        self.bindProgressCallback { (progress) -> Void in
+            nextDeferred.progress(progress)
+        }
+        
         return nextPromise
     }
 }
@@ -204,10 +208,34 @@ public extension Promise {
 
         return nextPromise
     }
+    /*
+    public func catch<N where N == V>(
+        onRejected: (reason: NSError) -> N
+        ) -> Promise<N>
+    {
+        let (nextDeferred, nextPromise) = Promise<N>.defer()
+        
+        self.bindCallbacks(
+            fulfillCallback: { (value) -> Void in
+                nextDeferred.resolve(value)
+            },
+            rejectCallback: { (reason) -> Void in
+                let nextValue = onRejected(reason: reason)
+                nextDeferred.resolve(nextValue)
+            }
+        )
+        
+        self.bindProgressCallback { (progress) -> Void in
+            nextDeferred.progress(progress)
+        }
+        
+        return nextPromise
+    }
+*/
 }
 
 public extension Promise {
-
+    
     public func then<N, T: Thenable where T.ValueType == N, T.ReasonType == NSError, T.ReturnType == Void>(
         #onFulfilled: (value: V) -> T,
         onRejected: Optional<(reason: NSError) -> T> = nil,
@@ -237,6 +265,29 @@ public extension Promise {
         }
         self.bindProgressCallback(progressCallback)
 
+        return nextPromise
+    }
+    
+    public func catch(
+        onRejected: (reason: NSError) -> Promise<V>
+        ) -> Promise<V>
+    {
+        let (nextDeferred, nextPromise) = Promise<V>.defer()
+        
+        self.bindCallbacks(
+            fulfillCallback: { (value) -> Void in
+                nextDeferred.resolve(value)
+            },
+            rejectCallback: { (reason) -> Void in
+                let nextPromise = onRejected(reason: reason)
+                nextDeferred.resolve(thenable: nextPromise, fraction: 0.0)
+            }
+        )
+        
+        self.bindProgressCallback { (progress) -> Void in
+            nextDeferred.progress(progress)
+        }
+        
         return nextPromise
     }
 }
