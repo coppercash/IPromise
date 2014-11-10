@@ -124,14 +124,15 @@ class ThenableObject: Thenable {
     
     func then(
         #onFulfilled: Optional<(value: NSData) -> Void>,
-        onRejected: Optional<(reason: NSError) -> Void>)
-        -> Void {
+        onRejected: Optional<(reason: NSError) -> Void>,
+        onProgress: Optional<(progress: Float) -> Float>
+        ) -> Void {
         // Implement
     }
 }
 
 let thenableObject = ThenableObject()
-let promise = Promise(thenable: thenableObject);
+let promise = Promise(thenable: thenableObject)
 ```
 
 ## Deferred
