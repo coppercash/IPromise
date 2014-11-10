@@ -136,6 +136,7 @@ let promise = Promise(thenable: thenableObject)
 ```
 
 ## Deferred
+
 Promise should be regarded as a wrapper for a future value. But to "resolve" or "reject" the value is not really its work. Under this situation, `Deferred` object is on call. It is useful when to offer a `Promise` to other part of the program.
 
 ```swift
@@ -162,6 +163,47 @@ There is a short hand for getting `Deferred`:
 ```swift
 let (deferred, promise) = Promise<String>.defer()
 ```
+
+## Progress
+
+The progress callback is passed as the third parameter of `then` method, which named `onProgress`. The progress value is propagated by default and can be stopped by returning a negative value.
+
+```swift
+promise.then(
+    onFulfilled: nil,
+    onRejected: nil,
+    onProgress: { (progress) -> Float in
+        return progress // The return value is used to propagate if it is locate in range 0.0...1.0
+})
+```
+
+Or use the shortcut method `progress`:
+
+```swift
+promise.progress { (progress) -> Void in
+    // The return value can also be omitted
+}
+```
+
+If there are other promises in a then chain publish their progress, the value of the consequential progress can be balanced with a value called 'fraction'. The 'fraction' value indicates how much weight the promise returned in `onFulfilled` takes.
+
+```swift
+promise.then(
+    onFulfilled: { () -> Promise<Void> in
+        let (anotherDeferred, anotherPromise) = Promise<Void>.defer()
+        return anotherPromise
+    },
+    onProgress: { (progress) -> Float in
+        return progress * 0.5   // The '0.5' indicates `promise` and `anotherPromise` take same weight
+})
+```
+
+The aggregate functions also notify progress in proper ways
+
+| Method | Progress meaning |
+| :--:  | :-- |
+| `all` | Average of all sub promises' progress |
+| `race` | Max of all sub promises' progress |
 
 ## Licence
 
