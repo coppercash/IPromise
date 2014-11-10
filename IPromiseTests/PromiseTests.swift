@@ -787,6 +787,47 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
+    func test_all_progress() {
+        let answers: [Float] = [
+            (0 + 0 + 0) / 3,
+            (0 + 0.3 + 0) / 3,
+            (0.5 + 0.3 + 0) / 3,
+            (0.5 + 0.5 + 0) / 3,
+            (1.0 + 0.5 + 0) / 3,
+            (1.0 + 1.0 + 0) / 3,
+            (1.0 + 1.0 + 0.3) / 3,
+            (1.0 + 1.0 + 0.5) / 3,
+            (1.0 + 1.0 + 1.0) / 3,
+        ]
+        var map: [Float: XCTestExpectation] = [:]
+        for (index, answer) in enumerate(answers) {
+            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
+            map[answer] = expt
+        }
+        
+        let (d0, promise0) = Promise<Void>.defer()
+        let (d1, promise1) = Promise<Void>.defer()
+        let (d2, promise2) = Promise<Void>.defer()
+        let promise = Promise<Void>.all(promise0, promise1, promise2)
+        promise.then(onFulfilled: nil, onRejected: nil) { (progress) -> Float in
+            let expt = map[progress]
+            expt!.fulfill()
+            return progress;
+        }
+        
+        d0.progress(0.0)
+        d1.progress(0.3)
+        d0.progress(0.5)
+        d1.progress(0.5)
+        d0.progress(1.0)
+        d1.progress(1.0)
+        d2.progress(0.3)
+        d2.progress(0.5)
+        d2.progress(1.0)
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
     // MARK: - race
 
     func test_race_fulfill_sync()
@@ -897,6 +938,38 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
+    func test_race_progress() {
+        let answers: [Float] = [
+            0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+        ]
+        var map: [Float: XCTestExpectation] = [:]
+        for (index, answer) in enumerate(answers) {
+            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
+            map[answer] = expt
+        }
+        
+        let (d0, promise0) = Promise<Void>.defer()
+        let (d1, promise1) = Promise<Void>.defer()
+        let (d2, promise2) = Promise<Void>.defer()
+        let promise = Promise<Void>.race(promise0, promise1, promise2)
+        promise.then(onFulfilled: nil, onRejected: nil) { (progress) -> Float in
+            let expt = map[progress]
+            expt!.fulfill()
+            return progress;
+        }
+        
+        d0.progress(0.0)
+        d1.progress(0.1)
+        d0.progress(0.2)
+        d1.progress(0.3)
+        d0.progress(0.4)
+        d1.progress(0.5)
+        d2.progress(0.6)
+        d2.progress(0.7)
+        d2.progress(0.8)
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
 
     // MARK: - init(:vagueThenable)
     
@@ -977,11 +1050,13 @@ class PromiseTests: XCTestCase
     // MARK: - Progress
     
     func test_progress() {
-        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
-        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
-        let expt2 = expectationWithDescription("\(__FUNCTION__)_2")
-        let map: [Float: XCTestExpectation] = [0.0: expt0, 0.5: expt1, 1.0: expt2]
-
+        let answers: [Float] = [0.0, 0.5, 1.0]
+        var map: [Float: XCTestExpectation] = [:]
+        for (index, answer) in enumerate(answers) {
+            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
+            map[answer] = expt
+        }
+        
         let deferred = Deferred<Void>()
         
         deferred.promise.progress { (progress) -> Float in
@@ -998,21 +1073,12 @@ class PromiseTests: XCTestCase
     }
 
     func test_progress_fraction() {
-        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
-        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
-        let expt2 = expectationWithDescription("\(__FUNCTION__)_2")
-        let expt3 = expectationWithDescription("\(__FUNCTION__)_3")
-        let expt4 = expectationWithDescription("\(__FUNCTION__)_4")
-        let expt5 = expectationWithDescription("\(__FUNCTION__)_5")
-        
-        let map: [Float: XCTestExpectation] = [
-            0.0: expt0,
-            0.35: expt1,
-            0.7: expt2,
-            0.73: expt3,
-            0.85: expt4,
-            1.0: expt5,
-        ]
+        let answers: [Float] = [0.0, 0.35, 0.7, 0.73, 0.85, 1.0]
+        var map: [Float: XCTestExpectation] = [:]
+        for (index, answer) in enumerate(answers) {
+            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
+            map[answer] = expt
+        }
         
         let (deferred0, promise0) = Promise<Void>.defer()
         let (deferred1, promise1) = Promise<Void>.defer()
