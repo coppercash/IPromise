@@ -151,5 +151,30 @@ class ReadMeTests: XCTestCase {
         }
         
         let (deferred, promise) = Promise<String>.defer()
-     }
+    }
+    
+    func test_progress() {
+        let (deferred, promise) = Promise<Void>.defer()
+        let (anotherDeferred, anotherPromise) = Promise<Void>.defer()
+        
+        promise.then(
+            onFulfilled: nil,
+            onRejected: nil,
+            onProgress: { (progress) -> Float in
+                return progress // The return value is used to propagate
+        })
+        
+        promise.progress { (progress) -> Void in
+            // The return value can also be omitted
+        }
+        
+        promise.then(
+            onFulfilled: { () -> Promise<Void> in
+                let (anotherDeferred, anotherPromise) = Promise<Void>.defer()
+                return anotherPromise
+            },
+            onProgress: { (progress) -> Float in
+                return progress * 0.7   // The '0.7' is used as fraction
+        })
+    }
 }

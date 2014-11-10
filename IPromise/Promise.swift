@@ -285,6 +285,25 @@ public extension Promise {
 
         return nextPromise
     }
+    
+    public func progress(onProgress: (progress: Float) -> Void) -> Promise<V>
+    {
+        let (nextDeferred, nextPromise) = Promise<V>.defer()
+        
+        self.bindCallbacks(
+            fulfillCallback: { (value) -> Void in
+                nextDeferred.resolve(value)
+            },
+            rejectCallback: { (reason) -> Void in
+                nextDeferred.reject(reason)
+            },
+            progressCallback: { (progress) -> Void in
+                nextDeferred.progress(progress)
+            }
+        )
+        
+        return nextPromise
+    }
 }
 
 public extension Promise {
