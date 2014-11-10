@@ -208,30 +208,6 @@ public extension Promise {
 
         return nextPromise
     }
-    /*
-    public func catch<N where N == V>(
-        onRejected: (reason: NSError) -> N
-        ) -> Promise<N>
-    {
-        let (nextDeferred, nextPromise) = Promise<N>.defer()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                nextDeferred.resolve(value)
-            },
-            rejectCallback: { (reason) -> Void in
-                let nextValue = onRejected(reason: reason)
-                nextDeferred.resolve(nextValue)
-            }
-        )
-        
-        self.bindProgressCallback { (progress) -> Void in
-            nextDeferred.progress(progress)
-        }
-        
-        return nextPromise
-    }
-*/
 }
 
 public extension Promise {

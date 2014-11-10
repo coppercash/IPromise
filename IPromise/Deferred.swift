@@ -66,7 +66,7 @@ public class Deferred<V> {
             },
             onProgress: { (progress: Float) -> Float in
                 self.progress((1 - fraction) + progress * fraction)
-                return progress;
+                return progress
             }
         )
     }

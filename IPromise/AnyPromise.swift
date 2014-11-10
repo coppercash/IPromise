@@ -1,5 +1,5 @@
 //
-//  APlusPromise.swift
+//  AnyPromise.swift
 //  IPromise
 //
 //  Created by William Remaerd on 9/25/14.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class APlusPromise: Thenable
+public class AnyPromise: Thenable
 {
     // MAKR: ivars
     
@@ -43,7 +43,7 @@ public class APlusPromise: Thenable
     public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
-        let deferred = APlusDeferred(promise: self)
+        let deferred = AnyDeferred(promise: self)
         resolver(
             resolve: deferred.resolve,
             reject: deferred.reject
@@ -54,7 +54,7 @@ public class APlusPromise: Thenable
     public init<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(thenable: T)
     {
         self.init()
-        let deferred = APlusDeferred(promise: self)
+        let deferred = AnyDeferred(promise: self)
         thenable.then(
             onFulfilled: { (value) -> Any? in
                 deferred.resolve(value)
@@ -89,32 +89,32 @@ public class APlusPromise: Thenable
 
     // MARK: - Static APIs
     
-    public class func defer() -> (APlusDeferred, APlusPromise)
+    public class func defer() -> (AnyDeferred, AnyPromise)
     {
-        let deferred = APlusDeferred();
+        let deferred = AnyDeferred()
         return (deferred, deferred.promise)
     }
     
-    public class func resolve(value: Any?) -> APlusPromise
+    public class func resolve(value: Any?) -> AnyPromise
     {
         // TODO: - Downcast to Thenable
         
         switch value {
-        case let aPlusPromise as APlusPromise:
-            return aPlusPromise
+        case let promise as AnyPromise:
+            return promise
         default:
             return self(value: value)
         }
     }
     
-    public class func reject(reason: Any?) -> APlusPromise
+    public class func reject(reason: Any?) -> AnyPromise
     {
         return self(reason: reason)
     }
     
     // MARK: - Thenable
     
-    typealias NextType = APlusPromise
+    typealias NextType = AnyPromise
     typealias ValueType = Any?
     typealias ReasonType = Any?
     typealias ReturnType = Any?
@@ -123,9 +123,9 @@ public class APlusPromise: Thenable
         onFulfilled: Optional<(value: Any?) -> Any?> = nil,
         onRejected: Optional<(reason: Any?) -> Any?> = nil,
         onProgress: Optional<(progress: Float) -> Float> = nil
-        ) -> APlusPromise
+        ) -> AnyPromise
     {
-        let (nextDeferred, nextPromise) = APlusPromise.defer()
+        let (nextDeferred, nextPromise) = AnyPromise.defer()
         
         let fulfillCallback: FulfillClosure = (onFulfilled != nil) ?
             { (value: Any?) -> Void in
@@ -146,9 +146,9 @@ public class APlusPromise: Thenable
         return nextPromise
     }
 
-    public func catch(onRejected: (reason: Any?) -> Any?) -> APlusPromise
+    public func catch(onRejected: (reason: Any?) -> Any?) -> AnyPromise
     {
-        let (nextDeferred, nextPromise) = APlusPromise.defer()
+        let (nextDeferred, nextPromise) = AnyPromise.defer()
         
         self.bindCallbacks(
             fulfillCallback: { (value) -> Void in
@@ -163,11 +163,11 @@ public class APlusPromise: Thenable
     }
 }
 
-public extension APlusPromise {
+public extension AnyPromise {
     
-    public class func all(values: [Any?]) -> APlusPromise
+    public class func all(values: [Any?]) -> AnyPromise
     {
-        let (allDeferred, allPromise) = APlusPromise.defer()
+        let (allDeferred, allPromise) = AnyPromise.defer()
         let count = values.count
         var results: [Any?] = []
         
@@ -192,14 +192,14 @@ public extension APlusPromise {
         return allPromise
     }
     
-    public class func all(values: Any?...) -> APlusPromise
+    public class func all(values: Any?...) -> AnyPromise
     {
         return self.all(values)
     }
     
-    public class func race(values: [Any?]) -> APlusPromise
+    public class func race(values: [Any?]) -> AnyPromise
     {
-        let (raceDeferred, racePromise) = APlusPromise.defer()
+        let (raceDeferred, racePromise) = AnyPromise.defer()
         
         for value in values
         {
@@ -219,18 +219,18 @@ public extension APlusPromise {
         return racePromise
     }
     
-    public class func race(values: Any?...) -> APlusPromise
+    public class func race(values: Any?...) -> AnyPromise
     {
         return self.race(values)
     }
 }
 
-public extension APlusPromise {
+public extension AnyPromise {
     convenience
     public init<V>(promise: Promise<V>)
     {
         self.init()
-        let deferred = APlusDeferred(promise: self)
+        let deferred = AnyDeferred(promise: self)
         deferred.resolve(promise: promise)
     }
 }

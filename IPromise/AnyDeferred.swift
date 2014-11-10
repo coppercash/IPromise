@@ -1,5 +1,5 @@
 //
-//  APlusDeferred.swift
+//  AnyDeferred.swift
 //  IPromise
 //
 //  Created by William Remaerd on 10/31/14.
@@ -8,16 +8,16 @@
 
 import Foundation
 
-public class APlusDeferred {
+public class AnyDeferred {
     
-    public let promise: APlusPromise
+    public let promise: AnyPromise
     
     required
     public convenience init() {
-        self.init(promise: APlusPromise())
+        self.init(promise: AnyPromise())
     }
     
-    init(promise: APlusPromise) {
+    init(promise: AnyPromise) {
         self.promise = promise
     }
     
@@ -27,12 +27,12 @@ public class APlusDeferred {
             return
         }
         
-        if let aplusPromise = value as? APlusPromise {
-            if aplusPromise === promise {
+        if let anyPromise = value as? AnyPromise {
+            if anyPromise === promise {
                 self.reject(NSError.promiseTypeError())
             }
             else {
-                aplusPromise.then(
+                anyPromise.then(
                     onFulfilled: { (value) -> Any? in
                         self.resolve(value)
                         return nil
@@ -69,7 +69,7 @@ public class APlusDeferred {
     }
 }
 
-public extension APlusDeferred {
+public extension AnyDeferred {
     
     func resolve<V>(#promise: Promise<V>) -> Void
     {

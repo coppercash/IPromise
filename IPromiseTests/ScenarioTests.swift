@@ -62,7 +62,7 @@ class ScenarioTests: XCTestCase {
                     d.resolve(NSString(data: data, encoding: NSUTF8StringEncoding)!)
             }
             
-            return d.promise;
+            return d.promise
         }
         
         let expt = expectationWithDescription(__FUNCTION__)

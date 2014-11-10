@@ -36,11 +36,11 @@ class ReadMeTests: XCTestCase {
 
     func test_typeFree() {
         
-        func answerToUniverse() -> APlusPromise {
-            return APlusPromise(value: 42)
+        func answerToUniverse() -> AnyPromise {
+            return AnyPromise(value: 42)
         }
         
-        let typeFreePromise: APlusPromise = answerToUniverse()
+        let typeFreePromise: AnyPromise = answerToUniverse()
         
         typeFreePromise.then(
             onFulfilled: { (value: Any?) -> Any? in
@@ -53,7 +53,7 @@ class ReadMeTests: XCTestCase {
         )
         
         let fromTypeFree: Promise<Any?> = Promise(vagueThenable: typeFreePromise)
-        let fromTypeSafe: APlusPromise = APlusPromise(promise: fromTypeFree)
+        let fromTypeSafe: AnyPromise = AnyPromise(promise: fromTypeFree)
     }
     
     func test_aggregate() {

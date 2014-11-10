@@ -665,7 +665,7 @@ class PromiseTests: XCTestCase
     // MARK: - reject(_)
 
         func test_reject() {
-        let a0 = APlusPromise.reject(ERROR_0)
+        let a0 = AnyPromise.reject(ERROR_0)
         XCTAssertEqual(a0.state, PromiseState.Rejected)
         XCTAssertTrue(a0.value == nil)
         XCTAssertEqual(a0.reason as NSError, ERROR_0)
@@ -681,7 +681,7 @@ class PromiseTests: XCTestCase
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
         let prms2 = Promise<Any?>(vagueThenable:
-            APlusPromise { (resolve, reject) -> Void in
+            AnyPromise { (resolve, reject) -> Void in
                 0 ~> resolve(value: STRING_VALUE_2)
             })
         
@@ -741,7 +741,7 @@ class PromiseTests: XCTestCase
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
         let prms2 = Promise<Any?>(vagueThenable:
-            APlusPromise { (resolve, reject) -> Void in
+            AnyPromise { (resolve, reject) -> Void in
                 0 ~> reject(reason: ERROR_2)
             })
         
@@ -812,7 +812,7 @@ class PromiseTests: XCTestCase
         promise.then(onFulfilled: nil, onRejected: nil) { (progress) -> Float in
             let expt = map[progress]
             expt!.fulfill()
-            return progress;
+            return progress
         }
         
         d0.progress(0.0)
@@ -955,7 +955,7 @@ class PromiseTests: XCTestCase
         promise.then(onFulfilled: nil, onRejected: nil) { (progress) -> Float in
             let expt = map[progress]
             expt!.fulfill()
-            return progress;
+            return progress
         }
         
         d0.progress(0.0)
@@ -976,7 +976,7 @@ class PromiseTests: XCTestCase
     func test_init_vagueThenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let superPromise = APlusPromise { (resolve, reject) -> Void in
+        let superPromise = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
         
@@ -1005,7 +1005,7 @@ class PromiseTests: XCTestCase
     func test_init_vagueThenable_rejectNSError() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let superPromise = APlusPromise { (resolve, reject) -> Void in
+        let superPromise = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
         
@@ -1026,7 +1026,7 @@ class PromiseTests: XCTestCase
     func test_init_vagueThenable_rejectAny() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let superPromise = APlusPromise { (resolve, reject) -> Void in
+        let superPromise = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: STRING_VALUE_0)
         }
         

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE60265D19F5D6A200FED245 /* ScenarioTests.swift */; };
 		BEBDD10319EDFC3C00DA957D /* IPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEBDD10219EDFC3C00DA957D /* IPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BEBDD11A19EDFC8300DA957D /* APlusPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11619EDFC8300DA957D /* APlusPromise.swift */; };
+		BEBDD11A19EDFC8300DA957D /* AnyPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11619EDFC8300DA957D /* AnyPromise.swift */; };
 		BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11719EDFC8300DA957D /* Promise.swift */; };
 		BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11819EDFC8300DA957D /* PromiseState.swift */; };
 		BEBDD11D19EDFC8300DA957D /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11919EDFC8300DA957D /* Thenable.swift */; };
@@ -20,7 +20,7 @@
 		BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */; };
 		BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC1A0751A01BF820088F675 /* Deferred.swift */; };
 		BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED1735619F1623B00D0E10B /* ReadMeTests.swift */; };
-		BEDF9D541A03042700DBD89C /* APlusDeferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDF9D531A03042700DBD89C /* APlusDeferred.swift */; };
+		BEDF9D541A03042700DBD89C /* AnyDeferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDF9D531A03042700DBD89C /* AnyDeferred.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +30,7 @@
 		BEBDD10219EDFC3C00DA957D /* IPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPromise.h; sourceTree = "<group>"; };
 		BEBDD10819EDFC3C00DA957D /* IPromiseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPromiseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEBDD10B19EDFC3C00DA957D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BEBDD11619EDFC8300DA957D /* APlusPromise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusPromise.swift; sourceTree = "<group>"; };
+		BEBDD11619EDFC8300DA957D /* AnyPromise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyPromise.swift; sourceTree = "<group>"; };
 		BEBDD11719EDFC8300DA957D /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		BEBDD11819EDFC8300DA957D /* PromiseState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseState.swift; sourceTree = "<group>"; };
 		BEBDD11919EDFC8300DA957D /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
@@ -40,7 +40,7 @@
 		BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+Promise.swift"; sourceTree = "<group>"; };
 		BEC1A0751A01BF820088F675 /* Deferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deferred.swift; sourceTree = "<group>"; };
 		BED1735619F1623B00D0E10B /* ReadMeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadMeTests.swift; sourceTree = "<group>"; };
-		BEDF9D531A03042700DBD89C /* APlusDeferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APlusDeferred.swift; sourceTree = "<group>"; };
+		BEDF9D531A03042700DBD89C /* AnyDeferred.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyDeferred.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,8 +85,8 @@
 			children = (
 				BEBDD11919EDFC8300DA957D /* Thenable.swift */,
 				BEBDD11819EDFC8300DA957D /* PromiseState.swift */,
-				BEBDD11619EDFC8300DA957D /* APlusPromise.swift */,
-				BEDF9D531A03042700DBD89C /* APlusDeferred.swift */,
+				BEBDD11619EDFC8300DA957D /* AnyPromise.swift */,
+				BEDF9D531A03042700DBD89C /* AnyDeferred.swift */,
 				BEBDD11719EDFC8300DA957D /* Promise.swift */,
 				BEC1A0751A01BF820088F675 /* Deferred.swift */,
 				BEBDD12519EDFD6300DA957D /* NSError+Promise.swift */,
@@ -232,10 +232,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEBDD11D19EDFC8300DA957D /* Thenable.swift in Sources */,
-				BEDF9D541A03042700DBD89C /* APlusDeferred.swift in Sources */,
+				BEDF9D541A03042700DBD89C /* AnyDeferred.swift in Sources */,
 				BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */,
 				BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */,
-				BEBDD11A19EDFC8300DA957D /* APlusPromise.swift in Sources */,
+				BEBDD11A19EDFC8300DA957D /* AnyPromise.swift in Sources */,
 				BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */,
 				BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */,
 			);

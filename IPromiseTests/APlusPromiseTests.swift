@@ -1,5 +1,5 @@
 //
-//  APlusPromiseTests.swift
+//  AnyPromiseTests.swift
 //  IPromise
 //
 //  Created by William Remaerd on 9/25/14.
@@ -10,14 +10,14 @@ import UIKit
 import XCTest
 import IPromise
 
-class APlusPromiseTests: XCTestCase
+class AnyPromiseTests: XCTestCase
 {
     // MARK: - 2.1.1; init(resolver)
     
     func test_state_pendingToFulfill(){
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
         promise.then { (value) -> Any? in
@@ -39,7 +39,7 @@ class APlusPromiseTests: XCTestCase
     func test_state_pendingToReject(){
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
         promise.catch { (reason) -> Any? in
@@ -63,7 +63,7 @@ class APlusPromiseTests: XCTestCase
     func test_state_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> {
                 resolve(value: STRING_VALUE_1)
                 reject(reason: ERROR_1)
@@ -92,7 +92,7 @@ class APlusPromiseTests: XCTestCase
     func test_state_reject() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> {
                 resolve(value: STRING_VALUE_1)
                 reject(reason: ERROR_1)
@@ -128,7 +128,7 @@ class APlusPromiseTests: XCTestCase
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> {
                 XCTAssertEqual(++counter, 1)
                 
@@ -179,7 +179,7 @@ class APlusPromiseTests: XCTestCase
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> {
                 XCTAssertEqual(++counter, 1)
                 
@@ -224,7 +224,7 @@ class APlusPromiseTests: XCTestCase
     // MARK: - 2.2.1; 2.2.7.3; init(value:)
     
     func test_optional_fulfill() {
-        let promise = APlusPromise(value: STRING_VALUE_0)
+        let promise = AnyPromise(value: STRING_VALUE_0)
         XCTAssertEqual(promise.state, PromiseState.Fulfilled)
         XCTAssertTrue(promise.reason == nil)
         
@@ -246,7 +246,7 @@ class APlusPromiseTests: XCTestCase
     // MARK: - 2.2.1; 2.2.7.4; init(reason:)
     
     func test_optional_reject() {
-        let promise = APlusPromise(reason: ERROR_0)
+        let promise = AnyPromise(reason: ERROR_0)
         XCTAssertEqual(promise.state, PromiseState.Rejected)
         XCTAssertTrue(promise.value == nil)
         
@@ -270,9 +270,9 @@ class APlusPromiseTests: XCTestCase
     func test_typeError_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        var subPromise: APlusPromise? = nil
+        var subPromise: AnyPromise? = nil
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
             }
             .then(
@@ -300,9 +300,9 @@ class APlusPromiseTests: XCTestCase
     func test_typeError_reject() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        var subPromise: APlusPromise? = nil
+        var subPromise: AnyPromise? = nil
         
-        let promise = APlusPromise { (resolve, reject) -> Void in
+        let promise = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
             }
             .then(
@@ -337,30 +337,30 @@ class APlusPromiseTests: XCTestCase
         }
         var counter = 0
         
-        let toFulfill = APlusPromise { (resolve, reject) -> Void in
+        let toFulfill = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_2)
         }
-        let toReject = APlusPromise { (resolve, reject) -> Void in
+        let toReject = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_2)
         }
         
-        APlusPromise(reason: ERROR_0)
+        AnyPromise(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> Any? in
                     XCTAssertFalse(true)
-                    return APlusPromise(value: STRING_VALUE_0)
+                    return AnyPromise(value: STRING_VALUE_0)
                 },
                 onRejected: { (reason) -> Any? in
                     XCTAssertEqual(reason as NSError, ERROR_0)
                     XCTAssertEqual(++counter, 1)
                     expts[1]!.fulfill()
-                    return APlusPromise(value: STRING_VALUE_0)
+                    return AnyPromise(value: STRING_VALUE_0)
                 }
             ).then { (value) -> Any? in
                 XCTAssertEqual(value as String, STRING_VALUE_0)
                 XCTAssertEqual(++counter, 2)
                 expts[2]!.fulfill()
-                return APlusPromise(reason: ERROR_1)
+                return AnyPromise(reason: ERROR_1)
             }.then(
                 onFulfilled: { (value) -> Any? in
                     XCTAssertFalse(true)
@@ -398,7 +398,7 @@ class APlusPromiseTests: XCTestCase
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
         
-        APlusPromise(reason: ERROR_0)
+        AnyPromise(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> Any? in
                     XCTAssertFalse(true)
@@ -438,7 +438,7 @@ class APlusPromiseTests: XCTestCase
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
         
-        APlusPromise(reason: ERROR_0)
+        AnyPromise(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> Any? in
                     XCTAssertFalse(true)
@@ -476,11 +476,11 @@ class APlusPromiseTests: XCTestCase
     func test_init_thenable_fulfill() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let superPromise = APlusPromise { (resolve, reject) -> Void in
+        let superPromise = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
         
-        let promise = APlusPromise(thenable: superPromise)
+        let promise = AnyPromise(thenable: superPromise)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value as String, STRING_VALUE_0)
@@ -507,11 +507,11 @@ class APlusPromiseTests: XCTestCase
     func test_init_thenable_reject() {
         let expt = expectationWithDescription(__FUNCTION__)
         
-        let superPromise = APlusPromise { (resolve, reject) -> Void in
+        let superPromise = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
         
-        let promise = APlusPromise(thenable: superPromise)
+        let promise = AnyPromise(thenable: superPromise)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -538,16 +538,16 @@ class APlusPromiseTests: XCTestCase
     // MARK: - resolve(_)
     
     func test_resolve() {
-        let (d, q0) = APlusPromise.defer()
-        let a0: APlusPromise = APlusPromise.resolve(q0)
+        let (d, q0) = AnyPromise.defer()
+        let a0: AnyPromise = AnyPromise.resolve(q0)
         XCTAssertTrue(q0 === a0)
         
-        let a1 = APlusPromise.resolve(STRING_VALUE_0)
+        let a1 = AnyPromise.resolve(STRING_VALUE_0)
         XCTAssertEqual(a1.state, PromiseState.Fulfilled)
         XCTAssertEqual(a1.value as String, STRING_VALUE_0)
         XCTAssertTrue(a1.reason == nil)
         
-        let a2 = APlusPromise.resolve(nil)
+        let a2 = AnyPromise.resolve(nil)
         XCTAssertEqual(a2.state, PromiseState.Fulfilled)
         XCTAssertTrue(a2.value! == nil)
         XCTAssertTrue(a2.reason == nil)
@@ -568,12 +568,12 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms0 = APlusPromise(value: nil)
-        let prms2 = APlusPromise { (resolve, reject) -> Void in
+        let prms0 = AnyPromise(value: nil)
+        let prms2 = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_2)
         }
         
-        let promise = APlusPromise.all(prms0, STRING_VALUE_1, prms2)
+        let promise = AnyPromise.all(prms0, STRING_VALUE_1, prms2)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 
@@ -600,8 +600,8 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise(value: STRING_VALUE_0)
-        let promise = APlusPromise.all([nil, STRING_VALUE_1, prms1])
+        let prms1 = AnyPromise(value: STRING_VALUE_0)
+        let promise = AnyPromise.all([nil, STRING_VALUE_1, prms1])
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -633,12 +633,12 @@ class APlusPromiseTests: XCTestCase
         let expectation = expectationWithDescription(__FUNCTION__)
         var counter = 0
         
-        let prms1 = APlusPromise(value: STRING_VALUE_0)
-        let prms3 = APlusPromise { (resolve, reject) -> Void in
+        let prms1 = AnyPromise(value: STRING_VALUE_0)
+        let prms3 = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_3)
         }
         
-        let promise = APlusPromise.all(prms1, STRING_VALUE_1, prms3)
+        let promise = AnyPromise.all(prms1, STRING_VALUE_1, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -664,12 +664,12 @@ class APlusPromiseTests: XCTestCase
         let expectation = expectationWithDescription(__FUNCTION__)
         var counter = 0
         
-        let prms1 = APlusPromise(reason: ERROR_1)
-        let prms3 = APlusPromise { (resolve, reject) -> Void in
+        let prms1 = AnyPromise(reason: ERROR_1)
+        let prms3 = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_3)
         }
         
-        let promise = APlusPromise.all([prms1, STRING_VALUE_2, prms3])
+        let promise = AnyPromise.all([prms1, STRING_VALUE_2, prms3])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -696,9 +696,9 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise(value: STRING_VALUE_1)
-        let prms2 = APlusPromise(reason: ERROR_2)
-        let promise = APlusPromise.race([prms1, STRING_VALUE_2, prms2])
+        let prms1 = AnyPromise(value: STRING_VALUE_1)
+        let prms2 = AnyPromise(reason: ERROR_2)
+        let promise = AnyPromise.race([prms1, STRING_VALUE_2, prms2])
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -721,13 +721,13 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let prms1 = APlusPromise { (resolve, reject) -> Void in
+        let prms1 = AnyPromise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_1)
         }
-        let (d2, prms2) = APlusPromise.defer()
-        let (d3, prms3) = APlusPromise.defer()
+        let (d2, prms2) = AnyPromise.defer()
+        let (d3, prms3) = AnyPromise.defer()
         
-        let promise = APlusPromise.race(prms1, prms2, prms3)
+        let promise = AnyPromise.race(prms1, prms2, prms3)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value as String, STRING_VALUE_1)
@@ -751,9 +751,9 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let (d1, prms1) = APlusPromise.defer()
-        let prms2 = APlusPromise(reason: ERROR_2)
-        let promise = APlusPromise.race([prms1, prms2, STRING_VALUE_3])
+        let (d1, prms1) = AnyPromise.defer()
+        let prms2 = AnyPromise(reason: ERROR_2)
+        let promise = AnyPromise.race([prms1, prms2, STRING_VALUE_3])
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -776,12 +776,12 @@ class APlusPromiseTests: XCTestCase
     {
         let expectation = expectationWithDescription(__FUNCTION__)
         
-        let (d1, prms1) = APlusPromise.defer()
-        let prms2 = APlusPromise { (resolve, reject) -> Void in
+        let (d1, prms1) = AnyPromise.defer()
+        let prms2 = AnyPromise { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_2)
         }
-        let (d3, prms3) = APlusPromise.defer()
-        let promise = APlusPromise.race(prms1, prms2, prms3)
+        let (d3, prms3) = AnyPromise.defer()
+        let promise = AnyPromise.race(prms1, prms2, prms3)
         
         promise.then(
             onFulfilled: { (value) -> Any? in
@@ -808,7 +808,7 @@ class APlusPromiseTests: XCTestCase
         let superPromise = Promise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
-        let promise = APlusPromise(promise: superPromise)
+        let promise = AnyPromise(promise: superPromise)
         promise.then { (value) -> Any? in
             XCTAssertEqual(value as String, STRING_VALUE_0)
             expt.fulfill()
