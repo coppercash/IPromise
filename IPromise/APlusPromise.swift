@@ -145,23 +145,7 @@ public class APlusPromise: Thenable
         
         return nextPromise
     }
-    
-    public func then(onFulfilled: (value: Any?) -> Any?) -> APlusPromise
-    {
-        let (nextDeferred, nextPromise) = APlusPromise.defer()
-        
-        self.bindCallbacks(
-            fulfillCallback: { (value) -> Void in
-                nextDeferred.resolve(onFulfilled(value: value))
-            },
-            rejectCallback: { (reason) -> Void in
-                nextDeferred.reject(reason)
-            }
-        )
-        
-        return nextPromise
-    }
-    
+
     public func catch(onRejected: (reason: Any?) -> Any?) -> APlusPromise
     {
         let (nextDeferred, nextPromise) = APlusPromise.defer()
