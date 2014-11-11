@@ -58,20 +58,9 @@ public class AnyPromise: Thenable
     public init<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(thenable: T)
     {
         self.init()
+        
         let deferred = AnyDeferred(promise: self)
-        thenable.then(
-            onFulfilled: { (value) -> Any? in
-                deferred.resolve(value)
-                return nil
-            },
-            onRejected: { (reason) -> Any? in
-                deferred.reject(reason)
-                return nil
-            },
-            onProgress: { (progress) -> Float in
-                return progress
-            }
-        )
+        deferred.resolve(thenable: thenable, fraction: 1.0)
     }
     
     // MARK: - Private APIs
@@ -254,7 +243,7 @@ public extension AnyPromise {
                     objc_sync_exit(allDeferred)
                     
                     allDeferred.progress(allProgress)
-                    return -1.0
+                    return -1
                 }
             )
         }
@@ -292,7 +281,7 @@ public extension AnyPromise {
                     objc_sync_exit(raceDeferred)
                     
                     raceDeferred.progress(maxProgress)
-                    return -1.0
+                    return -1
                 }
             )
         }
@@ -320,7 +309,7 @@ public extension AnyPromise {
                 deferred.reject(reason)
             },
             onProgress: { (progress: Float) -> Float in
-                return progress
+                return -1
             }
         )
     }

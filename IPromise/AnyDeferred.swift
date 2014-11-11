@@ -73,7 +73,7 @@ public class AnyDeferred {
                 },
                 onProgress: { (progress) -> Float in
                     self.progress((1 - fraction) + progress * fraction)
-                    return progress
+                    return -1
                 }
             )
         }

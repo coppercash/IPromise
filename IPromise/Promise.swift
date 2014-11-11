@@ -342,7 +342,7 @@ public extension Promise {
                     objc_sync_exit(allDeferred)
 
                     allDeferred.progress(allProgress)
-                    return -1.0
+                    return -1
                 }
             )
         }
@@ -377,7 +377,7 @@ public extension Promise {
                     objc_sync_exit(raceDeferred)
 
                     raceDeferred.progress(maxProgress)
-                    return -1.0
+                    return -1
                 }
             )
         }
@@ -414,7 +414,7 @@ public extension Promise {
                 return nil
             },
             onProgress: { (progress: Float) -> Float in
-                return progress
+                return -1
             }
         )
     }
