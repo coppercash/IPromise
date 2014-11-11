@@ -328,9 +328,9 @@ public extension Promise {
                     
                     if (remain > 0) { return }
                     
-                    var value: [V] = []
-                    for result: V! in results { value.append(result!) }
-                    allDeferred.resolve(value)
+                    var allValue: [V] = []
+                    for result: V? in results { allValue.append(result!) }
+                    allDeferred.resolve(allValue)
                 },
                 onRejected: { (reason) -> Void in
                     allDeferred.reject(reason)

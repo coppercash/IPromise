@@ -18,8 +18,11 @@ public class AnyPromise: Thenable
 
     public typealias FulfillClosure = (value: Any?) -> Void
     public typealias RejectClosure = (reason: Any?) -> Void
+    public typealias ProgressClosure = (progress: Float) -> Void
+
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
+    lazy var progressCallbacks: [ProgressClosure] = []
 
     // MARK: - Initializers
     
@@ -43,6 +46,7 @@ public class AnyPromise: Thenable
     public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
     {
         self.init()
+        
         let deferred = AnyDeferred(promise: self)
         resolver(
             resolve: deferred.resolve,
@@ -72,10 +76,17 @@ public class AnyPromise: Thenable
     
     // MARK: - Private APIs
     
-    func bindCallbacks(#fulfillCallback: FulfillClosure, rejectCallback: RejectClosure)
+    func bindCallbacks(
+        #fulfillCallback: FulfillClosure,
+        rejectCallback: RejectClosure,
+        progressCallback: ProgressClosure
+        ) -> Void
     {
+        objc_sync_enter(self)
+
         self.fulfillCallbacks.append(fulfillCallback)
         self.rejectCallbacks.append(rejectCallback)
+        self.progressCallbacks.append(progressCallback)
         
         switch self.state {
         case .Fulfilled:
@@ -85,6 +96,8 @@ public class AnyPromise: Thenable
         default:
             break
         }
+        
+        objc_sync_exit(self)
     }
 
     // MARK: - Static APIs
@@ -126,22 +139,37 @@ public class AnyPromise: Thenable
         ) -> AnyPromise
     {
         let (nextDeferred, nextPromise) = AnyPromise.defer()
-        
-        let fulfillCallback: FulfillClosure = (onFulfilled != nil) ?
+        let fraction: Float = (onProgress == nil) ? 0.0 : 1.0 - onProgress!(progress: 1.0)
+
+        let fulfillCallback: FulfillClosure = (onFulfilled == nil) ?
+            { (value: Any?) -> Void in nextDeferred.resolve(value) } :
             { (value: Any?) -> Void in
                 let nextValue: Any? = onFulfilled!(value: value)
-                nextDeferred.resolve(nextValue)
-            } :
-            { (value: Any?) -> Void in nextDeferred.resolve(value) }
-        
-        let rejectCallback: RejectClosure = (onRejected != nil) ?
+                if let nextPromise = nextValue as? AnyPromise {
+                    nextDeferred.resolve(thenable: nextPromise, fraction: fraction)
+                }
+                else {
+                    nextDeferred.resolve(nextValue)
+                }
+            }
+        let rejectCallback: RejectClosure = (onRejected == nil) ?
+            { (reason: Any?) -> Void in nextDeferred.reject(reason) } :
             { (reason: Any?) -> Void in
-                let nextReason: Any? = onRejected!(reason: reason)
-                nextDeferred.resolve(nextReason)
-            } :
-            { (reason: Any?) -> Void in nextDeferred.reject(reason) }
-        
-        self.bindCallbacks(fulfillCallback, rejectCallback)
+                let nextValue: Any? = onRejected!(reason: reason)
+                if let nextPromise = nextValue as? AnyPromise {
+                    nextDeferred.resolve(thenable: nextPromise, fraction: fraction)
+                }
+                else {
+                    nextDeferred.resolve(nextValue)
+                }
+            }
+        let progressCallback: ProgressClosure = (onProgress == nil) ?
+            { (progress: Float) -> Void in nextDeferred.progress(progress) } :
+            { (progress: Float) -> Void in
+                let nextProgress = onProgress!(progress: progress)
+                nextDeferred.progress(nextProgress)
+        }
+        self.bindCallbacks(fulfillCallback, rejectCallback, progressCallback)
         
         return nextPromise
     }
@@ -156,6 +184,29 @@ public class AnyPromise: Thenable
             },
             rejectCallback: { (reason) -> Void in
                 nextDeferred.resolve(onRejected(reason: reason))
+            },
+            progressCallback: { (progress) -> Void in
+                nextDeferred.progress(progress)
+            }
+        )
+        
+        return nextPromise
+    }
+    
+    public func progress(onProgress: (progress: Float) -> Float) -> AnyPromise
+    {
+        let (nextDeferred, nextPromise) = AnyPromise.defer()
+        
+        self.bindCallbacks(
+            fulfillCallback: { (value) -> Void in
+                nextDeferred.resolve(value)
+            },
+            rejectCallback: { (reason) -> Void in
+                nextDeferred.reject(reason)
+            },
+            progressCallback: { (progress) -> Void in
+                let nextProgress = onProgress(progress: progress)
+                nextDeferred.progress(nextProgress)
             }
         )
         
@@ -167,24 +218,43 @@ public extension AnyPromise {
     
     public class func all(values: [Any?]) -> AnyPromise
     {
+        var remain: Int = values.count
+        var results: [Any??] = [Any??](count: remain, repeatedValue: nil)
+        var progresses: [Float] = [Float](count: remain, repeatedValue: 0.0)
+        let count = Float(remain)
+
         let (allDeferred, allPromise) = AnyPromise.defer()
-        let count = values.count
-        var results: [Any?] = []
         
-        for value in values
+        for (index, value) in enumerate(values)
         {
             let promise = self.resolve(value)
             promise.then(
                 onFulfilled: { (value) -> Any? in
-                    results.append(value)
-                    if results.count >= count {
-                        allDeferred.resolve(results)
-                    }
+                    objc_sync_enter(allDeferred)
+                    results[index] = value
+                    remain -= 1
+                    objc_sync_exit(allDeferred)
+                    
+                    if (remain > 0) { return nil }
+                    
+                    var allValue: [Any?] = []
+                    for result: Any?? in results { allValue.append(result!) }
+                    allDeferred.resolve(allValue)
+                    
                     return nil
                 },
                 onRejected: { (reason) -> Any? in
                     allDeferred.reject(reason)
                     return nil
+                },
+                onProgress: { (progress) -> Float in
+                    objc_sync_enter(allDeferred)
+                    progresses[index] = progress
+                    let allProgress: Float = progresses.reduce(0.0, combine: +) / count
+                    objc_sync_exit(allDeferred)
+                    
+                    allDeferred.progress(allProgress)
+                    return -1.0
                 }
             )
         }
@@ -199,9 +269,11 @@ public extension AnyPromise {
     
     public class func race(values: [Any?]) -> AnyPromise
     {
+        var progresses: [Float] = [Float](count: values.count, repeatedValue: 0.0)
+
         let (raceDeferred, racePromise) = AnyPromise.defer()
         
-        for value in values
+        for (index, value) in enumerate(values)
         {
             let promise = self.resolve(value)
             promise.then(
@@ -212,6 +284,15 @@ public extension AnyPromise {
                 onRejected: { (reason) -> Any? in
                     raceDeferred.reject(reason)
                     return nil
+                },
+                onProgress: { (progress) -> Float in
+                    objc_sync_enter(raceDeferred)
+                    progresses[index] = progress
+                    let maxProgress: Float = progresses.reduce(0.0, combine: max)
+                    objc_sync_exit(raceDeferred)
+                    
+                    raceDeferred.progress(maxProgress)
+                    return -1.0
                 }
             )
         }
@@ -231,6 +312,16 @@ public extension AnyPromise {
     {
         self.init()
         let deferred = AnyDeferred(promise: self)
-        deferred.resolve(promise: promise)
+        promise.then(
+            onFulfilled: { (value) -> Void in
+                deferred.resolve(value)
+            },
+            onRejected: { (reason) -> Void in
+                deferred.reject(reason)
+            },
+            onProgress: { (progress: Float) -> Float in
+                return progress
+            }
+        )
     }
 }

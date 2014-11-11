@@ -23,31 +23,17 @@ public class AnyDeferred {
     
     public func resolve(value: Any?) -> Void
     {
-        if promise.state != .Pending {
+        if let anyPromise = value as? AnyPromise {
+            resolve(thenable: anyPromise, fraction: 1.0)
             return
         }
         
-        if let anyPromise = value as? AnyPromise {
-            if anyPromise === promise {
-                self.reject(NSError.promiseTypeError())
-            }
-            else {
-                anyPromise.then(
-                    onFulfilled: { (value) -> Any? in
-                        self.resolve(value)
-                        return nil
-                    },
-                    onRejected: { (reason) -> Any? in
-                        self.reject(reason)
-                        return nil
-                    }
-                )
-            }
-            return
-        }
+        objc_sync_enter(promise)
+        let fulfilled = promise.state.fulfill()
+        objc_sync_exit(promise)
+        if !fulfilled { return }
         
         promise.value = value
-        promise.state = .Fulfilled
         
         for callback in promise.fulfillCallbacks {
             callback(value: value)
@@ -56,34 +42,53 @@ public class AnyDeferred {
     
     public func reject(reason: Any?) -> Void
     {
-        if promise.state != .Pending {
-            return
-        }
+        objc_sync_enter(promise)
+        let rejected = promise.state.reject()
+        objc_sync_exit(promise)
+        if !rejected { return }
         
         promise.reason = reason
-        promise.state = .Rejected
-        
         for callback in promise.rejectCallbacks {
             callback(reason: reason)
         }
     }
-}
-
-public extension AnyDeferred {
     
-    func resolve<V>(#promise: Promise<V>) -> Void
+    public func resolve<T: Thenable where T.ValueType == Optional<Any>, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(
+        #thenable: T,
+        fraction: Float
+        )
     {
-        if self.promise.state != .Pending {
-            return
+        if (thenable as? AnyPromise) === promise {
+            self.reject(NSError.promiseTypeError())
+        }
+        else {
+            thenable.then(
+                onFulfilled: { (value) -> Any? in
+                    self.resolve(value)
+                    return nil
+                },
+                onRejected: { (reason) -> Any? in
+                    self.reject(reason)
+                    return nil
+                },
+                onProgress: { (progress) -> Float in
+                    self.progress((1 - fraction) + progress * fraction)
+                    return progress
+                }
+            )
+        }
+    }
+    
+    public func progress(progress: Float) -> Void
+    {
+        objc_sync_enter(promise)
+        
+        if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
+            for callback in promise.progressCallbacks {
+                callback(progress: progress)
+            }
         }
         
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                self.resolve(value)
-            },
-            onRejected: { (reason) -> Void in
-                self.reject(reason)
-            }
-        )
+        objc_sync_exit(promise)
     }
 }
