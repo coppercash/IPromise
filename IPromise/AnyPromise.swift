@@ -172,7 +172,8 @@ public class AnyPromise: Thenable
                 nextDeferred.resolve(value)
             },
             rejectCallback: { (reason) -> Void in
-                nextDeferred.resolve(onRejected(reason: reason))
+                let nextValue: Any? = onRejected(reason: reason)
+                nextDeferred.resolve(nextValue)
             },
             progressCallback: { (progress) -> Void in
                 nextDeferred.progress(progress)

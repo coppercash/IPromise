@@ -155,7 +155,7 @@ public class Promise<V>: Thenable
     }
 
     public func catch(
-        onRejected: (reason: NSError) -> Void
+        #ignored: (reason: NSError) -> Void
         ) -> Promise<Void>
     {
         let (nextDeferred, nextPromise) = Promise<Void>.defer()
@@ -165,7 +165,7 @@ public class Promise<V>: Thenable
                 nextDeferred.resolve()
             },
             rejectCallback: { (reason) -> Void in
-                onRejected(reason: reason)
+                ignored(reason: reason)
                 nextDeferred.resolve()
             },
             progressCallback: { (progress) -> Void in
@@ -175,6 +175,7 @@ public class Promise<V>: Thenable
         
         return nextPromise
     }
+
 }
 
 public extension Promise {
@@ -206,6 +207,28 @@ public extension Promise {
         }
         self.bindCallbacks(fulfillCallback, rejectCallback, progressCallback)
 
+        return nextPromise
+    }
+    
+    public func catch(
+        onRejected: (reason: NSError) -> V
+        ) -> Promise<V>
+    {
+        let (nextDeferred, nextPromise) = Promise<V>.defer()
+        
+        self.bindCallbacks(
+            fulfillCallback: { (value) -> Void in
+                nextDeferred.resolve(value)
+            },
+            rejectCallback: { (reason) -> Void in
+                let nextValue = onRejected(reason: reason)
+                nextDeferred.resolve(nextValue)
+            },
+            progressCallback: { (progress) -> Void in
+                nextDeferred.progress(progress)
+            }
+        )
+        
         return nextPromise
     }
 }

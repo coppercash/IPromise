@@ -41,9 +41,9 @@ class PromiseTests: XCTestCase
         let promise = Promise<Void> { (resolve, reject) -> Void in
             0 ~> reject(reason: ERROR_0)
         }
-        promise.catch { (reason) -> Void in
+        promise.catch(ignored:{ (reason) -> Void in
             expt.fulfill()
-        }
+        })
         
         XCTAssertEqual(promise.state, PromiseState.Pending)
         XCTAssertNil(promise.reason)
@@ -532,18 +532,59 @@ class PromiseTests: XCTestCase
         }
         
         Promise<String>(value: STRING_VALUE_0)
-        .then { (value) -> Void in
-            XCTAssertEqual(value, STRING_VALUE_0)
-            expts[0]!.fulfill()
-        }.catch { (reason) -> Void in
-            XCTAssertFalse(true)
-        }.then { (value) -> String in
-            XCTAssertEqual("\(value)", VOID_SUMMARY)
-            expts[1]!.fulfill()
+            .then { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                expts[0]!.fulfill()
+            }
+            .catch(ignored: { (reason) -> Void in
+                XCTAssertFalse(true)
+            })
+            .then { (value) -> String in
+                XCTAssertEqual("\(value)", VOID_SUMMARY)
+                expts[1]!.fulfill()
+                return STRING_VALUE_1
+            }
+            .then { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_1)
+                expts[2]!.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_catch_value() {
+        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
+        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
+
+        Promise<String>(reason: ERROR_0)
+        .catch { (reason) -> String in
+            XCTAssertEqual(ERROR_0, reason)
+            expt0.fulfill()
+            return STRING_VALUE_0
+        }
+        .then { (value) -> String in
+            XCTAssertEqual(STRING_VALUE_0, value)
+            expt1.fulfill()
             return STRING_VALUE_1
-        }.then { (value) -> Void in
-            XCTAssertEqual(value, STRING_VALUE_1)
-            expts[2]!.fulfill()
+        }
+
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_catch_promise() {
+        let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
+        let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
+        
+        Promise<String>(reason: ERROR_0)
+            .catch { (reason) -> Promise<String> in
+                XCTAssertEqual(ERROR_0, reason)
+                expt0.fulfill()
+                return Promise(value: STRING_VALUE_0)
+            }
+            .then { (value) -> String in
+                XCTAssertEqual(STRING_VALUE_0, value)
+                expt1.fulfill()
+                return STRING_VALUE_1
         }
         
         waitForExpectationsWithTimeout(7, handler: nil)
@@ -1047,7 +1088,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
-    // MARK: - Progress
+    // MARK: - progress
     
     func test_progress() {
         let answers: [Float] = [0.0, 0.5, 1.0]
