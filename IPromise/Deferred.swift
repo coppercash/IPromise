@@ -12,6 +12,8 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
+    let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
+    
     required
     public convenience init() {
         self.init(promise: Promise<V>())
@@ -47,16 +49,35 @@ public class Deferred<V> {
         }
     }
     
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(
-        #thenable: T,
-        fraction: Float
-        ) -> Void
+    public func progress(progress: Float) -> Void
+    {
+        objc_sync_enter(promise)
+        
+        if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
+            for callback in promise.progressCallbacks {
+                callback(progress: progress)
+            }
+        }
+        
+        objc_sync_exit(promise)
+    }
+    
+    public func onCanceled(cancelation: () -> Void) {
+        
+    }
+    
+    func doCancel() {
+        
+    }
+    
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>
+        (#thenable: T, fraction: Float) -> Void
     {
         if (thenable as? Promise<V>) === promise {
             self.reject(NSError.promiseTypeError())
             return
         }
-
+        
         thenable.then(
             onFulfilled: { (value: V) -> Void in
                 self.resolve(value)
@@ -70,17 +91,14 @@ public class Deferred<V> {
             }
         )
     }
-    
-    public func progress(progress: Float) -> Void
-    {
-        objc_sync_enter(promise)
-        
-        if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
-            for callback in promise.progressCallbacks {
-                callback(progress: progress)
-            }
-        }
-        
-        objc_sync_exit(promise)
+}
+
+extension Deferred: Hashable, Equatable {
+    public var hashValue: Int {
+        return identifier.hashValue
     }
+}
+
+public func ==<V>(lhs: Deferred<V>, rhs: Deferred<V>) -> Bool {
+    return lhs.identifier == rhs.identifier
 }

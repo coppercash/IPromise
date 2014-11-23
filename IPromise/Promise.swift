@@ -12,6 +12,8 @@ public class Promise<V>: Thenable
 {
     // MARK: - ivars
     
+    let deferred: Deferred<V> = Deferred<V>()
+    
     public internal(set) var state: PromiseState = .Pending
     public internal(set) var value: V? = nil
     public internal(set) var reason: NSError? = nil
@@ -20,6 +22,7 @@ public class Promise<V>: Thenable
     public typealias RejectClosure = (reason: NSError) -> Void
     public typealias ProgressClosure = (progress: Float) -> Void
     
+    lazy var callbackSets: [CallbackSet<V, NSError>] = []
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
     lazy var progressCallbacks: [ProgressClosure] = []
@@ -151,6 +154,13 @@ public class Promise<V>: Thenable
         }
         self.bindCallbacks(fulfillCallback, rejectCallback, progressCallback)
 
+        let callbackSet = CallbackSet(fulfillCallback, rejectCallback, progressCallback)
+        
+        nextDeferred.onCanceled { [unowned self, nextDeferred, nextPromise] () -> Void in
+            let cancelReason = NSError()
+            nextDeferred.reject(cancelReason)
+        }
+        
         return nextPromise
     }
 
@@ -176,6 +186,14 @@ public class Promise<V>: Thenable
         return nextPromise
     }
 
+    
+    // MARK: - Cancel
+
+    func unbindCallbacks() {
+        
+    }
+    
+    
 }
 
 public extension Promise {

@@ -705,14 +705,13 @@ class PromiseTests: XCTestCase
     
     // MARK: - reject(_)
 
-        func test_reject() {
+    func test_reject() {
         let a0 = AnyPromise.reject(ERROR_0)
         XCTAssertEqual(a0.state, PromiseState.Rejected)
         XCTAssertTrue(a0.value == nil)
         XCTAssertEqual(a0.reason as NSError, ERROR_0)
     }
 
-    
     // MARK: - all
     
     func test_all_fulfill_async() {
@@ -871,8 +870,7 @@ class PromiseTests: XCTestCase
     
     // MARK: - race
 
-    func test_race_fulfill_sync()
-    {
+    func test_race_fulfill_sync() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = Promise(value: STRING_VALUE_1)
@@ -897,8 +895,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_fulfill_async()
-    {
+    func test_race_fulfill_async() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = Promise { (resolve, reject) -> Void in
@@ -925,8 +922,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_reject_sync()
-    {
+    func test_race_reject_sync() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let (deferred1, prms1) = Promise<String>.defer()
@@ -951,8 +947,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_reject_async()
-    {
+    func test_race_reject_async() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let (deferred1, prms1) = Promise<String>.defer()
@@ -1147,4 +1142,8 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
+
+    // MARK - cancel
+    
+    
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE4849F91A1E33BA00763E3D /* CallbackSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4849F81A1E33BA00763E3D /* CallbackSet.swift */; };
 		BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE60265D19F5D6A200FED245 /* ScenarioTests.swift */; };
 		BEBDD10319EDFC3C00DA957D /* IPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEBDD10219EDFC3C00DA957D /* IPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEBDD11A19EDFC8300DA957D /* AnyPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11619EDFC8300DA957D /* AnyPromise.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BE4849F81A1E33BA00763E3D /* CallbackSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallbackSet.swift; sourceTree = "<group>"; };
 		BE60265D19F5D6A200FED245 /* ScenarioTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScenarioTests.swift; sourceTree = "<group>"; };
 		BEBDD0FD19EDFC3C00DA957D /* IPromise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IPromise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEBDD10119EDFC3C00DA957D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			children = (
 				BEBDD11919EDFC8300DA957D /* Thenable.swift */,
 				BEBDD11819EDFC8300DA957D /* PromiseState.swift */,
+				BE4849F81A1E33BA00763E3D /* CallbackSet.swift */,
 				BEBDD11619EDFC8300DA957D /* AnyPromise.swift */,
 				BEDF9D531A03042700DBD89C /* AnyDeferred.swift */,
 				BEBDD11719EDFC8300DA957D /* Promise.swift */,
@@ -236,6 +239,7 @@
 				BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */,
 				BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */,
 				BEBDD11A19EDFC8300DA957D /* AnyPromise.swift in Sources */,
+				BE4849F91A1E33BA00763E3D /* CallbackSet.swift in Sources */,
 				BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */,
 				BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */,
 			);
