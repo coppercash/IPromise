@@ -1145,5 +1145,58 @@ class PromiseTests: XCTestCase
 
     // MARK - cancel
     
-    
+    func test_cancel_chain() {
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 1...6 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        
+        let (d_0, p_0) = Promise<Void>.defer()
+        
+        d_0.onCanceled { () -> Void in
+            expts[1]!.fulfill()
+            return
+        }
+        
+        let p = p_0
+            .then(
+                onFulfilled: { (value) -> Promise<Void> in
+                    return Promise<Void>(value: ())
+                },
+                onRejected: { (reason) -> Promise<Void> in
+                    XCTAssertTrue(reason.isCanceled())
+                    expts[2]!.fulfill()
+                    return Promise<Void>(value: ())
+                }
+            )
+            .then(
+                onFulfilled: { (value) -> String in
+                    return STRING_VALUE_0
+                },
+                onRejected: { (reason) -> String in
+                    XCTAssertTrue(reason.isCanceled())
+                    expts[3]!.fulfill()
+                    return STRING_VALUE_1
+                }
+            )
+            .then(
+                onFulfilled: { (value) -> Void in
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertTrue(reason.isCanceled())
+                    expts[4]!.fulfill()
+                }
+            )
+            .catch (ignored: {(reason) -> Void in
+                XCTAssertTrue(reason.isCanceled())
+                expts[5]!.fulfill()
+            })
+        
+        p.cancel().then { () -> Void in
+            expts[6]!.fulfill()
+            return
+        }
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
 }

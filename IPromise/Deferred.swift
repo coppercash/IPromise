@@ -66,6 +66,10 @@ public class Deferred<V> {
         
     }
     
+    public func onCanceled(cancelation: () -> Promise<Void>) {
+        
+    }
+    
     func doCancel() {
         
     }

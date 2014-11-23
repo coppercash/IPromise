@@ -12,6 +12,7 @@ public let PromiseErrorDomain = "PromiseErrorDomain"
 public let PromiseTypeError = 1000
 public let PromiseReasonWrapperError = 1001
 public let PromiseValueTypeError = 1002
+public let PromiseCancelError = 1002
 
 public let PromiseErrorReasonKey = "reason"
 
@@ -52,5 +53,17 @@ extension NSError {
             code: PromiseReasonWrapperError,
             userInfo: [NSLocalizedDescriptionKey: PromiseErrorReasonKey, ("reason" as NSString): reasonValue!,]
         )
+    }
+
+    class func promiseCancelError() -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseCancelError,
+            userInfo: [NSLocalizedDescriptionKey: "CancelError",]
+        )
+    }
+    
+    public func isCanceled() -> Bool {
+        return self.domain == PromiseErrorDomain && self.code == PromiseCancelError
     }
 }

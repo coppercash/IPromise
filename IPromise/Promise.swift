@@ -189,11 +189,9 @@ public class Promise<V>: Thenable
     
     // MARK: - Cancel
 
-    func unbindCallbacks() {
-        
+    public func cancel() -> Promise<Void> {
+        return Promise<Void>()
     }
-    
-    
 }
 
 public extension Promise {
