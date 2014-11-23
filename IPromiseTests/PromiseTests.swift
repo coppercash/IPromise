@@ -1199,4 +1199,86 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
+    
+    func test_cancel_delay() {
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 1...3 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        
+        let (d_0, p_0) = Promise<Void>.defer()
+        
+        var cancelDeferred: Deferred<Void>? = nil
+        d_0.onCanceled { () -> Promise<Void> in
+            expts[1]!.fulfill()
+            cancelDeferred = Deferred<Void>()
+            return cancelDeferred!.promise
+        }
+        
+        let p_00 = p_0.then(onRejected: { (reason) -> Void in
+            expts[2]!.fulfill()
+            XCTAssertTrue(reason.isCanceled())
+        })
+        
+        p_00.cancel().then(onFulfilled: { (value) -> Void in
+            expts[3]!.fulfill()
+        })
+        
+        cancelDeferred!.resolve()
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_cancel_leaf() {
+        var expts: [Int: XCTestExpectation] = [:]
+        for index in 1...2 {
+            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
+        }
+        
+        var cancelDeferred: Deferred<Void>? = nil
+        Promise<String>(value: STRING_VALUE_1)
+        .then(onFulfilled: { (value) -> Promise<Void> in
+            let (d_leaf, p_leaf) = Promise<Void>.defer()
+            d_leaf.onCanceled({ () -> Promise<Void> in
+                expts[1]!.fulfill()
+                let (d_cancel, p_cancel) = Promise<Void>.defer()
+                cancelDeferred = d_cancel
+                return p_cancel
+            })
+            return p_leaf
+        })
+        .then()
+        .cancel()
+        .then(onRejected: { (value) -> Void in
+            expts[2]!.fulfill()
+        })
+        
+        cancelDeferred!.resolve()
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_cancel_multipleChildren() {
+        let (d_0, p_0) = Promise<String>.defer()
+        d_0.onCanceled { () -> Void in
+            XCTAssertFalse(true, " ")
+            return
+        }
+        
+        let p_00 = p_0.catch { (reason) -> Void in
+            XCTAssertFalse(true, " ")
+            return
+        }
+        
+        let p_01 = p_0.catch { (reason) -> Void in
+            XCTAssertFalse(true, " ")
+            return
+        }
+        
+        p_00.cancel().then(onFulfilled: { (value) -> Void in
+            XCTAssertFalse(true, " ")
+        }, onRejected: { (reason) -> Void in
+            XCTAssertFalse(true, " ")
+        })
+    }
 }
