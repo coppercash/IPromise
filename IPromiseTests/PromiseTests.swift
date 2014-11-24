@@ -1281,4 +1281,12 @@ class PromiseTests: XCTestCase
             XCTAssertFalse(true, " ")
         })
     }
+    
+    func tt() {
+        var array = ["one","two"]
+        array.extend(["three","four"])
+        
+        var vv = "asdf"
+        vv.extend("bbb")
+    }
 }

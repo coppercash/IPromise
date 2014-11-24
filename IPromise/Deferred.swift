@@ -11,9 +11,10 @@ import Foundation
 public class Deferred<V> {
     
     public let promise: Promise<V>
-    
     let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
-    
+    /*
+    private lazy var callbackSets: [String: CallbackSet<V, NSError>] = [:]
+    */
     required
     public convenience init() {
         self.init(promise: Promise<V>())
@@ -96,7 +97,28 @@ public class Deferred<V> {
         )
     }
 }
+/*
+extension Deferred {
+    func bindCallbackSet<D>(deferred: Deferred<D>, callbackSet: CallbackSet<V, NSError>) {
+        objc_sync_enter(self)
 
+        self.callbackSets[deferred.identifier] = callbackSet
+        
+        let promise = self.promise
+        switch promise.state {
+        case .Fulfilled:
+            callbackSet.fulfillCallback(value: promise.value!)
+        case .Rejected:
+            callbackSet.rejectCallback(reason: promise.reason!)
+        default:
+            break
+        }
+        
+        objc_sync_exit(self)
+    }
+}
+*/
+/*
 extension Deferred: Hashable, Equatable {
     public var hashValue: Int {
         return identifier.hashValue
@@ -106,3 +128,4 @@ extension Deferred: Hashable, Equatable {
 public func ==<V>(lhs: Deferred<V>, rhs: Deferred<V>) -> Bool {
     return lhs.identifier == rhs.identifier
 }
+*/
