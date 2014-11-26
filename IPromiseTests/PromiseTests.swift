@@ -1144,7 +1144,7 @@ class PromiseTests: XCTestCase
     }
 
     // MARK - cancel
-    
+    /*
     func test_cancel_chain() {
         var expts: [Int: XCTestExpectation] = [:]
         for index in 1...6 {
@@ -1281,12 +1281,5 @@ class PromiseTests: XCTestCase
             XCTAssertFalse(true, " ")
         })
     }
-    
-    func tt() {
-        var array = ["one","two"]
-        array.extend(["three","four"])
-        
-        var vv = "asdf"
-        vv.extend("bbb")
-    }
+*/
 }

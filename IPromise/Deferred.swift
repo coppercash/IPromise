@@ -27,27 +27,29 @@ public class Deferred<V> {
     public func resolve(value: V) -> Void
     {
         objc_sync_enter(promise)
-        let fulfilled = promise.state.fulfill()
-        objc_sync_exit(promise)
-        if !fulfilled { return }
         
-        promise.value = value
-        for callback in promise.fulfillCallbacks {
-            callback(value: value)
+        if promise.state.fulfill() {
+            promise.value = value
+            for callbackSet in promise.callbackSets {
+                callbackSet.fulfillCallback(value: value)
+            }
         }
+        
+        objc_sync_exit(promise)
     }
     
     public func reject(reason: NSError) -> Void
     {
         objc_sync_enter(promise)
-        let rejected = promise.state.reject()
-        objc_sync_exit(promise)
-        if !rejected { return }
         
-        promise.reason = reason
-        for callback in promise.rejectCallbacks {
-            callback(reason: reason)
+        if promise.state.reject() {
+            promise.reason = reason
+            for callbackSet in promise.callbackSets {
+                callbackSet.rejectCallback(reason: reason)
+            }
         }
+        
+        objc_sync_exit(promise)
     }
     
     public func progress(progress: Float) -> Void
@@ -55,8 +57,8 @@ public class Deferred<V> {
         objc_sync_enter(promise)
         
         if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
-            for callback in promise.progressCallbacks {
-                callback(progress: progress)
+            for callbackSet in promise.callbackSets {
+                callbackSet.progressCallback(progress: progress)
             }
         }
         

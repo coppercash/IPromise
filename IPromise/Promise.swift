@@ -16,36 +16,34 @@ public class Promise<V>: Thenable
     public internal(set) var value: V? = nil
     public internal(set) var reason: NSError? = nil
     
-    public typealias FulfillClosure = (value: V) -> Void
-    public typealias RejectClosure = (reason: NSError) -> Void
-    public typealias ProgressClosure = (progress: Float) -> Void
+    lazy var callbackSets: [CallbackSet<V, NSError>] = []
     
-    lazy var callbackSets: [String: CallbackSet<V, NSError>] = [:]
+    /*
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
     lazy var progressCallbacks: [ProgressClosure] = []
+*/
     
     // MARK: - Initializers
     
-    init() {}
+    init() {
+        self.state = .Pending
+    }
     
     required
-    public init(value: V)
-    {
+    public init(value: V) {
         self.value = value
         self.state = .Fulfilled
     }
     
     required
-    public init(reason: NSError)
-    {
+    public init(reason: NSError) {
         self.reason = reason
         self.state = .Rejected
     }
     
     convenience
-    public init(resolver: (resolve: FulfillClosure, reject: RejectClosure) -> Void)
-    {
+    public init(resolver: (resolve: (value: V) -> Void, reject: (reason: NSError) -> Void) -> Void) {
         self.init()
         
         let deferred = Deferred<V>(promise: self)
@@ -56,8 +54,7 @@ public class Promise<V>: Thenable
     }
     
     convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(thenable: T)
-    {
+    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(thenable: T) {
         self.init()
         
         let deferred = Deferred<V>(promise: self)
@@ -66,11 +63,10 @@ public class Promise<V>: Thenable
     
     // MARK: - Callbacks
     
-    func bindCallbackSet<D>(callbackSet: CallbackSet<V, NSError>, forDeferred deferred: Deferred<D>) -> Void
-    {
+    func bindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Void {
         objc_sync_enter(self)
         
-        self.callbackSets[deferred.identifier] = callbackSet
+        self.callbackSets.append(callbackSet)
         
         switch self.state {
         case .Fulfilled:
@@ -84,24 +80,24 @@ public class Promise<V>: Thenable
         objc_sync_exit(self)
     }
     
-    func unbindCallbackSet<D>(forDeferred deferred: Deferred<D>) {
+    func unbindCallbackSet(callbackSet: CallbackSet<V, NSError>) {
         objc_sync_enter(self)
 
-        self.callbackSets.removeValueForKey(deferred.identifier)
+        if let index = find(callbackSets, callbackSet)? {
+            self.callbackSets.removeAtIndex(index)
+        }
         
         objc_sync_exit(self)
     }
     
     // MARK: - Static APIs
     
-    public class func defer() -> (Deferred<V>, Promise<V>)
-    {
+    public class func defer() -> (Deferred<V>, Promise<V>) {
         let deferred = Deferred<V>()
         return (deferred, deferred.promise)
     }
     
-    public class func resolve<V>(value: Any) -> Promise<V>
-    {
+    public class func resolve<V>(value: Any) -> Promise<V> {
         switch value {
         case let promise as Promise<V>:
             return promise
@@ -114,8 +110,7 @@ public class Promise<V>: Thenable
         }
     }
     
-    public class func reject<V>(reason: NSError) -> Promise<V>
-    {
+    public class func reject<V>(reason: NSError) -> Promise<V> {
         return Promise<V>(reason: reason)
     }
     
@@ -125,6 +120,10 @@ public class Promise<V>: Thenable
     public typealias ValueType = V
     public typealias ReasonType = NSError
     public typealias ReturnType = Void
+    
+    typealias FulfillClosure = (value: V) -> Void
+    typealias RejectClosure = (reason: NSError) -> Void
+    typealias ProgressClosure = (progress: Float) -> Void
     
     public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
@@ -154,14 +153,12 @@ public class Promise<V>: Thenable
         }
 
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         
         nextDeferred.onCanceled { [unowned self, nextDeferred] () -> Void in
-            self.unbindCallbackSet(forDeferred: nextDeferred)
-            let cancelReason = NSError()
-            nextDeferred.reject(cancelReason)
-            
+            self.unbindCallbackSet(callbackSet)
+            nextDeferred.reject(NSError.promiseCancelError())
             if (self.callbackSets.count == 0) {
                 self.cancel()
             }
@@ -189,7 +186,7 @@ public class Promise<V>: Thenable
             }
         )
         
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         return nextPromise
     }
@@ -231,7 +228,7 @@ public extension Promise {
         }
         
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         return nextPromise
     }
@@ -255,7 +252,7 @@ public extension Promise {
             }
         )
         
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         return nextPromise
     }
@@ -289,7 +286,7 @@ public extension Promise {
                 nextDeferred.progress(nextProgress)
         }
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         return nextPromise
     }
@@ -312,7 +309,7 @@ public extension Promise {
                 nextDeferred.progress(progress)
             }
         )
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         return nextPromise
     }
@@ -335,7 +332,7 @@ public extension Promise {
                 nextDeferred.progress(nextProgress)
             }
         )
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         return nextPromise
     }
@@ -355,7 +352,7 @@ public extension Promise {
                 nextDeferred.progress(progress)
             }
         )
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         return nextPromise
     }
