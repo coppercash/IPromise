@@ -11,8 +11,10 @@ import Foundation
 public class Deferred<V> {
     
     public let promise: Promise<V>
-    let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
+    var cancelation: Optional<() -> Promise<Void>> = nil
+    
     /*
+    let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
     private lazy var callbackSets: [String: CallbackSet<V, NSError>] = [:]
     */
     required
@@ -22,55 +24,30 @@ public class Deferred<V> {
     
     init(promise: Promise<V>) {
         self.promise = promise
+        promise.deferred = self
     }
     
-    public func resolve(value: V) -> Void
-    {
-        objc_sync_enter(promise)
-        
-        if promise.state.fulfill() {
-            promise.value = value
-            for callbackSet in promise.callbackSets {
-                callbackSet.fulfillCallback(value: value)
-            }
-        }
-        
-        objc_sync_exit(promise)
+    public func resolve(value: V) -> Void {
+        self.promise.resolve(value)
     }
     
-    public func reject(reason: NSError) -> Void
-    {
-        objc_sync_enter(promise)
-        
-        if promise.state.reject() {
-            promise.reason = reason
-            for callbackSet in promise.callbackSets {
-                callbackSet.rejectCallback(reason: reason)
-            }
-        }
-        
-        objc_sync_exit(promise)
+    public func reject(reason: NSError) -> Void {
+        self.promise.reject(reason)
     }
     
-    public func progress(progress: Float) -> Void
-    {
-        objc_sync_enter(promise)
-        
-        if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
-            for callbackSet in promise.callbackSets {
-                callbackSet.progressCallback(progress: progress)
-            }
-        }
-        
-        objc_sync_exit(promise)
+    public func progress(progress: Float) -> Void {
+        self.promise.progress(progress)
     }
     
     public func onCanceled(cancelation: () -> Void) {
-        
+        self.cancelation = {
+            cancelation()
+            return Promise<Void>(value: ())
+        }
     }
     
     public func onCanceled(cancelation: () -> Promise<Void>) {
-        
+        self.cancelation = cancelation
     }
     
     func doCancel() {

@@ -10,6 +10,7 @@ import Foundation
 
 struct CallbackSet<V, R>: Equatable {
     let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
+    
     let fulfillCallback: (value: V) -> Void
     let rejectCallback: (reason: R) -> Void
     let progressCallback: (progress: Float) -> Void
