@@ -131,10 +131,13 @@ public class Promise<V>: Thenable
     
     // MARK: - Callbacks
     
-    func bindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Void {
+    func bindCallbackSet<D>(callbackSet: CallbackSet<V, NSError>, forDeferred deferred: Deferred<D>) -> Void {
         objc_sync_enter(self)
         
         self.callbackSets.append(callbackSet)
+        deferred.onCanceled { [unowned self, callbackSet] () -> Void in
+            self.unbindCallbackSet(callbackSet)
+        }
         
         switch self.state {
         case .Fulfilled:
@@ -200,12 +203,7 @@ public class Promise<V>: Thenable
         }
 
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet)
-        
-        
-        nextDeferred.onCanceled { [unowned self, callbackSet] () -> Void in
-            self.unbindCallbackSet(callbackSet)
-        }
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
         
         return nextPromise
     }
@@ -229,7 +227,7 @@ public class Promise<V>: Thenable
             }
         )
         
-        self.bindCallbackSet(callbackSet)
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
         
         return nextPromise
     }
@@ -278,7 +276,7 @@ public extension Promise {
         }
         
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet)
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
         
         return nextPromise
     }
@@ -302,7 +300,7 @@ public extension Promise {
             }
         )
         
-        self.bindCallbackSet(callbackSet)
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
         
         return nextPromise
     }
@@ -335,9 +333,10 @@ public extension Promise {
                 let nextProgress = onProgress!(progress: progress)
                 nextDeferred.progress(nextProgress)
         }
+        
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet)
-
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        
         return nextPromise
     }
     
@@ -359,8 +358,8 @@ public extension Promise {
                 nextDeferred.progress(progress)
             }
         )
-        self.bindCallbackSet(callbackSet)
-
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        
         return nextPromise
     }
 }
@@ -382,7 +381,7 @@ public extension Promise {
                 nextDeferred.progress(nextProgress)
             }
         )
-        self.bindCallbackSet(callbackSet)
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
 
         return nextPromise
     }
@@ -402,7 +401,7 @@ public extension Promise {
                 nextDeferred.progress(progress)
             }
         )
-        self.bindCallbackSet(callbackSet)
+        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
 
         return nextPromise
     }
