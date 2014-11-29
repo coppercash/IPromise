@@ -19,6 +19,8 @@ public class Promise<V>: Thenable
     weak var deferred: Deferred<V>?
     lazy var callbackSets: [CallbackSet<V, NSError>] = []
     
+    lazy var cancelDeferred: Deferred<Void> = Deferred<Void>()
+    
     /*
     lazy var fulfillCallbacks: [FulfillClosure] = []
     lazy var rejectCallbacks: [RejectClosure] = []
@@ -135,8 +137,8 @@ public class Promise<V>: Thenable
         objc_sync_enter(self)
         
         self.callbackSets.append(callbackSet)
-        deferred.onCanceled { [unowned self, callbackSet] () -> Void in
-            self.unbindCallbackSet(callbackSet)
+        deferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
+            self.cancelByRemovingCallbackSet(callbackSet)
         }
         
         switch self.state {
@@ -151,17 +153,22 @@ public class Promise<V>: Thenable
         objc_sync_exit(self)
     }
     
-    func unbindCallbackSet(callbackSet: CallbackSet<V, NSError>) {
+    func unbindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Int {
+        var count = Int.max
+        
         objc_sync_enter(self)
         
-        if let index = find(self.callbackSets, callbackSet)? {
-            self.callbackSets.removeAtIndex(index)
-        }
-        if self.callbackSets.count == 0 {
-            self.cancel()
+        var callbackSets: [CallbackSet<V, NSError>] = self.callbackSets
+        
+        if let index = find(callbackSets, callbackSet)? {
+            callbackSets.removeAtIndex(index)
         }
         
+        count = callbackSets.count
+        
         objc_sync_exit(self)
+        
+        return count
     }
     
     // MARK: - Thenable
@@ -237,12 +244,23 @@ public class Promise<V>: Thenable
 
     public func cancel() -> Promise<Void> {
         reject(NSError.promiseCancelError())
-        
-        if let cancelation = self.deferred?.cancelation? {
-            return cancelation()
+        return primitiveCancel(false)
+    }
+    
+    func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Promise<Void> {
+        let cancel: Bool = unbindCallbackSet(callbackSet) == 0
+        if cancel {
+            reject(NSError.promiseCancelError())
+        }
+        return primitiveCancel(cancel)
+    }
+    
+    public func primitiveCancel(cached: Bool) -> Promise<Void> {
+        if let deferred = self.deferred? {
+            return deferred.cancel()
         }
         else {
-            return Promise<Void>(value: ())
+            return Promise<Void>(value: ()) // TODO: Return fail
         }
     }
 }

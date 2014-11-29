@@ -11,7 +11,9 @@ import Foundation
 public class Deferred<V> {
     
     public let promise: Promise<V>
+    
     var cancelation: Optional<() -> Promise<Void>> = nil
+    var cancelPromise: Optional<Promise<Void>> = nil
     
     /*
     let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
@@ -40,7 +42,7 @@ public class Deferred<V> {
     }
     
     public func onCanceled(cancelation: () -> Void) {
-        self.cancelation = {
+        onCanceled { () -> Promise<Void> in
             cancelation()
             return Promise<Void>(value: ())
         }
@@ -50,7 +52,7 @@ public class Deferred<V> {
         self.cancelation = cancelation
     }
     
-    func doCancel() {
+    func cancel(cached: Bool) -> Promise<Void> {
         
     }
     
