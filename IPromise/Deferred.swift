@@ -12,13 +12,8 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
-    var cancelation: Optional<() -> Promise<Void>> = nil
-    var cancelPromise: Optional<Promise<Void>> = nil
+    var cancelEvent: Optional<CancelEvent> = nil;
     
-    /*
-    let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
-    private lazy var callbackSets: [String: CallbackSet<V, NSError>] = [:]
-    */
     required
     public convenience init() {
         self.init(promise: Promise<V>())
@@ -40,21 +35,47 @@ public class Deferred<V> {
     public func progress(progress: Float) -> Void {
         self.promise.progress(progress)
     }
+}
+
+public extension Deferred {
     
-    public func onCanceled(cancelation: () -> Void) {
-        onCanceled { () -> Promise<Void> in
+    public func onCanceled(cancelation: () -> Void) -> Bool {
+        return onCanceled { () -> Promise<Void> in
             cancelation()
             return Promise<Void>(value: ())
         }
     }
     
-    public func onCanceled(cancelation: () -> Promise<Void>) {
-        self.cancelation = cancelation
+    public func onCanceled(cancelation: () -> Promise<Void>) -> Bool {
+        if self.cancelEvent != nil {
+            return false
+        }
+        else {
+            let cancelEvent: CancelEvent = CancelEvent(callback: cancelation)
+            self.cancelEvent = cancelEvent
+            if let reason = self.promise.reason? {
+                if reason.isCanceled() {
+                    cancelEvent.invoke()
+                }
+            }
+            return true
+        }
     }
     
-    func cancel(cached: Bool) -> Promise<Void> {
-        
+    internal func cancel(#invoke: Bool) -> Promise<Void> {
+        if let cancelEvent = self.cancelEvent {
+            if invoke {
+                cancelEvent.invoke()
+            }
+            return cancelEvent.buffer.promise
+        }
+        else {
+            return Promise<Void>(reason: NSError()) // TODO
+        }
     }
+}
+
+extension Deferred {
     
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>
         (#thenable: T, fraction: Float) -> Void
@@ -78,35 +99,3 @@ public class Deferred<V> {
         )
     }
 }
-/*
-extension Deferred {
-    func bindCallbackSet<D>(deferred: Deferred<D>, callbackSet: CallbackSet<V, NSError>) {
-        objc_sync_enter(self)
-
-        self.callbackSets[deferred.identifier] = callbackSet
-        
-        let promise = self.promise
-        switch promise.state {
-        case .Fulfilled:
-            callbackSet.fulfillCallback(value: promise.value!)
-        case .Rejected:
-            callbackSet.rejectCallback(reason: promise.reason!)
-        default:
-            break
-        }
-        
-        objc_sync_exit(self)
-    }
-}
-*/
-/*
-extension Deferred: Hashable, Equatable {
-    public var hashValue: Int {
-        return identifier.hashValue
-    }
-}
-
-public func ==<V>(lhs: Deferred<V>, rhs: Deferred<V>) -> Bool {
-    return lhs.identifier == rhs.identifier
-}
-*/
