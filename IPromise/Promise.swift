@@ -125,7 +125,7 @@ public class Promise<V>: Thenable
     
     // MARK: - Callbacks
     
-    func bindCallbackSet<D>(callbackSet: CallbackSet<V, NSError>, forDeferred deferred: Deferred<D>) -> Void {
+    func bindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Void {
         objc_sync_enter(self)
         
         self.callbackSets.append(callbackSet)
@@ -197,7 +197,7 @@ public class Promise<V>: Thenable
         }
 
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -225,7 +225,7 @@ public class Promise<V>: Thenable
             }
         )
         
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -267,7 +267,7 @@ public extension Promise {
         }
         
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -295,7 +295,7 @@ public extension Promise {
             }
         )
         
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -334,7 +334,7 @@ public extension Promise {
         }
         
         let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -362,7 +362,7 @@ public extension Promise {
             }
         )
         
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
         
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -390,7 +390,7 @@ public extension Promise {
                 nextDeferred.progress(nextProgress)
             }
         )
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
@@ -414,7 +414,7 @@ public extension Promise {
                 nextDeferred.progress(progress)
             }
         )
-        self.bindCallbackSet(callbackSet, forDeferred: nextDeferred)
+        self.bindCallbackSet(callbackSet)
 
         nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
             self.cancelByRemovingCallbackSet(callbackSet)
