@@ -1327,7 +1327,6 @@ class PromiseTests: XCTestCase
         })
         
         let promise1 = promise.then(onFulfilled: { (value) -> Void in
-            
         })
         
         promise0.cancel().then(onFulfilled: { (value) -> Void in

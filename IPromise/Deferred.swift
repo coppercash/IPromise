@@ -12,7 +12,7 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
-    var cancelEvent: Optional<CancelEvent> = nil;
+    private var cancelEvent: Optional<CancelEvent> = nil;
     
     required
     public convenience init() {
