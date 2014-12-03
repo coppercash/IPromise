@@ -17,7 +17,7 @@ public class Promise<V>: Thenable
     public internal(set) var reason: NSError? = nil
     
     weak var deferred: Deferred<V>?
-    lazy var callbackSets: [CallbackSet<V, NSError>] = []
+    lazy var callbackSets: [CallbackSet<V>] = []
     
     // MARK: - Initializers
     
@@ -125,7 +125,7 @@ public class Promise<V>: Thenable
     
     // MARK: - Callbacks
     
-    func bindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Void {
+    func bindCallbackSet(callbackSet: CallbackSet<V>) -> Void {
         objc_sync_enter(self)
         
         self.callbackSets.append(callbackSet)
@@ -142,7 +142,7 @@ public class Promise<V>: Thenable
         objc_sync_exit(self)
     }
     
-    func unbindCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Int {
+    func unbindCallbackSet(callbackSet: CallbackSet<V>) -> Int {
         var count = Int.max
         
         objc_sync_enter(self)
@@ -175,67 +175,49 @@ public class Promise<V>: Thenable
         onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> Promise<Void>
     {
-        let (nextDeferred, nextPromise) = Promise<Void>.defer()
+        let nextDeferred = Deferred<Void>()
         
+        let builder = CallbackSet<V>.builder(self)
+        if let onRejected = onRejected? {
+            builder.onRejected { (reason: NSError) -> Void in
+                onRejected(reason: reason)
+                nextDeferred.resolve()
+            }
+        }
+        if let onProgress = onProgress? {
+            builder.onProgress { (progress: Float) -> Void in
+                let nextProgress = onProgress(progress: progress)
+                nextDeferred.progress(nextProgress)
+            }
+        }
         let fulfillCallback: FulfillClosure = (onFulfilled == nil) ?
             { (value: V) -> Void in nextDeferred.resolve() } :
             { (value: V) -> Void in
                 onFulfilled!(value: value)
                 nextDeferred.resolve()
         }
-        let rejectCallback: RejectClosure = (onRejected == nil) ?
-            { (reason: NSError) -> Void in nextDeferred.reject(reason) } :
-            { (reason: NSError) -> Void in
-                onRejected!(reason: reason)
-                nextDeferred.resolve()
-        }
-        let progressCallback: ProgressClosure = (onProgress == nil) ?
-            { (progress: Float) -> Void in nextDeferred.progress(progress) } :
-            { (progress: Float) -> Void in
-                let nextProgress = onProgress!(progress: progress)
-                nextDeferred.progress(nextProgress)
-        }
-
-        let callbackSet = CallbackSet<V, NSError>(fulfillCallback, rejectCallback, progressCallback)
-        self.bindCallbackSet(callbackSet)
+        let callbackSet = builder.build(nextDeferred, onFulfilled: fulfillCallback)
         
-        nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
-            self.cancelByRemovingCallbackSet(callbackSet)
-        }
-
-        return nextPromise
+        return nextDeferred.promise
     }
 
     public func catch(
         #ignored: (reason: NSError) -> Void
         ) -> Promise<Void>
     {
-        let (nextDeferred, nextPromise) = Promise<Void>.defer()
-        
-        let callbackSet = CallbackSet<V, NSError>(
-            fulfillCallback: { (value) -> Void in
-                nextDeferred.resolve()
-            },
-            rejectCallback: { (reason) -> Void in
+        let nextDeferred = Deferred<Void>()
+
+        CallbackSet<V>.builder(self)
+            .onRejected { (reason) -> Void in
                 ignored(reason: reason)
                 nextDeferred.resolve()
-            },
-            progressCallback: { (progress) -> Void in
-                nextDeferred.progress(progress)
             }
-        )
-        
-        self.bindCallbackSet(callbackSet)
-        
-        nextDeferred.onCanceled { [unowned self, callbackSet] () -> Promise<Void> in
-            self.cancelByRemovingCallbackSet(callbackSet)
+            .build(nextDeferred) { (value) -> Void in
+                nextDeferred.resolve()
         }
         
-        return nextPromise
+        return nextDeferred.promise
     }
-
-    
-    // MARK: - Cancel
 }
 
 public extension Promise {
@@ -545,7 +527,7 @@ public extension Promise {
         return invokeCancelEvent(canceled: true)
     }
     
-    internal func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V, NSError>) -> Promise<Void> {
+    internal func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V>) -> Promise<Void> {
         let cancel: Bool = unbindCallbackSet(callbackSet) == 0
         if cancel {
             reject(NSError.promiseCancelError())
