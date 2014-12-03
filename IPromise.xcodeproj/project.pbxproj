@@ -11,7 +11,7 @@
 		BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE60265D19F5D6A200FED245 /* ScenarioTests.swift */; };
 		BEBDD10319EDFC3C00DA957D /* IPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEBDD10219EDFC3C00DA957D /* IPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11719EDFC8300DA957D /* Promise.swift */; };
-		BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11819EDFC8300DA957D /* PromiseState.swift */; };
+		BEBDD11C19EDFC8300DA957D /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11819EDFC8300DA957D /* State.swift */; };
 		BEBDD11D19EDFC8300DA957D /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11919EDFC8300DA957D /* Thenable.swift */; };
 		BEBDD12219EDFCA400DA957D /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */; };
 		BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD12019EDFCA400DA957D /* Utilities.swift */; };
@@ -31,7 +31,7 @@
 		BEBDD10819EDFC3C00DA957D /* IPromiseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPromiseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEBDD10B19EDFC3C00DA957D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BEBDD11719EDFC8300DA957D /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
-		BEBDD11819EDFC8300DA957D /* PromiseState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseState.swift; sourceTree = "<group>"; };
+		BEBDD11819EDFC8300DA957D /* State.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		BEBDD11919EDFC8300DA957D /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
 		BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		BEBDD12019EDFCA400DA957D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
@@ -82,7 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				BEBDD11919EDFC8300DA957D /* Thenable.swift */,
-				BEBDD11819EDFC8300DA957D /* PromiseState.swift */,
+				BEBDD11819EDFC8300DA957D /* State.swift */,
 				BE4849F81A1E33BA00763E3D /* CallbackSet.swift */,
 				BEBDD11719EDFC8300DA957D /* Promise.swift */,
 				BEC1A0751A01BF820088F675 /* Deferred.swift */,
@@ -231,7 +231,7 @@
 				BEBDD11D19EDFC8300DA957D /* Thenable.swift in Sources */,
 				BEC3E55E1A2B6DDA00CB2E87 /* CancelEvent.swift in Sources */,
 				BEBDD12619EDFD6300DA957D /* NSError+Promise.swift in Sources */,
-				BEBDD11C19EDFC8300DA957D /* PromiseState.swift in Sources */,
+				BEBDD11C19EDFC8300DA957D /* State.swift in Sources */,
 				BE4849F91A1E33BA00763E3D /* CallbackSet.swift in Sources */,
 				BEC1A0761A01BF820088F675 /* Deferred.swift in Sources */,
 				BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */,

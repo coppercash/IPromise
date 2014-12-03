@@ -12,7 +12,7 @@ public class Promise<V>: Thenable
 {
     // MARK: - ivars
     
-    public internal(set) var state: PromiseState = .Pending
+    public internal(set) var state: State = .Pending
     public internal(set) var value: V? = nil
     public internal(set) var reason: NSError? = nil
     

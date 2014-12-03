@@ -24,12 +24,12 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.value)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -45,11 +45,11 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         })
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.reason)
 
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertEqual(promise.reason!, ERROR_0)
         })
     }
@@ -72,12 +72,12 @@ class PromiseTests: XCTestCase
             reject(reason: ERROR_2)
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+        XCTAssertEqual(promise.state, State.Fulfilled)
         XCTAssertEqual(promise.value!, STRING_VALUE_0)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -101,12 +101,12 @@ class PromiseTests: XCTestCase
             reject(reason: ERROR_2)
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Rejected)
+        XCTAssertEqual(promise.state, State.Rejected)
         XCTAssertEqual(promise.reason!, ERROR_0)
         XCTAssertNil(promise.value)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertEqual(promise.reason!, ERROR_0)
             XCTAssertNil(promise.value)
         })
@@ -292,7 +292,7 @@ class PromiseTests: XCTestCase
     
     func test_optional_fulfill() {
         let promise = Promise(value: STRING_VALUE_0)
-        XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+        XCTAssertEqual(promise.state, State.Fulfilled)
         XCTAssertNil(promise.reason)
         
         promise
@@ -316,7 +316,7 @@ class PromiseTests: XCTestCase
 
     func test_optional_reject() {
         let promise = Promise<String>(reason: ERROR_0)
-        XCTAssertEqual(promise.state, PromiseState.Rejected)
+        XCTAssertEqual(promise.state, State.Rejected)
         XCTAssertNil(promise.value)
 
         promise
@@ -610,12 +610,12 @@ class PromiseTests: XCTestCase
                 }
         )
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.value)
         XCTAssertNil(promise.reason)
 
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -639,12 +639,12 @@ class PromiseTests: XCTestCase
             }
         )
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertTrue(promise.value == nil)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertTrue(promise.value == nil)
             XCTAssertEqual(promise.reason!, ERROR_0)
         })
@@ -687,7 +687,7 @@ class PromiseTests: XCTestCase
             println(reason.localizedDescription)
             expt1.fulfill()
         }
-        XCTAssertEqual(a1.state, PromiseState.Rejected)
+        XCTAssertEqual(a1.state, State.Rejected)
 
         let expt3 = expectationWithDescription("\(__FUNCTION__)_3")
         let q3 = Promise<Int>(value: 3)
@@ -698,7 +698,7 @@ class PromiseTests: XCTestCase
             println(reason.localizedDescription)
             expt3.fulfill()
         }
-        XCTAssertEqual(a3.state, PromiseState.Rejected)
+        XCTAssertEqual(a3.state, State.Rejected)
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
@@ -707,7 +707,7 @@ class PromiseTests: XCTestCase
 
     func test_reject() {
         let a0 = Promise<String>.reject(ERROR_0)
-        XCTAssertEqual(PromiseState.Rejected, a0.state)
+        XCTAssertEqual(State.Rejected, a0.state)
         XCTAssertNil(a0.value)
         XCTAssertEqual(ERROR_0, a0.reason!)
     }
