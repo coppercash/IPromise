@@ -89,7 +89,7 @@ public class Promise<V>: Thenable
         if self.state.fulfill() {
             self.value = value
             for callbackSet in self.callbackSets {
-                callbackSet.fulfillCallback(value: value)
+                callbackSet.fulfill(value: value)
             }
         }
         
@@ -103,7 +103,7 @@ public class Promise<V>: Thenable
         if self.state.reject() {
             self.reason = reason
             for callbackSet in self.callbackSets {
-                callbackSet.rejectCallback(reason: reason)
+                callbackSet.reject(reason: reason)
             }
         }
         
@@ -116,7 +116,7 @@ public class Promise<V>: Thenable
         
         if self.state == .Pending && (0.0 <= progress && progress <= 1.0) {
             for callbackSet in self.callbackSets {
-                callbackSet.progressCallback(progress: progress)
+                callbackSet.progress(progress: progress)
             }
         }
         
@@ -132,9 +132,9 @@ public class Promise<V>: Thenable
         
         switch self.state {
         case .Fulfilled:
-            callbackSet.fulfillCallback(value: self.value!)
+            callbackSet.fulfill(value: self.value!)
         case .Rejected:
-            callbackSet.rejectCallback(reason: self.reason!)
+            callbackSet.reject(reason: self.reason!)
         default:
             break
         }
@@ -164,11 +164,7 @@ public class Promise<V>: Thenable
     public typealias ValueType = V
     public typealias ReasonType = NSError
     public typealias ReturnType = Void
-    
-    typealias FulfillClosure = (value: V) -> Void
-    typealias RejectClosure = (reason: NSError) -> Void
-    typealias ProgressClosure = (progress: Float) -> Void
-    
+        
     public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
         onRejected: Optional<(reason: NSError) -> Void> = nil,
@@ -179,24 +175,24 @@ public class Promise<V>: Thenable
         
         let builder = CallbackSet<V>.builder(self)
         if let onRejected = onRejected? {
-            builder.onRejected { (reason: NSError) -> Void in
+            builder.reject { (reason: NSError) -> Void in
                 onRejected(reason: reason)
                 nextDeferred.resolve()
             }
         }
         if let onProgress = onProgress? {
-            builder.onProgress { (progress: Float) -> Void in
+            builder.progress { (progress: Float) -> Void in
                 let nextProgress = onProgress(progress: progress)
                 nextDeferred.progress(nextProgress)
             }
         }
-        let fulfillCallback: FulfillClosure = (onFulfilled == nil) ?
+        let fulfillCallback: (value: V) -> Void = (onFulfilled == nil) ?
             { (value: V) -> Void in nextDeferred.resolve() } :
             { (value: V) -> Void in
                 onFulfilled!(value: value)
                 nextDeferred.resolve()
         }
-        let callbackSet = builder.build(nextDeferred, onFulfilled: fulfillCallback)
+        let callbackSet = builder.build(nextDeferred, fulfill: fulfillCallback)
         
         return nextDeferred.promise
     }
@@ -208,7 +204,7 @@ public class Promise<V>: Thenable
         let nextDeferred = Deferred<Void>()
 
         CallbackSet<V>.builder(self)
-            .onRejected { (reason) -> Void in
+            .reject { (reason) -> Void in
                 ignored(reason: reason)
                 nextDeferred.resolve()
             }
@@ -232,13 +228,13 @@ public extension Promise {
         
         let builder = CallbackSet<V>.builder(self)
         if let onRejected = onRejected? {
-            builder.onRejected { (reason: NSError) -> Void in
+            builder.reject { (reason: NSError) -> Void in
                 let nextValue = onRejected(reason: reason)
                 nextDeferred.resolve(nextValue)
             }
         }
         if let onProgress = onProgress? {
-            builder.onProgress { (progress: Float) -> Void in
+            builder.progress { (progress: Float) -> Void in
                 let nextProgress = onProgress(progress: progress)
                 nextDeferred.progress(nextProgress)
             }
@@ -258,7 +254,7 @@ public extension Promise {
         let nextDeferred = Deferred<V>()
         
         CallbackSet<V>.builder(self)
-            .onRejected { (reason) -> Void in
+            .reject { (reason) -> Void in
                 let nextValue = onRejected(reason: reason)
                 nextDeferred.resolve(nextValue)
             }
@@ -282,13 +278,13 @@ public extension Promise {
         
         let builder = CallbackSet<V>.builder(self)
         if let onRejected = onRejected? {
-            builder.onRejected { (reason: NSError) -> Void in
+            builder.reject { (reason: NSError) -> Void in
                 let nextThenable = onRejected(reason: reason)
                 nextDeferred.resolve(thenable: nextThenable, fraction: fraction)
             }
         }
         if let onProgress = onProgress? {
-            builder.onProgress { (progress: Float) -> Void in
+            builder.progress { (progress: Float) -> Void in
                 let nextProgress = onProgress(progress: progress)
                 nextDeferred.progress(nextProgress)
             }
@@ -308,7 +304,7 @@ public extension Promise {
         let nextDeferred = Deferred<V>()
         
         CallbackSet<V>.builder(self)
-            .onRejected { (reason) -> Void in
+            .reject { (reason) -> Void in
                 let nextPromise = onRejected(reason: reason)
                 nextDeferred.resolve(thenable: nextPromise, fraction: 0.0)
             }
@@ -325,7 +321,7 @@ public extension Promise {
         let nextDeferred = Deferred<V>()
         
         CallbackSet<V>.builder(self)
-            .onProgress { (progress) -> Void in
+            .progress { (progress) -> Void in
                 let nextProgress = onProgress(progress: progress)
                 nextDeferred.progress(nextProgress)
             }

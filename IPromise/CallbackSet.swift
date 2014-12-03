@@ -9,20 +9,21 @@
 import Foundation
 
 struct CallbackSet<V>: Equatable {
+    
     let identifier: String = NSProcessInfo.processInfo().globallyUniqueString
     
-    let fulfillCallback: (value: V) -> Void
-    let rejectCallback: (reason: NSError) -> Void
-    let progressCallback: (progress: Float) -> Void
+    let fulfill: (value: V) -> Void
+    let reject: (reason: NSError) -> Void
+    let progress: (progress: Float) -> Void
     
     init(
-        fulfillCallback: (value: V) -> Void,
-        rejectCallback: (reason: NSError) -> Void,
-        progressCallback: (progress: Float) -> Void)
+        fulfill: (value: V) -> Void,
+        reject: (reason: NSError) -> Void,
+        progress: (progress: Float) -> Void)
     {
-        self.fulfillCallback = fulfillCallback
-        self.rejectCallback = rejectCallback
-        self.progressCallback = progressCallback
+        self.fulfill = fulfill
+        self.reject = reject
+        self.progress = progress
     }
     
     static func builder(promise: Promise<V>) -> CallbackSetBuilder<V> {
@@ -37,50 +38,50 @@ func ==<V>(lhs: CallbackSet<V>, rhs: CallbackSet<V>) -> Bool {
 class CallbackSetBuilder<V> {
     
     private let promise: Promise<V>
-    private var onRejected: Optional<(reason: NSError) -> Void>
-    private var onProgress: Optional<(progress: Float) -> Void>
-    private var onCanceled: Optional<() -> Promise<Void>>
+    private var reject: Optional<(reason: NSError) -> Void>
+    private var progress: Optional<(progress: Float) -> Void>
+    private var cancel: Optional<() -> Promise<Void>>
     
     init(promise: Promise<V>) {
         self.promise = promise
     }
     
-    func onRejected(closure: (reason: NSError) -> Void) -> CallbackSetBuilder<V> {
-        self.onRejected = closure
-        return self
-    }
-    
-    func onProgress(closure: (progress: Float) -> Void) -> CallbackSetBuilder<V> {
-        self.onProgress = closure
+    func reject(callback: (reason: NSError) -> Void) -> CallbackSetBuilder<V> {
+        self.reject = callback
         return self
     }
 
-    func onCanceled(closure: () -> Promise<Void>) -> CallbackSetBuilder<V> {
-        self.onCanceled = closure
+    func progress(callback: (progress: Float) -> Void) -> CallbackSetBuilder<V> {
+        self.progress = callback
         return self
     }
 
-    func build<N>(nextDeferred: Deferred<N>, onFulfilled: (value: V) -> Void) -> CallbackSet<V> {
+    func cancel(callback: () -> Promise<Void>) -> CallbackSetBuilder<V> {
+        self.cancel = callback
+        return self
+    }
+
+    func build<N>(nextDeferred: Deferred<N>, fulfill: (value: V) -> Void) -> CallbackSet<V> {
         
-        let onRejected: (reason: NSError) -> Void = (self.onRejected != nil) ?
-            self.onRejected! :
+        let reject: (reason: NSError) -> Void = (self.reject != nil) ?
+            self.reject! :
             { (reason: NSError) -> Void in nextDeferred.reject(reason) }
         
-        let onProgress: (progress: Float) -> Void = (self.onProgress != nil) ?
-            self.onProgress! :
+        let progress: (progress: Float) -> Void = (self.progress != nil) ?
+            self.progress! :
             { (progress: Float) -> Void in nextDeferred.progress(progress) }
         
-        let callbackSet: CallbackSet<V> = CallbackSet<V>(onFulfilled, onRejected, onProgress)
+        let callbackSet: CallbackSet<V> = CallbackSet<V>(fulfill, reject, progress)
         
         let promise = self.promise
         
-        let onCanceled: () -> Promise<Void> = (self.onCanceled != nil) ?
-            self.onCanceled! :
+        let cancel: () -> Promise<Void> = (self.cancel != nil) ?
+            self.cancel! :
             { [unowned promise, callbackSet] () -> Promise<Void> in
                 promise.cancelByRemovingCallbackSet(callbackSet)
         }
         
-        nextDeferred.onCanceled(onCanceled)
+        nextDeferred.onCanceled(cancel)
         
         promise.bindCallbackSet(callbackSet)
         
@@ -88,7 +89,7 @@ class CallbackSetBuilder<V> {
     }
     
     func build(nextDeferred: Deferred<V>) -> CallbackSet<V> {
-        return build(nextDeferred, onFulfilled: { (value) -> Void in
+        return build(nextDeferred, fulfill: { (value) -> Void in
             nextDeferred.resolve(value)
         })
     }
