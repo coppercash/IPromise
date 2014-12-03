@@ -662,8 +662,8 @@ class PromiseTests: XCTestCase
         }
         XCTAssertEqual(a0.value! as String, STRING_VALUE_0)
         
-        let a1: Promise<Any> = Promise<String>.resolve(STRING_VALUE_0)
-        XCTAssertEqual(a1.value as String, STRING_VALUE_0)
+        let a1: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
+        XCTAssertEqual(STRING_VALUE_0, a1.value!)
         
         let q2 = Promise<String>(value: STRING_VALUE_0)
         let a2: Promise<String> = Promise<String>.resolve(q2)
@@ -706,10 +706,10 @@ class PromiseTests: XCTestCase
     // MARK: - reject(_)
 
     func test_reject() {
-        let a0 = AnyPromise.reject(ERROR_0)
-        XCTAssertEqual(a0.state, PromiseState.Rejected)
-        XCTAssertTrue(a0.value == nil)
-        XCTAssertEqual(a0.reason as NSError, ERROR_0)
+        let a0 = Promise<String>.reject(ERROR_0)
+        XCTAssertEqual(PromiseState.Rejected, a0.state)
+        XCTAssertNil(a0.value)
+        XCTAssertEqual(ERROR_0, a0.reason!)
     }
 
     // MARK: - all
@@ -720,10 +720,9 @@ class PromiseTests: XCTestCase
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(vagueThenable:
-            AnyPromise { (resolve, reject) -> Void in
-                0 ~> resolve(value: STRING_VALUE_2)
-            })
+        let prms2 = Promise<Any?> { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_2)
+        }
         
         let promise = Promise<Any>.all(prms0, prms1, prms2)
         promise.then(
@@ -780,10 +779,9 @@ class PromiseTests: XCTestCase
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(vagueThenable:
-            AnyPromise { (resolve, reject) -> Void in
-                0 ~> reject(reason: ERROR_2)
-            })
+        let prms2 = Promise<Any?> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_2)
+        }
         
         let promise = Promise<Any>.all([prms0, prms1, prms2])
         promise.then(
@@ -1003,82 +1001,6 @@ class PromiseTests: XCTestCase
         d2.progress(0.6)
         d2.progress(0.7)
         d2.progress(0.8)
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
-
-    // MARK: - init(:vagueThenable)
-    
-    func test_init_vagueThenable_fulfill() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> resolve(value: STRING_VALUE_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertEqual(value as String, STRING_VALUE_0)
-                expt.fulfill()
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertFalse(true)
-            }
-        )
-        
-        XCTAssertEqual(promise.state, PromiseState.Pending)
-        XCTAssertTrue(promise.value == nil)
-        XCTAssertNil(promise.reason)
-        
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
-            XCTAssertEqual(promise.value as String, STRING_VALUE_0)
-            XCTAssertNil(promise.reason)
-        })
-    }
-    
-    func test_init_vagueThenable_rejectNSError() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> reject(reason: ERROR_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertFalse(true)
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertEqual(reason, ERROR_0)
-                expt.fulfill()
-            }
-        )
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
-    
-    func test_init_vagueThenable_rejectAny() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> reject(reason: STRING_VALUE_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertFalse(true)
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertEqual(reason.domain, PromiseErrorDomain)
-                XCTAssertEqual(reason.code, PromiseReasonWrapperError)
-                XCTAssertEqual(reason.userInfo![PromiseErrorReasonKey]! as String, STRING_VALUE_0)
-
-                expt.fulfill()
-            }
-        )
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }

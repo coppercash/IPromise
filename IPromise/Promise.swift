@@ -63,7 +63,7 @@ public class Promise<V>: Thenable
         return (deferred, deferred.promise)
     }
     
-    public class func resolve<V>(value: Any) -> Promise<V> {
+    public class func resolve(value: Any) -> Promise<V> {
         switch value {
         case let promise as Promise<V>:
             return promise
@@ -76,7 +76,7 @@ public class Promise<V>: Thenable
         }
     }
     
-    public class func reject<V>(reason: NSError) -> Promise<V> {
+    public class func reject(reason: NSError) -> Promise<V> {
         return Promise<V>(reason: reason)
     }
     

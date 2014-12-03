@@ -33,28 +33,6 @@ class ReadMeTests: XCTestCase {
                 println(value.stringByAppendingString(" Oh yeah!"))
         }
     }
-
-    func test_typeFree() {
-        
-        func answerToUniverse() -> AnyPromise {
-            return AnyPromise(value: 42)
-        }
-        
-        let typeFreePromise: AnyPromise = answerToUniverse()
-        
-        typeFreePromise.then(
-            onFulfilled: { (value: Any?) -> Any? in
-                let isItStill42 = (value as Int) == 42
-                return nil
-            },
-            onRejected: { (reason: Any?) -> Any? in
-                return nil
-            }
-        )
-        
-        let fromTypeFree: Promise<Any?> = Promise(vagueThenable: typeFreePromise)
-        let fromTypeSafe: AnyPromise = AnyPromise(promise: fromTypeFree)
-    }
     
     func test_aggregate() {
         
