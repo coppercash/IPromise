@@ -12,7 +12,9 @@ public let PromiseErrorDomain = "PromiseErrorDomain"
 public let PromiseTypeError = 1000
 public let PromiseReasonWrapperError = 1001
 public let PromiseValueTypeError = 1002
-public let PromiseCancelError = 1002
+public let PromiseCancelError = 1003
+public let PromiseNoSuchEventError = 1004
+public let PromiseWrongStateError = 1004
 
 public let PromiseErrorReasonKey = "reason"
 
@@ -34,27 +36,6 @@ extension NSError {
         )
     }
 
-    class func promiseReasonWrapperError(reason: Any?) -> Self {
-        var reasonValue: AnyObject? = nil
-        if let validReason = reason? {
-            if let reasonObject = validReason as? NSObject {
-                reasonValue = reasonObject
-            }
-            else {
-                reasonValue = "\(validReason)"
-            }
-        }
-        else {
-            reasonValue = NSNull()
-        }
-        
-        return self(
-            domain: PromiseErrorDomain,
-            code: PromiseReasonWrapperError,
-            userInfo: [NSLocalizedDescriptionKey: PromiseErrorReasonKey, ("reason" as NSString): reasonValue!,]
-        )
-    }
-
     class func promiseCancelError() -> Self {
         return self(
             domain: PromiseErrorDomain,
@@ -65,5 +46,21 @@ extension NSError {
     
     public func isCanceled() -> Bool {
         return self.domain == PromiseErrorDomain && self.code == PromiseCancelError
+    }
+    
+    class func promiseNoSuchEventError(#name: String) -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseNoSuchEventError,
+            userInfo: [NSLocalizedDescriptionKey: "No such event named '\(name)'.",]
+        )
+    }
+    
+    class func promiseWrongStateError(#state: State, to action: String) -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseWrongStateError,
+            userInfo: [NSLocalizedDescriptionKey: "Can't not do '\(action)' under state '\(state)'",]
+        )
     }
 }

@@ -40,7 +40,7 @@ class CallbackSetBuilder<V> {
     private let promise: Promise<V>
     private var reject: Optional<(reason: NSError) -> Void>
     private var progress: Optional<(progress: Float) -> Void>
-    private var cancel: Optional<() -> Promise<Void>>
+    private var cancelBuilder: Optional<(callbackSet: CallbackSet<V>) -> (CancelEvent.Callback)>
     
     init(promise: Promise<V>) {
         self.promise = promise
@@ -50,38 +50,37 @@ class CallbackSetBuilder<V> {
         self.reject = callback
         return self
     }
-
+    
     func progress(callback: (progress: Float) -> Void) -> CallbackSetBuilder<V> {
         self.progress = callback
         return self
     }
-
-    func cancel(callback: () -> Promise<Void>) -> CallbackSetBuilder<V> {
-        self.cancel = callback
+    
+    func onBuildCancel(cancelBuilder: (callbackSet: CallbackSet<V>) -> (CancelEvent.Callback)) -> CallbackSetBuilder<V> {
+        self.cancelBuilder = cancelBuilder
         return self
     }
-
+    
     func build<N>(nextDeferred: Deferred<N>, fulfill: (value: V) -> Void) -> CallbackSet<V> {
         
-        let reject: (reason: NSError) -> Void = (self.reject != nil) ?
-            self.reject! :
+        let reject: (reason: NSError) -> Void = (self.reject != nil) ? self.reject! :
             { (reason: NSError) -> Void in nextDeferred.reject(reason) }
         
-        let progress: (progress: Float) -> Void = (self.progress != nil) ?
-            self.progress! :
+        let progress: (progress: Float) -> Void = (self.progress != nil) ? self.progress! :
             { (progress: Float) -> Void in nextDeferred.progress(progress) }
         
         let callbackSet: CallbackSet<V> = CallbackSet<V>(fulfill, reject, progress)
         
         let promise = self.promise
         
-        let cancel: () -> Promise<Void> = (self.cancel != nil) ?
-            self.cancel! :
-            { [unowned promise, callbackSet] () -> Promise<Void> in
-                promise.cancelByRemovingCallbackSet(callbackSet)
+        if let builder = self.cancelBuilder? {
+            nextDeferred.onCanceled(builder(callbackSet: callbackSet))
         }
-        
-        nextDeferred.onCanceled(cancel)
+        else {
+            nextDeferred.onCanceled { [weak promise] () -> Promise<Void>? in
+                return promise?.cancelByRemovingCallbackSet(callbackSet)
+            }
+        }
         
         promise.bindCallbackSet(callbackSet)
         

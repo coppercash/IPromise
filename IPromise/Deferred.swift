@@ -13,6 +13,7 @@ public class Deferred<V> {
     public let promise: Promise<V>
     
     private var cancelEvent: Optional<CancelEvent> = nil
+    private weak var resolvingPromise: Optional<Promise<V>> = nil
     
     required
     public convenience init() {
@@ -46,7 +47,7 @@ public extension Deferred {
         }
     }
     
-    public func onCanceled(cancelation: () -> Promise<Void>) -> Bool {
+    public func onCanceled(cancelation: () -> Promise<Void>?) -> Bool {
         if self.cancelEvent != nil {
             return false
         }
@@ -62,6 +63,15 @@ public extension Deferred {
         }
     }
     
+    public func cancelResolvingPromise() -> Promise<Void> {
+        if let promise = self.resolvingPromise? {
+            return promise.cancel()
+        }
+        else {
+            return Promise<Void>(value: ())
+        }
+    }
+    
     internal func cancel(#invoke: Bool) -> Promise<Void> {
         if let cancelEvent = self.cancelEvent {
             if invoke {
@@ -70,7 +80,7 @@ public extension Deferred {
             return cancelEvent.buffer.promise
         }
         else {
-            return Promise<Void>(reason: NSError()) // TODO
+            return Promise<Void>(reason: NSError.promiseNoSuchEventError(name: "cancel"))
         }
     }
 }
@@ -83,6 +93,10 @@ extension Deferred {
         if (thenable as? Promise<V>) === promise {
             self.reject(NSError.promiseTypeError())
             return
+        }
+        
+        if let promise = thenable as? Promise<V> {
+            self.resolvingPromise = promise
         }
         
         thenable.then(

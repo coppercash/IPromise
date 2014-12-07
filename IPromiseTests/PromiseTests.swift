@@ -1067,6 +1067,46 @@ class PromiseTests: XCTestCase
 
     // MARK: - cancel
     
+    func test_cancel_state() {
+        var expts: [XCTestExpectation] = []
+        for index in 0..<3 {
+            expts.append(expectationWithDescription("\(__FUNCTION__)_\(index)"))
+        }
+
+        let fulfilledPromise = Promise<String>(value: STRING_VALUE_0)
+        fulfilledPromise.cancel().then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertEqual(PromiseWrongStateError, reason.code)
+                expts[0].fulfill()
+        })
+        
+        let rejectedPromise = Promise<String>(reason: ERROR_0)
+        rejectedPromise.cancel().then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertEqual(PromiseWrongStateError, reason.code)
+                expts[1].fulfill()
+        })
+        
+        let canceledPromise = Promise<String> { (resolve, reject) -> Void in
+        }
+        canceledPromise.cancel()
+        canceledPromise.cancel().then(
+            onFulfilled: { (value) -> Void in
+                expts[2].fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+        })
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
     /*
     If the tail promise of a then-chain canceled and no branch on the chain, the head deferred gets notificatiion.
     And no callback in the middle gets notificatiion.
@@ -1188,10 +1228,7 @@ class PromiseTests: XCTestCase
     }
     
     func test_cancel_onCanceled_returnPromise_reject() {
-        var expts: [XCTestExpectation] = []
-        for index in 0..<2 {
-            expts.append(expectationWithDescription("\(__FUNCTION__)_\(index)"))
-        }
+        var expts = expectationsFor(indexes:[Int](0..<2), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let (deferred, promise) = Promise<Void>.defer()
@@ -1230,10 +1267,7 @@ class PromiseTests: XCTestCase
     */
     
     func test_cancel_onCanceled_branch() {
-        var expts: [XCTestExpectation] = []
-        for index in 0..<3 {
-            expts.append(expectationWithDescription("\(__FUNCTION__)_\(index)"))
-        }
+        var expts: [XCTestExpectation] = expectationsFor(indexes: [Int](0..<3), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let (deferred, promise) = Promise<Void>.defer()
@@ -1266,6 +1300,30 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: nil)
     }
 
+    func test_cancel_leaf() {
+        var expts: [Int: XCTestExpectation] = expectationsFor(keys: [Int](0..<2), descPrefix: __FUNCTION__)
+        
+        var memHolder: Deferred<Void>? = nil
+        let promise = Promise<String>(value: STRING_VALUE_1)
+        promise
+            .then(onFulfilled: { (value) -> Promise<Void> in
+                let (d_leaf, p_leaf) = Promise<Void>.defer()
+                memHolder = d_leaf
+                d_leaf.onCanceled({ () -> Promise<Void> in
+                    expts[0]!.fulfill()
+                    let (d_cancel, p_cancel) = Promise<Void>.defer()
+                    0.1 ~> d_cancel.resolve()
+                    return p_cancel
+                })
+                return p_leaf
+            })
+            .cancel()
+            .then(onRejected: { (value) -> Void in
+                expts[1]!.fulfill()
+            })
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
     
     /*
     

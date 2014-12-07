@@ -289,6 +289,12 @@ public extension Promise {
                 nextDeferred.progress(nextProgress)
             }
         }
+        builder.onBuildCancel { [weak self, unowned nextDeferred] (callbackSet) -> (CancelEvent.Callback) in
+            return { () -> Promise<Void>? in
+                nextDeferred.cancelResolvingPromise()
+                return self?.cancelByRemovingCallbackSet(callbackSet)
+            }
+        }
         let callbackSet = builder.build(nextDeferred) { (value) -> Void in
             let nextThenable = onFulfilled(value: value)
             nextDeferred.resolve(thenable: nextThenable, fraction: fraction)
@@ -303,12 +309,16 @@ public extension Promise {
     {
         let nextDeferred = Deferred<V>()
         
-        CallbackSet<V>.builder(self)
+        let callbackSet = CallbackSet<V>.builder(self)
             .reject { (reason) -> Void in
                 let nextPromise = onRejected(reason: reason)
                 nextDeferred.resolve(thenable: nextPromise, fraction: 0.0)
             }
             .build(nextDeferred)
+        nextDeferred.onCanceled { [weak self, unowned nextDeferred] () -> Promise<Void>? in
+            nextDeferred.cancelResolvingPromise()
+            return self?.cancelByRemovingCallbackSet(callbackSet)
+        }
         
         return nextDeferred.promise
     }
@@ -427,46 +437,22 @@ public extension Promise {
 
 public extension Promise {
     
-    convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == Optional<Any>, T.ReturnType == Optional<Any>>(vagueThenable: T)
-    {
-        self.init()
-        let deferred = Deferred<V>(promise: self)
-        
-        vagueThenable.then(
-            onFulfilled: { (value: V) -> Any? in
-                deferred.resolve(value)
-                return nil
-            },
-            onRejected: { (reason: Any?) -> Any? in
-                if let reasonObject = reason as? NSError {
-                    deferred.reject(reasonObject)
-                }
-                else {
-                    deferred.reject(NSError.promiseReasonWrapperError(reason))
-                }
-                return nil
-            },
-            onProgress: { (progress: Float) -> Float in
-                return -1
-            }
-        )
-    }
-}
-
-public extension Promise {
-    
     public func cancel() -> Promise<Void> {
-        reject(NSError.promiseCancelError())
-        return invokeCancelEvent(canceled: true)
+        let cancelErr = NSError.promiseCancelError()
+        
+        if .Pending == self.state {
+            return invokeCancelEvent(canceled: true)
+        }
+        else if .Rejected == self.state && cancelErr == self.reason  {
+            return Promise<Void>(value: ())
+        }
+        else {
+            return Promise<Void>(reason: NSError.promiseWrongStateError(state: self.state, to: "cancel"))
+        }
     }
     
     internal func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V>) -> Promise<Void> {
-        let cancel: Bool = unbindCallbackSet(callbackSet) == 0
-        if cancel {
-            reject(NSError.promiseCancelError())
-        }
-        return invokeCancelEvent(canceled: cancel)
+        return (unbindCallbackSet(callbackSet) == 0) ? cancel() : invokeCancelEvent(canceled: false)
     }
     
     internal func invokeCancelEvent(#canceled: Bool) -> Promise<Void> {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import XCTest
 
 func ~> (lhs: NSTimeInterval, rhs: @autoclosure () -> Void)
 {
@@ -27,3 +28,21 @@ let ERROR_2 = NSError(domain: " ", code: 2, userInfo: nil)
 let ERROR_3 = NSError(domain: " ", code: 3, userInfo: nil)
 
 let VOID_SUMMARY = "()"
+
+extension XCTestCase {
+    func expectationsFor(#indexes: [Int], descPrefix: String) -> [XCTestExpectation] {
+        var expts: [XCTestExpectation] = []
+        for index in indexes {
+            expts.append(expectationWithDescription("\(descPrefix)_\(index)"))
+        }
+        return expts
+    }
+    
+    func expectationsFor<Key: Hashable>(#keys: [Key], descPrefix: String) -> [Key: XCTestExpectation] {
+        var expts: [Key: XCTestExpectation] = [:]
+        for key in keys {
+            expts[key] = expectationWithDescription("\(descPrefix)_\(key)")
+        }
+        return expts
+    }
+}
