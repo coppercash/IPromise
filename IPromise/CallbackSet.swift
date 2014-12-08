@@ -36,9 +36,22 @@ struct CallbackSet<V>: Equatable {
         reject: Reject?,
         progress: Progress?
         ) {
-            self.fulfill = fulfill
-            self.reject = reject != nil ? reject! : { (reason: NSError) -> Void in deferred.reject(reason) }
-            self.progress = progress != nil ? progress! : { (progress: Float) -> Void in deferred.progress(progress) }
+            let r = (reject != nil) ? reject! :
+                { (reason: NSError) -> Void in deferred.reject(reason) }
+            let p = (progress != nil) ? progress! :
+                { (progress: Float) -> Void in deferred.progress(progress) }
+            self.init(fulfill, r, p)
+    }
+
+    init(
+        _ deferred: Deferred<V>,
+        fulfill: Fulfill?,
+        reject: Reject?,
+        progress: Progress?
+        ) {
+            let f = (fulfill != nil) ? fulfill! :
+                { (value: V) -> Void in deferred.resolve(value) }
+            self.init(deferred, fulfill, reject, progress)
     }
 }
 
