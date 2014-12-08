@@ -30,6 +30,16 @@ struct CallbackSet<V>: Equatable {
             self.progress = progress
     }
     
+    init<N>(
+        _ deferred: Deferred<N>,
+        fulfill: Fulfill,
+        reject: Reject?,
+        progress: Progress?
+        ) {
+            self.fulfill = fulfill
+            self.reject = reject != nil ? reject! : { (reason: NSError) -> Void in deferred.reject(reason) }
+            self.progress = progress != nil ? progress! : { (progress: Float) -> Void in deferred.progress(progress) }
+    }
 }
 
 func ==<V>(lhs: CallbackSet<V>, rhs: CallbackSet<V>) -> Bool {

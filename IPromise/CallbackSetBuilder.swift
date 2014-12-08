@@ -21,12 +21,12 @@ class CallbackSetBuilder<V, N> {
     }
     
     private
-    func buildReject(promise: Promise<V>, deferred: Deferred<N>) -> CallbackSet<V>.Reject {
+    func buildReject(deferred: Deferred<N>) -> CallbackSet<V>.Reject {
         return { (reason: NSError) -> Void in deferred.reject(reason) }
     }
     
     private
-    func buildProgress(promise: Promise<V>, deferred: Deferred<N>) -> CallbackSet<V>.Progress {
+    func buildProgress(deferred: Deferred<N>) -> CallbackSet<V>.Progress {
         if let onProgress = self.progress? {
             return { (progress) -> Void in
                 let nextProgress = onProgress(progress: progress)
@@ -52,8 +52,8 @@ class CallbackSetBuilder<V, N> {
         
         let callbackSet: CallbackSet<V> = CallbackSet<V>(
             fulfill,
-            buildReject(promise, deferred: deferred),
-            buildProgress(promise, deferred: deferred)
+            buildReject(deferred),
+            buildProgress(deferred)
         )
         
         deferred.onCanceled(buildCancel(promise, deferred: deferred, callbackSet: callbackSet))
@@ -73,7 +73,7 @@ class CallbackSetVoidBuilder<V>: CallbackSetBuilder<V, Void> {
     }
     
     override
-    private func buildReject(promise: Promise<V>, deferred: Deferred<Void>) -> CallbackSet<V>.Reject {
+    private func buildReject(deferred: Deferred<Void>) -> CallbackSet<V>.Reject {
         if let onRejected = self.reject? {
             return { (reason: NSError) -> Void in
                 onRejected(reason: reason)
@@ -81,7 +81,7 @@ class CallbackSetVoidBuilder<V>: CallbackSetBuilder<V, Void> {
             }
         }
         else {
-            return super.buildReject(promise, deferred: deferred)
+            return super.buildReject(deferred)
         }
     }
     
@@ -111,7 +111,7 @@ class CallbackSetValueBuilder<V, N>: CallbackSetBuilder<V, N> {
     }
     
     override
-    private func buildReject(promise: Promise<V>, deferred: Deferred<N>) -> CallbackSet<V>.Reject {
+    private func buildReject(deferred: Deferred<N>) -> CallbackSet<V>.Reject {
         if let onRejected = self.reject? {
             return { (reason: NSError) -> Void in
                 let nextValue = onRejected(reason: reason)
@@ -119,7 +119,7 @@ class CallbackSetValueBuilder<V, N>: CallbackSetBuilder<V, N> {
             }
         }
         else {
-            return super.buildReject(promise, deferred: deferred)
+            return super.buildReject(deferred)
         }
     }
 }
@@ -135,7 +135,7 @@ class CallbackSetThenableBuilder<V, N, T: Thenable where T.ValueType == N, T.Rea
     }
     
     private override
-    func buildReject(promise: Promise<V>, deferred: Deferred<N>) -> CallbackSet<V>.Reject {
+    func buildReject(deferred: Deferred<N>) -> CallbackSet<V>.Reject {
         if let onRejected = self.reject? {
             let fraction = self.fraction
             return { (reason: NSError) -> Void in
@@ -144,7 +144,7 @@ class CallbackSetThenableBuilder<V, N, T: Thenable where T.ValueType == N, T.Rea
             }
         }
         else {
-            return super.buildReject(promise, deferred: deferred)
+            return super.buildReject(deferred)
         }
     }
     
