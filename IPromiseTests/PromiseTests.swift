@@ -1009,18 +1009,18 @@ class PromiseTests: XCTestCase
     
     func test_progress() {
         let answers: [Float] = [0.0, 0.5, 1.0]
-        var map: [Float: XCTestExpectation] = [:]
-        for (index, answer) in enumerate(answers) {
-            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
-            map[answer] = expt
-        }
+        let expts = expectationsFor(keys: answers, descPrefix: __FUNCTION__)
+        let propagateAnswers: [Float: Float] = [0.0: 0.1, 0.5: 0.6, 1.0: 0.9]
+        let porpagateExpts = expectationsFor(keys: Array(propagateAnswers.values), descPrefix: __FUNCTION__)
         
         let deferred = Deferred<Void>()
         
-        deferred.promise.progress { (progress) -> Float in
-            let expt = map[progress]
-            expt!.fulfill()
-            return progress
+        deferred.promise
+            .progress { (progress) -> Float in
+                expts[progress]!.fulfill()
+                return propagateAnswers[progress]!
+            }.progress { (progress) -> Void in
+                porpagateExpts[progress]!.fulfill()
         }
         
         deferred.progress(0.0)
