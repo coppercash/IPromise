@@ -16,7 +16,7 @@ class PromiseTests: XCTestCase
     
     func test_state_pendingToFulfill(){
         let expt = expectationWithDescription(__FUNCTION__)
-
+        
         let promise = Promise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
@@ -47,7 +47,7 @@ class PromiseTests: XCTestCase
         
         XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.reason)
-
+        
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
             XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertEqual(promise.reason!, ERROR_0)
@@ -129,7 +129,7 @@ class PromiseTests: XCTestCase
                 XCTAssertEqual(++counter, 1)
                 
                 resolve(value: STRING_VALUE_0)
-
+                
                 resolve(value: STRING_VALUE_1)
                 reject(reason: ERROR_1)
                 
@@ -153,7 +153,7 @@ class PromiseTests: XCTestCase
             XCTAssertEqual(++counter, 3)
             expts[3]!.fulfill()
         }
-
+        
         promise.catch { (reason) -> Void in
             XCTAssertFalse(true)
         }
@@ -202,9 +202,9 @@ class PromiseTests: XCTestCase
             
         })
     }
-
+    
     // MARK: - 2.2.3; 2.2.6
-
+    
     func test_then_onRejected() {
         
         var counter = 0
@@ -313,12 +313,12 @@ class PromiseTests: XCTestCase
     }
     
     // MARK: - 2.2.1; 2.2.7.4; init(reason:)
-
+    
     func test_optional_reject() {
         let promise = Promise<String>(reason: ERROR_0)
         XCTAssertEqual(promise.state, State.Rejected)
         XCTAssertNil(promise.value)
-
+        
         promise
             .then(
                 onFulfilled: nil,
@@ -448,7 +448,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
         })
     }
-
+    
     // MARK: - 2.3.3
     
     // MARK: - 2.3.4; chain
@@ -459,7 +459,7 @@ class PromiseTests: XCTestCase
         for index in 0...3 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
-
+        
         Promise<Void>(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> String in
@@ -497,7 +497,7 @@ class PromiseTests: XCTestCase
         for index in 0...3 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
-
+        
         Promise<Void>(reason: ERROR_0)
             .then(
                 onFulfilled: { (value: Void) -> Void in
@@ -523,9 +523,9 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
     func test_chain_void_fulfill() {
-
+        
         var expts: [Int: XCTestExpectation] = [:]
         for index in 0...2 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
@@ -555,19 +555,19 @@ class PromiseTests: XCTestCase
     func test_catch_value() {
         let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
-
+        
         Promise<String>(reason: ERROR_0)
-        .catch { (reason) -> String in
-            XCTAssertEqual(ERROR_0, reason)
-            expt0.fulfill()
-            return STRING_VALUE_0
+            .catch { (reason) -> String in
+                XCTAssertEqual(ERROR_0, reason)
+                expt0.fulfill()
+                return STRING_VALUE_0
+            }
+            .then { (value) -> String in
+                XCTAssertEqual(STRING_VALUE_0, value)
+                expt1.fulfill()
+                return STRING_VALUE_1
         }
-        .then { (value) -> String in
-            XCTAssertEqual(STRING_VALUE_0, value)
-            expt1.fulfill()
-            return STRING_VALUE_1
-        }
-
+        
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
@@ -601,19 +601,19 @@ class PromiseTests: XCTestCase
         
         let promise = Promise(thenable: superPromise)
         promise.then(
-                onFulfilled: { (value) -> Void in
-                    XCTAssertEqual(value, STRING_VALUE_0)
-                    expt.fulfill()
-                },
-                onRejected: { (reason) -> Void in
-                    XCTAssertFalse(true)
-                }
+            onFulfilled: { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                expt.fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+            }
         )
         
         XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.value)
         XCTAssertNil(promise.reason)
-
+        
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
             XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
@@ -653,7 +653,7 @@ class PromiseTests: XCTestCase
     // MARK: - resolve(_)
     
     func test_resolve() {
-
+        
         let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let a0: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
         a0.then { (value) -> Void in
@@ -688,7 +688,7 @@ class PromiseTests: XCTestCase
             expt1.fulfill()
         }
         XCTAssertEqual(a1.state, State.Rejected)
-
+        
         let expt3 = expectationWithDescription("\(__FUNCTION__)_3")
         let q3 = Promise<Int>(value: 3)
         let a3: Promise<String> = Promise<String>.resolve(q3)
@@ -704,18 +704,18 @@ class PromiseTests: XCTestCase
     }
     
     // MARK: - reject(_)
-
+    
     func test_reject() {
         let a0 = Promise<String>.reject(ERROR_0)
         XCTAssertEqual(State.Rejected, a0.state)
         XCTAssertNil(a0.value)
         XCTAssertEqual(ERROR_0, a0.reason!)
     }
-
+    
     // MARK: - all
     
     func test_all_fulfill_async() {
-
+        
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
@@ -769,10 +769,10 @@ class PromiseTests: XCTestCase
         )
         
         XCTAssertEqual(promise.value!, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
-
+        
         waitForExpectationsWithTimeout(7) { println($0) }
     }
-
+    
     func test_all_reject_aync() {
         
         let expectation = expectationWithDescription(__FUNCTION__)
@@ -867,7 +867,7 @@ class PromiseTests: XCTestCase
     }
     
     // MARK: - race
-
+    
     func test_race_fulfill_sync() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
@@ -1026,10 +1026,10 @@ class PromiseTests: XCTestCase
         deferred.progress(0.0)
         deferred.progress(0.5)
         deferred.progress(1.0)
-
+        
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
     func test_progress_fraction() {
         let answers: [Float] = [0.0, 0.35, 0.7, 0.73, 0.85, 1.0]
         var map: [Float: XCTestExpectation] = [:]
@@ -1048,10 +1048,10 @@ class PromiseTests: XCTestCase
             onProgress: { (progress) -> Float in
                 return progress * 0.7
         })
-        .progress { (progress) -> Float in
-            let expt = map[progress]
-            expt!.fulfill()
-            return progress
+            .progress { (progress) -> Float in
+                let expt = map[progress]
+                expt!.fulfill()
+                return progress
         }
         
         deferred0.progress(0.0)
@@ -1064,7 +1064,7 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
     // MARK: - cancel
     
     func test_cancel_state() {
@@ -1072,7 +1072,7 @@ class PromiseTests: XCTestCase
         for index in 0..<3 {
             expts.append(expectationWithDescription("\(__FUNCTION__)_\(index)"))
         }
-
+        
         let fulfilledPromise = Promise<String>(value: STRING_VALUE_0)
         fulfilledPromise.cancel().then(
             onFulfilled: { (value) -> Void in
@@ -1113,7 +1113,7 @@ class PromiseTests: XCTestCase
     */
     func test_cancel_chain() {
         let expt = expectationWithDescription(__FUNCTION__)
-
+        
         let (headDeferred, headPromise) = Promise<Void>.defer()
         
         headDeferred.onCanceled { () -> Void in
@@ -1162,7 +1162,7 @@ class PromiseTests: XCTestCase
     }
     
     /*
-    The promise returned from method cancel will be fulfilled after onCanceled block being invoked if no promise returned from it
+    The promise returned from method `Promise#cancel` will be fulfilled after onCanceled block being invoked if no promise returned from it
     */
     func test_cancel_onCanceled_returnVoid() {
         var expts: [XCTestExpectation] = []
@@ -1189,7 +1189,7 @@ class PromiseTests: XCTestCase
     }
     
     /*
-    The promise returned from method cancel will be fulfilled or rejected base on the the onCanceled block of the deferred object.
+    The promise returned from method `Promise#cancel` will be fulfilled or rejected base on the the onCanceled block of the deferred object.
     */
     func test_cancel_onCanceled_returnPromise_fulfill() {
         var expts: [XCTestExpectation] = []
@@ -1202,13 +1202,13 @@ class PromiseTests: XCTestCase
         
         deferred.onCanceled { () -> Promise<Void> in
             let (deferred, promise) = Promise<Void>.defer()
-
+            
             0.1 ~> {
                 XCTAssertEqual(0, sequencer)
                 expts[sequencer].fulfill()
                 sequencer++
                 deferred.resolve()
-            }()
+                }()
             
             return promise
         }
@@ -1252,7 +1252,7 @@ class PromiseTests: XCTestCase
             },
             onRejected: { (reason) -> Void in
                 XCTAssertEqual(ERROR_0, reason)
-
+                
                 XCTAssertEqual(1, sequencer)
                 expts[sequencer].fulfill()
                 sequencer++
@@ -1265,7 +1265,6 @@ class PromiseTests: XCTestCase
     /*
     The promise is canceled only if all its sub-promises canceled
     */
-    
     func test_cancel_onCanceled_branch() {
         var expts: [XCTestExpectation] = expectationsFor(indexes: [Int](0..<3), descPrefix: __FUNCTION__)
         var sequencer = 0
@@ -1290,7 +1289,7 @@ class PromiseTests: XCTestCase
             expts[sequencer].fulfill()
             sequencer++
         })
-       
+        
         promise1.cancel().then(onFulfilled: { (value) -> Void in
             XCTAssertEqual(2, sequencer)
             expts[sequencer].fulfill()
@@ -1299,7 +1298,10 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
+    /*
+    If cancel a promise which's result depends on another promise returned in then closures, the depended promise is canceled too
+    */
     func test_cancel_leaf() {
         var expts: [Int: XCTestExpectation] = expectationsFor(keys: [Int](0..<2), descPrefix: __FUNCTION__)
         
@@ -1326,88 +1328,31 @@ class PromiseTests: XCTestCase
     }
     
     /*
-    
-
-    func test_cancel_delay() {
-        var expts: [Int: XCTestExpectation] = [:]
-        for index in 1...3 {
-            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
-        }
-        
-        let (d_0, p_0) = Promise<Void>.defer()
-        
-        var cancelDeferred: Deferred<Void>? = nil
-        d_0.onCanceled { () -> Promise<Void> in
-            expts[1]!.fulfill()
-            cancelDeferred = Deferred<Void>()
-            return cancelDeferred!.promise
-        }
-        
-        let p_00 = p_0.then(onRejected: { (reason) -> Void in
-            expts[2]!.fulfill()
-            XCTAssertTrue(reason.isCanceled())
-        })
-        
-        p_00.cancel().then(onFulfilled: { (value) -> Void in
-            expts[3]!.fulfill()
-        })
-        
-        cancelDeferred!.resolve()
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
-    
-    func test_cancel_leaf() {
-        var expts: [Int: XCTestExpectation] = [:]
-        for index in 1...2 {
-            expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
-        }
-        
-        var cancelDeferred: Deferred<Void>? = nil
-        Promise<String>(value: STRING_VALUE_1)
-        .then(onFulfilled: { (value) -> Promise<Void> in
-            let (d_leaf, p_leaf) = Promise<Void>.defer()
-            d_leaf.onCanceled({ () -> Promise<Void> in
-                expts[1]!.fulfill()
-                let (d_cancel, p_cancel) = Promise<Void>.defer()
-                cancelDeferred = d_cancel
-                return p_cancel
-            })
-            return p_leaf
-        })
-        .then()
-        .cancel()
-        .then(onRejected: { (value) -> Void in
-            expts[2]!.fulfill()
-        })
-        
-        cancelDeferred!.resolve()
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
-    
+    A promise will not be canceled unless all its sub-promises have been canceled
+    */
     func test_cancel_multipleChildren() {
         let (d_0, p_0) = Promise<String>.defer()
         d_0.onCanceled { () -> Void in
-            XCTAssertFalse(true, " ")
+            XCTAssertFalse(true)
             return
         }
         
         let p_00 = p_0.catch { (reason) -> Void in
-            XCTAssertFalse(true, " ")
+            XCTAssertFalse(true)
             return
         }
         
         let p_01 = p_0.catch { (reason) -> Void in
-            XCTAssertFalse(true, " ")
+            XCTAssertFalse(true)
             return
         }
         
-        p_00.cancel().then(onFulfilled: { (value) -> Void in
-            XCTAssertFalse(true, " ")
-        }, onRejected: { (reason) -> Void in
-            XCTAssertFalse(true, " ")
+        p_00.cancel().then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
         })
     }
-*/
 }
