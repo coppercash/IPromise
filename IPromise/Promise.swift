@@ -55,7 +55,7 @@ public class Promise<V>: Thenable
         let deferred = Deferred<V>(promise: self)
         deferred.resolve(thenable: thenable, fraction: 1.0)
     }
-
+    
     // MARK: - Static APIs
     
     public class func defer() -> (Deferred<V>, Promise<V>) {
@@ -164,7 +164,7 @@ public class Promise<V>: Thenable
     public typealias ValueType = V
     public typealias ReasonType = NSError
     public typealias ReturnType = Void
-        
+    
     public func then(
         onFulfilled: Optional<(value: V) -> Void> = nil,
         onRejected: Optional<(reason: NSError) -> Void> = nil,
@@ -179,40 +179,35 @@ public class Promise<V>: Thenable
                 onFulfilled!(value: value)
                 deferred.resolve()
         }
-        let reject: CallbackSet<V>.Reject? = (onRejected == nil) ? nil :
-            { (reason: NSError) -> Void in
+        let callbackSet = CallbackSetBuilder<V, Void>(deferred: deferred)
+            .setReject(useDefault: (onRejected == nil)) { (reason: NSError) -> Void in
                 onRejected!(reason: reason)
                 deferred.resolve()
-        }
-        let progress: CallbackSet<V>.Progress? = (onProgress == nil) ? nil :
-            { (progress) -> Void in
-                let nextProgress = onProgress!(progress: progress)
-                deferred.progress(nextProgress)
-        }
+            }
+            .setProgress(onProgress: onProgress)
+            .build(fulfill)
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, fulfill, reject, progress),
-            unbindByDeferred: deferred
-        )
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
-
+    
     public func catch(
         #ignored: (reason: NSError) -> Void
         ) -> Promise<Void>
     {
         let deferred = Deferred<Void>()
-
-        let fulfill = { (value: V) -> Void in deferred.resolve() };
-        let reject = { (reason: NSError) -> Void in
-            ignored(reason: reason)
-            deferred.resolve()
+        
+        let callbackSet = CallbackSetBuilder<V, Void>(deferred: deferred)
+            .setReject(useDefault: false) { (reason: NSError) -> Void in
+                ignored(reason: reason)
+                deferred.resolve()
+            }
+            .build() { (value: V) -> Void in
+                deferred.resolve()
         }
-        bindCallbackSet(
-            CallbackSet<V>(deferred, fulfill, reject, nil),
-            unbindByDeferred: deferred
-        )
+        
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -228,25 +223,18 @@ public extension Promise {
     {
         let deferred = Deferred<N>()
         
-        let fulfill: CallbackSet<V>.Fulfill = { (value: V) -> Void in
-            let nextValue = onFulfilled(value: value)
-            deferred.resolve(nextValue)
-        }
-        let reject: CallbackSet<V>.Reject? = (onRejected == nil) ? nil :
-            { (reason: NSError) -> Void in
+        let callbackSet = CallbackSetBuilder<V, N>(deferred: deferred)
+            .setReject(useDefault: (onRejected == nil)) { (reason: NSError) -> Void in
                 let nextValue = onRejected!(reason: reason)
                 deferred.resolve(nextValue)
-        }
-        let progress: CallbackSet<V>.Progress? = (onProgress == nil) ? nil :
-            { (progress) -> Void in
-                let nextProgress = onProgress!(progress: progress)
-                deferred.progress(nextProgress)
+            }
+            .setProgress(onProgress: onProgress)
+            .build() { (value: V) -> Void in
+                let nextValue = onFulfilled(value: value)
+                deferred.resolve(nextValue)
         }
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, fulfill, reject, progress),
-            unbindByDeferred: deferred
-        )
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -257,15 +245,14 @@ public extension Promise {
     {
         let deferred = Deferred<V>()
         
-        let reject = { (reason: NSError) -> Void in
-            let nextValue = onRejected(reason: reason)
-            deferred.resolve(nextValue)
-        }
-
-        bindCallbackSet(
-            CallbackSet<V>(deferred, nil, reject, nil),
-            unbindByDeferred: deferred
-        )
+        let callbackSet = CallbackSetThroughBuilder<V>(deferred: deferred)
+            .setReject(useDefault: false) { (reason: NSError) -> Void in
+                let nextValue = onRejected(reason: reason)
+                deferred.resolve(nextValue)
+            }
+            .build()
+        
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -279,30 +266,23 @@ public extension Promise {
         onProgress: Optional<(progress: Float) -> Float> = nil
         ) -> Promise<N>
     {
-        let fraction: Float = (onProgress == nil) ? 0.0 : 1.0 - onProgress!(progress: 1.0)
-        
         let deferred = Deferred<N>()
         
-        let fulfill: CallbackSet<V>.Fulfill = { (value: V) -> Void in
-            let nextThenable = onFulfilled(value: value)
-            deferred.resolve(thenable: nextThenable, fraction: fraction)
-        }
-        let reject: CallbackSet<V>.Reject? = (onRejected == nil) ? nil :
-            { (reason: NSError) -> Void in
+        let fraction: Float = (onProgress == nil) ? 0.0 : 1.0 - onProgress!(progress: 1.0)
+
+        let callbackSet = CallbackSetBuilder<V, N>(deferred: deferred)
+            .setReject(useDefault: (onRejected == nil)) { (reason: NSError) -> Void in
                 let nextThenable = onRejected!(reason: reason)
                 deferred.resolve(thenable: nextThenable, fraction: fraction)
-        }
-        let progress: CallbackSet<V>.Progress? = (onProgress == nil) ? nil :
-            { (progress) -> Void in
-                let nextProgress = onProgress!(progress: progress)
-                deferred.progress(nextProgress)
+            }
+            .setProgress(onProgress: onProgress)
+            .build() { (value: V) -> Void in
+                let nextThenable = onFulfilled(value: value)
+                deferred.resolve(thenable: nextThenable, fraction: fraction)
         }
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, fulfill, reject, progress),
-            unbindByDeferred: deferred
-        )
-        
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
+
         return deferred.promise
     }
     
@@ -312,15 +292,14 @@ public extension Promise {
     {
         let deferred = Deferred<V>()
         
-        let reject = { (reason: NSError) -> Void in
-            let nextThenable = onRejected(reason: reason)
-            deferred.resolve(thenable: nextThenable, fraction: 0.0)
-        }
+        let callbackSet = CallbackSetThroughBuilder<V>(deferred: deferred)
+            .setReject(useDefault: false) { (reason: NSError) -> Void in
+                let nextThenable = onRejected(reason: reason)
+                deferred.resolve(thenable: nextThenable, fraction: 0.0)
+            }
+            .build()
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, nil, reject, nil),
-            unbindByDeferred: deferred
-        )
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -332,15 +311,11 @@ public extension Promise {
     {
         let deferred = Deferred<V>()
         
-        let progress: CallbackSet<V>.Progress? = { (progress) -> Void in
-            let nextProgress = onProgress(progress: progress)
-            deferred.progress(nextProgress)
-        }
+        let callbackSet = CallbackSetThroughBuilder<V>(deferred: deferred)
+            .setProgress(onProgress: onProgress)
+            .build()
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, nil, nil, progress),
-            unbindByDeferred: deferred
-        )
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -349,15 +324,14 @@ public extension Promise {
     {
         let deferred = Deferred<V>()
         
-        let progress: CallbackSet<V>.Progress? = { (progress) -> Void in
-            onProgress(progress: progress)
-            deferred.progress(progress)
-        }
+        let callbackSet = CallbackSetThroughBuilder<V>(deferred: deferred)
+            .setProgress(onProgress: nil) { (progress) -> Void in
+                onProgress(progress: progress)
+                deferred.progress(progress)
+            }
+            .build()
         
-        bindCallbackSet(
-            CallbackSet<V>(deferred, nil, nil, progress),
-            unbindByDeferred: deferred
-        )
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
         
         return deferred.promise
     }
@@ -397,7 +371,7 @@ public extension Promise {
                     progresses[index] = progress
                     let allProgress: Float = progresses.reduce(0.0, combine: +) / count
                     objc_sync_exit(allDeferred)
-
+                    
                     allDeferred.progress(allProgress)
                     return -1
                 }
@@ -432,7 +406,7 @@ public extension Promise {
                     progresses[index] = progress
                     let maxProgress: Float = progresses.reduce(0.0, combine: max)
                     objc_sync_exit(raceDeferred)
-
+                    
                     raceDeferred.progress(maxProgress)
                     return -1
                 }

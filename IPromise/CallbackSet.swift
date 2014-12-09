@@ -30,46 +30,6 @@ struct CallbackSet<V>: Equatable {
             self.progress = progress
     }
     
-    init<N>(
-        _ deferred: Deferred<N>,
-        fulfill: Fulfill,
-        reject: Reject?,
-        progress: Progress?
-        ) {
-            let r = (reject != nil) ? reject! :
-                { (reason: NSError) -> Void in deferred.reject(reason) }
-            let p = (progress != nil) ? progress! :
-                { (progress: Float) -> Void in deferred.progress(progress) }
-            self.init(fulfill, r, p)
-    }
-
-    init(
-        _ deferred: Deferred<V>,
-        fulfill: Fulfill?,
-        reject: Reject?,
-        progress: Progress?
-        ) {
-            let f = (fulfill != nil) ? fulfill! :
-                { (value: V) -> Void in deferred.resolve(value) }
-            self.init(deferred, fulfill, reject, progress)
-    }
-    
-    
-    static func defaultFulfill(deferred: Deferred<V>, fulfill: Fulfill? = nil) -> Fulfill {
-        return (fulfill != nil) ? fulfill! :
-            { (value: V) -> Void in deferred.resolve(value) }
-    }
-    
-    static func defaultReject<N>(deferred: Deferred<N>, reject: Reject? = nil) -> Reject {
-        return (reject != nil) ? reject! :
-            { (reason: NSError) -> Void in deferred.reject(reason) }
-    }
-    
-    static func defaultProgress<N>(deferred: Deferred<N>, progress: Progress? = nil) -> Progress {
-        return (progress != nil) ? progress! :
-            { (progress: Float) -> Void in deferred.progress(progress) }
-    }
-    
     static func makeFulfill(
         deferred: Deferred<V>,
         useDefault: Bool = true,
@@ -114,12 +74,53 @@ func ==<V>(lhs: CallbackSet<V>, rhs: CallbackSet<V>) -> Bool {
 
 class CallbackSetBuilder<V, N> {
     
-    var fulfill: CallbackSet<V>.Fulfill? = nil
+    let deferred: Deferred<N>
     var reject: CallbackSet<V>.Reject? = nil
     var progress: CallbackSet<V>.Progress? = nil
     
     init(deferred: Deferred<N>) {
+        self.deferred = deferred
     }
     
+    func setReject(useDefault: Bool = true, reject: CallbackSet<V>.Reject? = nil) -> Self {
+        self.reject = CallbackSet<V>.makeReject(self.deferred, useDefault: useDefault, reject: reject)
+        return self
+    }
     
+    func setProgress(onProgress: Optional<(progress: Float) -> Float> = nil, progress: CallbackSet<V>.Progress? = nil) -> Self {
+        self.progress = CallbackSet<V>.makeProgress(self.deferred, onProgress: onProgress, progress: progress)
+        return self
+    }
+    
+    func build(fulfill: CallbackSet<V>.Fulfill) -> CallbackSet<V> {
+        if self.reject == nil {
+            setReject()
+        }
+        if self.progress == nil {
+            setProgress()
+        }
+        return CallbackSet<V>(fulfill, self.reject!, self.progress!)
+    }
+}
+
+class CallbackSetThroughBuilder<V>: CallbackSetBuilder<V, V> {
+    
+    var fulfill: CallbackSet<V>.Fulfill? = nil
+    
+    override
+    init(deferred: Deferred<V>) {
+        super.init(deferred: deferred)
+    }
+    
+    func setFulfill(useDefault: Bool = true, fulfill: CallbackSet<V>.Fulfill? = nil) -> Self {
+        self.fulfill = CallbackSet<V>.makeFulfill(self.deferred, useDefault: useDefault, fulfill: fulfill)
+        return self
+    }
+    
+    func build() -> CallbackSet<V> {
+        if self.fulfill == nil {
+            setFulfill()
+        }
+        return build(self.fulfill!)
+    }
 }
