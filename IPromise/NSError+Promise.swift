@@ -8,13 +8,16 @@
 
 import Foundation
 
+
 public let PromiseErrorDomain = "PromiseErrorDomain"
+
 public let PromiseTypeError = 1000
 public let PromiseReasonWrapperError = 1001
 public let PromiseValueTypeError = 1002
 public let PromiseCancelError = 1003
 public let PromiseNoSuchEventError = 1004
-public let PromiseWrongStateError = 1004
+public let PromiseWrongStateError = 1005
+public let PromiseCancelForkedPromiseError = 1006
 
 public let PromiseErrorReasonKey = "reason"
 
@@ -61,6 +64,14 @@ extension NSError {
             domain: PromiseErrorDomain,
             code: PromiseWrongStateError,
             userInfo: [NSLocalizedDescriptionKey: "Can't not do '\(action)' under state '\(state)'",]
+        )
+    }
+    
+    class func promiseCancelForkedPromiseError() -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseCancelForkedPromiseError,
+            userInfo: [NSLocalizedDescriptionKey: "A forked promise can not be canceled",]
         )
     }
 }

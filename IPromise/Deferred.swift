@@ -15,8 +15,8 @@ public class Deferred<V> {
     private var cancelEvent: Optional<CancelEvent> = nil
     private weak var resolvingPromise: Optional<Promise<V>> = nil
     
-    required
-    public convenience init() {
+    public required convenience
+    init() {
         self.init(promise: Promise<V>())
     }
     
@@ -25,29 +25,34 @@ public class Deferred<V> {
         promise.deferred = self
     }
     
-    public func resolve(value: V) -> Void {
+    public
+    func resolve(value: V) -> Void {
         self.promise.resolve(value)
     }
     
-    public func reject(reason: NSError) -> Void {
+    public
+    func reject(reason: NSError) -> Void {
         self.promise.reject(reason)
     }
     
-    public func progress(progress: Float) -> Void {
+    public
+    func progress(progress: Float) -> Void {
         self.promise.progress(progress)
     }
 }
 
 public extension Deferred {
     
-    public func onCanceled(cancelation: () -> Void) -> Bool {
+    public
+    func onCanceled(cancelation: () -> Void) -> Bool {
         return onCanceled { () -> Promise<Void> in
             cancelation()
             return Promise<Void>(value: ())
         }
     }
     
-    public func onCanceled(cancelation: () -> Promise<Void>?) -> Bool {
+    public
+    func onCanceled(cancelation: () -> Promise<Void>?) -> Bool {
         if self.cancelEvent != nil {
             return false
         }
@@ -63,7 +68,8 @@ public extension Deferred {
         }
     }
     
-    public func cancelResolvingPromise() -> Promise<Void> {
+    public
+    func cancelResolvingPromise() -> Promise<Void> {
         if let promise = self.resolvingPromise? {
             return promise.cancel()
         }
@@ -72,7 +78,8 @@ public extension Deferred {
         }
     }
     
-    internal func cancel(#invoke: Bool) -> Promise<Void> {
+    internal
+    func cancel(#invoke: Bool) -> Promise<Void> {
         if let cancelEvent = self.cancelEvent {
             if invoke {
                 cancelEvent.invoke()
@@ -87,6 +94,7 @@ public extension Deferred {
 
 extension Deferred {
     
+    internal
     func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>
         (#thenable: T, fraction: Float) -> Void
     {

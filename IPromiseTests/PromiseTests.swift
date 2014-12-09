@@ -1355,4 +1355,29 @@ class PromiseTests: XCTestCase
                 XCTAssertFalse(true)
         })
     }
+    
+    /*
+    A forked promise can not be canceled
+    */
+    func test_cancel_fork() {
+        let expt = expectationWithDescription(__FUNCTION__)
+        
+        let deferred = Deferred<Void>()
+        
+        deferred.promise
+            .fork()
+            .cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertFalse(true)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertEqual(PromiseCancelForkedPromiseError, reason.code)
+                    XCTAssertEqual(PromiseErrorDomain, reason.domain)
+                    expt.fulfill()
+                }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
 }

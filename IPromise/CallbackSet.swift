@@ -74,9 +74,9 @@ func ==<V>(lhs: CallbackSet<V>, rhs: CallbackSet<V>) -> Bool {
 
 class CallbackSetBuilder<V, N> {
     
-    let deferred: Deferred<N>
-    var reject: CallbackSet<V>.Reject? = nil
-    var progress: CallbackSet<V>.Progress? = nil
+    private let deferred: Deferred<N>
+    private var reject: CallbackSet<V>.Reject? = nil
+    private var progress: CallbackSet<V>.Progress? = nil
     
     init(deferred: Deferred<N>) {
         self.deferred = deferred
@@ -105,7 +105,7 @@ class CallbackSetBuilder<V, N> {
 
 class CallbackSetThroughBuilder<V>: CallbackSetBuilder<V, V> {
     
-    var fulfill: CallbackSet<V>.Fulfill? = nil
+    private var fulfill: CallbackSet<V>.Fulfill? = nil
     
     override
     init(deferred: Deferred<V>) {
