@@ -404,6 +404,14 @@ public extension Promise {
             )
         }
         
+        allDeferred.onCanceled { () -> Promise<Void>? in
+            var cancelPromises: [Promise<Void>] = []
+            for promise in promises {
+                cancelPromises.append(promise.cancel())
+            }
+            return Promise<Void>.all(cancelPromises).then()
+        }
+        
         return allPromise
     }
     

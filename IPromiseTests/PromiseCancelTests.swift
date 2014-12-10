@@ -369,22 +369,25 @@ class PromiseCancelTests: XCTestCase {
         
         let d0 = Deferred<String>();
         d0.onCanceled { () -> Void in
-            XCTAssertEqual(0, sequencer)
-            expts[sequencer++].fulfill()
+            expts[sequencer].fulfill()
+            XCTAssertEqual(0, sequencer++)
         }
         
         let d1 = Deferred<String>();
         d1.onCanceled { () -> Void in
-            XCTAssertEqual(1, sequencer)
-            expts[sequencer++].fulfill()
+            expts[sequencer].fulfill()
+            XCTAssertEqual(1, sequencer++)
         }
         
         let d2 = Deferred<String>();
-        d2.onCanceled { () -> Void in
+        d2.onCanceled { () -> Promise<Void> in
+            let deferred = Deferred<Void>()
             0.1 ~> {
-                XCTAssertEqual(2, sequencer)
-                expts[sequencer++].fulfill()
+                expts[sequencer].fulfill()
+                XCTAssertEqual(2, sequencer++)
+                deferred.resolve()
             }()
+            return deferred.promise
         }
         
         let promise = Promise.all(d0.promise, d1.promise, d2.promise)
@@ -392,8 +395,8 @@ class PromiseCancelTests: XCTestCase {
         promise.cancel()
             .then(
                 onFulfilled: { (value) -> Void in
-                    XCTAssertEqual(3, sequencer)
-                    expts[sequencer++].fulfill()
+                    expts[sequencer].fulfill()
+                    XCTAssertEqual(3, sequencer++)
                 },
                 onRejected: { (reason) -> Void in
                     XCTAssertFalse(true)
@@ -415,12 +418,21 @@ class PromiseCancelTests: XCTestCase {
         
         let d1 = Deferred<String>();
         d1.onCanceled { () -> Promise<Void> in
-            XCTAssertEqual(1, sequencer)
-            expts[sequencer++].fulfill()
-            return Promise<Void>(reason: ERROR_0)
+            let deferred = Deferred<Void>()
+            0.1 ~> {
+                XCTAssertEqual(1, sequencer)
+                expts[sequencer++].fulfill()
+                deferred.reject(ERROR_0)
+                }()
+            return deferred.promise
         }
         
-        let promise = Promise.all(d0.promise, d1.promise)
+        let d2 = Deferred<String>();
+        d2.onCanceled { () -> Promise<Void> in
+            return Deferred<Void>().promise
+        }
+        
+        let promise = Promise.all(d0.promise, d1.promise, d2.promise)
         
         promise.cancel()
             .then(
