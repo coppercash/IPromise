@@ -12,14 +12,14 @@ class CancelEvent {
     typealias Callback = () -> Promise<Void>?
     
     private var invoked: Bool = false
-    var callback: Callback
-    let buffer: Deferred<Void> = Deferred<Void>()
+    private var callback: Callback
+    private let buffer: Deferred<Void> = Deferred<Void>()
     
     init(callback: Callback) {
         self.callback = callback
     }
     
-    func invoke() {
+    func resolve() {
         if self.invoked == false {
             if let promise = callback()? {
                 self.buffer.resolve(thenable: promise, fraction: 1)
@@ -29,5 +29,13 @@ class CancelEvent {
             }
             self.invoked = true
         }
+    }
+    
+    func reject(state: State) {
+        self.buffer.reject(NSError.promiseWrongStateError(state: state, to: "cancel"))
+    }
+    
+    var bufferPromise: Promise<Void> {
+        return buffer.promise
     }
 }

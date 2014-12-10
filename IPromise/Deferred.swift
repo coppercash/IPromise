@@ -28,11 +28,13 @@ public class Deferred<V> {
     public
     func resolve(value: V) -> Void {
         self.promise.resolve(value)
+        self.cancelEvent?.reject(State.Fulfilled)
     }
     
     public
     func reject(reason: NSError) -> Void {
         self.promise.reject(reason)
+        self.cancelEvent?.reject(State.Rejected)
     }
     
     public
@@ -59,10 +61,8 @@ public extension Deferred {
         else {
             let cancelEvent: CancelEvent = CancelEvent(callback: cancelation)
             self.cancelEvent = cancelEvent
-            if let reason = self.promise.reason? {
-                if reason.isCanceled() {
-                    cancelEvent.invoke()
-                }
+            if self.promise.isCanceled() {
+                cancelEvent.resolve()
             }
             return true
         }
@@ -82,9 +82,9 @@ public extension Deferred {
     func cancel(#invoke: Bool) -> Promise<Void> {
         if let cancelEvent = self.cancelEvent {
             if invoke {
-                cancelEvent.invoke()
+                cancelEvent.resolve()
             }
-            return cancelEvent.buffer.promise
+            return cancelEvent.bufferPromise
         }
         else {
             return Promise<Void>(reason: NSError.promiseNoSuchEventError(name: "cancel"))

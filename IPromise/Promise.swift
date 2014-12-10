@@ -365,7 +365,7 @@ public extension Promise {
 public extension Promise {
     
     public
-    class func all<V>(promises: [Promise<V>]) -> Promise<[V]>
+    class func all(promises: [Promise<V>]) -> Promise<[V]>
     {
         var remain: Int = promises.count
         var results: [V?] = [V?](count: remain, repeatedValue: nil)
@@ -408,7 +408,7 @@ public extension Promise {
     }
     
     public
-    class func all<V>(promises: Promise<V>...) -> Promise<[V]>
+    class func all(promises: Promise<V>...) -> Promise<[V]>
     {
         return self.all(promises)
     }
@@ -480,6 +480,11 @@ public extension Promise {
         }
         
         return deferred.promise
+    }
+    
+    public
+    func isCanceled() -> Bool {
+        return self.reason != nil && self.reason!.isCanceled()
     }
     
     private

@@ -48,8 +48,8 @@ class ReadMeTests: XCTestCase {
         ]
         
         let promise = arrayOrVariadic ?
-            Promise<[Int]>.all(promises) :
-            Promise<[Int]>.all(promiseA, promiseB, promiseC)
+            Promise.all(promises) :
+            Promise.all(promiseA, promiseB, promiseC)
         
         promise.then { (value) -> Void in
             for number: Int in value {

@@ -56,6 +56,37 @@ class PromiseCancelTests: XCTestCase {
     }
     
     /*
+    The promise returned from method `Promise#cancel` will be rejected if there is promise fulfilled or rejected on chain.
+    */
+    func test_cancel_fail_stateChange() {
+        let expts = expectationsFor(indexes: [Int](0...1), descPrefix: __FUNCTION__)
+        var sequencer = 0
+        
+        let deferred = Deferred<String>()
+        deferred.onCanceled { () -> Promise<Void> in
+            return Deferred<Void>().promise
+        }
+       
+        0.1 ~> {
+            expts[sequencer].fulfill()
+            XCTAssertEqual(0, sequencer++)
+            deferred.resolve(STRING_VALUE_0)
+            }()
+        
+        deferred.promise.cancel().then(
+            onFulfilled: { (value) -> Void in
+                XCTAssertFalse(true)
+            },
+            onRejected: { (reason) -> Void in
+                expts[sequencer].fulfill()
+                XCTAssertEqual(1, sequencer++)
+            }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    /*
     If the tail promise of a then-chain canceled and no branch on the chain, the head deferred gets notificatiion.
     And no callback in the middle gets notificatiion.
     */
@@ -327,5 +358,87 @@ class PromiseCancelTests: XCTestCase {
         )
         
         waitForExpectationsWithTimeout(7, handler: nil)
+    }
+
+    /*
+    A 'all' promise will be canceled after all its sub-promises canceled
+    */
+    func test_cancel_all_success() {
+        let expts = expectationsFor(indexes: [Int](0...3), descPrefix: __FUNCTION__)
+        var sequencer = 0
+        
+        let d0 = Deferred<String>();
+        d0.onCanceled { () -> Void in
+            XCTAssertEqual(0, sequencer)
+            expts[sequencer++].fulfill()
+        }
+        
+        let d1 = Deferred<String>();
+        d1.onCanceled { () -> Void in
+            XCTAssertEqual(1, sequencer)
+            expts[sequencer++].fulfill()
+        }
+        
+        let d2 = Deferred<String>();
+        d2.onCanceled { () -> Void in
+            0.1 ~> {
+                XCTAssertEqual(2, sequencer)
+                expts[sequencer++].fulfill()
+            }()
+        }
+        
+        let promise = Promise.all(d0.promise, d1.promise, d2.promise)
+        
+        promise.cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertEqual(3, sequencer)
+                    expts[sequencer++].fulfill()
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertFalse(true)
+                }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func test_cancel_all_fail() {
+        let expts = expectationsFor(indexes: [Int](0...2), descPrefix: __FUNCTION__)
+        var sequencer = 0
+        
+        let d0 = Deferred<String>();
+        d0.onCanceled { () -> Void in
+            XCTAssertEqual(0, sequencer)
+            expts[sequencer++].fulfill()
+        }
+        
+        let d1 = Deferred<String>();
+        d1.onCanceled { () -> Promise<Void> in
+            XCTAssertEqual(1, sequencer)
+            expts[sequencer++].fulfill()
+            return Promise<Void>(reason: ERROR_0)
+        }
+        
+        let promise = Promise.all(d0.promise, d1.promise)
+        
+        promise.cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertFalse(true)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertEqual(2, sequencer)
+                    expts[sequencer++].fulfill()
+                }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    /*
+    */
+    func test_cancel_race() {
+        
     }
 }
