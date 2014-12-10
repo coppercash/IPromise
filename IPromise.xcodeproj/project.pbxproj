@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		BE4849F91A1E33BA00763E3D /* CallbackSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4849F81A1E33BA00763E3D /* CallbackSet.swift */; };
 		BE60265E19F5D6A200FED245 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE60265D19F5D6A200FED245 /* ScenarioTests.swift */; };
+		BE807BA01A37D28400A44CA5 /* PromiseCancelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE807B9F1A37D28400A44CA5 /* PromiseCancelTests.swift */; };
 		BEBDD10319EDFC3C00DA957D /* IPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = BEBDD10219EDFC3C00DA957D /* IPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEBDD11B19EDFC8300DA957D /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11719EDFC8300DA957D /* Promise.swift */; };
 		BEBDD11C19EDFC8300DA957D /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBDD11819EDFC8300DA957D /* State.swift */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		BE4849F81A1E33BA00763E3D /* CallbackSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallbackSet.swift; sourceTree = "<group>"; };
 		BE60265D19F5D6A200FED245 /* ScenarioTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScenarioTests.swift; sourceTree = "<group>"; };
+		BE807B9F1A37D28400A44CA5 /* PromiseCancelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseCancelTests.swift; sourceTree = "<group>"; };
 		BEBDD0FD19EDFC3C00DA957D /* IPromise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IPromise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEBDD10119EDFC3C00DA957D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BEBDD10219EDFC3C00DA957D /* IPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPromise.h; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				BEBDD12019EDFCA400DA957D /* Utilities.swift */,
 				BED1735619F1623B00D0E10B /* ReadMeTests.swift */,
 				BEBDD11F19EDFCA400DA957D /* PromiseTests.swift */,
+				BE807B9F1A37D28400A44CA5 /* PromiseCancelTests.swift */,
 				BE60265D19F5D6A200FED245 /* ScenarioTests.swift */,
 				BEBDD10A19EDFC3C00DA957D /* Supporting Files */,
 			);
@@ -246,6 +249,7 @@
 				BEBDD12219EDFCA400DA957D /* PromiseTests.swift in Sources */,
 				BED1735719F1623B00D0E10B /* ReadMeTests.swift in Sources */,
 				BEBDD12319EDFCA400DA957D /* Utilities.swift in Sources */,
+				BE807BA01A37D28400A44CA5 /* PromiseCancelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
