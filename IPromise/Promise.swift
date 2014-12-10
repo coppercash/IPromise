@@ -422,7 +422,7 @@ public extension Promise {
     }
     
     public
-    class func race<V>(promises: [Promise<V>]) -> Promise<V>
+    class func race(promises: [Promise<V>]) -> Promise<V>
     {
         var progresses: [Float] = [Float](count: promises.count, repeatedValue: 0.0)
         
@@ -449,11 +449,19 @@ public extension Promise {
             )
         }
         
+        raceDeferred.onCanceled { () -> Promise<Void>? in
+            var cancelPromises: [Promise<Void>] = []
+            for promise in promises {
+                cancelPromises.append(promise.cancel())
+            }
+            return Promise<Void>.all(cancelPromises).then()
+        }
+        
         return racePromise
     }
     
     public
-    class func race<V>(promises: Promise<V>...) -> Promise<V>
+    class func race(promises: Promise<V>...) -> Promise<V>
     {
         return self.race(promises)
     }

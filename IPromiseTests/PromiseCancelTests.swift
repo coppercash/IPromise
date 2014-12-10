@@ -449,8 +449,91 @@ class PromiseCancelTests: XCTestCase {
     }
     
     /*
+    A 'race' promise will be canceled after all its sub-promises canceled
     */
-    func test_cancel_race() {
+    func test_cancel_race_success() {
+        let expts = expectationsFor(indexes: [Int](0...3), descPrefix: __FUNCTION__)
+        var sequencer = 0
         
+        let d0 = Deferred<String>();
+        d0.onCanceled { () -> Void in
+            expts[sequencer].fulfill()
+            XCTAssertEqual(0, sequencer++)
+        }
+        
+        let d1 = Deferred<String>();
+        d1.onCanceled { () -> Void in
+            expts[sequencer].fulfill()
+            XCTAssertEqual(1, sequencer++)
+        }
+        
+        let d2 = Deferred<String>();
+        d2.onCanceled { () -> Promise<Void> in
+            let deferred = Deferred<Void>()
+            0.1 ~> {
+                expts[sequencer].fulfill()
+                XCTAssertEqual(2, sequencer++)
+                deferred.resolve()
+                }()
+            return deferred.promise
+        }
+        
+        let promise = Promise.race(d0.promise, d1.promise, d2.promise)
+        
+        promise.cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    expts[sequencer].fulfill()
+                    XCTAssertEqual(3, sequencer++)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertFalse(true)
+                }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
     }
+    
+    func test_cancel_race_fail() {
+        let expts = expectationsFor(indexes: [Int](0...2), descPrefix: __FUNCTION__)
+        var sequencer = 0
+        
+        let d0 = Deferred<String>();
+        d0.onCanceled { () -> Void in
+            XCTAssertEqual(0, sequencer)
+            expts[sequencer++].fulfill()
+        }
+        
+        let d1 = Deferred<String>();
+        d1.onCanceled { () -> Promise<Void> in
+            let deferred = Deferred<Void>()
+            0.1 ~> {
+                XCTAssertEqual(1, sequencer)
+                expts[sequencer++].fulfill()
+                deferred.reject(ERROR_0)
+                }()
+            return deferred.promise
+        }
+        
+        let d2 = Deferred<String>();
+        d2.onCanceled { () -> Promise<Void> in
+            return Deferred<Void>().promise
+        }
+        
+        let promise = Promise.race(d0.promise, d1.promise, d2.promise)
+        
+        promise.cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    XCTAssertFalse(true)
+                },
+                onRejected: { (reason) -> Void in
+                    XCTAssertEqual(2, sequencer)
+                    expts[sequencer++].fulfill()
+                }
+        )
+        
+        waitForExpectationsWithTimeout(7, handler: nil)
+    }
+
 }
