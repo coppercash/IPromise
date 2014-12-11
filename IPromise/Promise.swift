@@ -16,7 +16,7 @@ public class Promise<V>: Thenable
     public private(set) var value: V? = nil
     public private(set) var reason: NSError? = nil
     
-    weak var deferred: Deferred<V>?
+    internal var deferred: Deferred<V>?
     private lazy var callbackSets: [CallbackSet<V>] = []
     
     // MARK: - Initializers
@@ -25,22 +25,21 @@ public class Promise<V>: Thenable
         self.state = .Pending
     }
     
-    required
-    public init(value: V) {
+    public required
+    init(value: V) {
         self.value = value
         self.state = .Fulfilled
     }
     
-    required
-    public init(reason: NSError) {
+    public required
+    init(reason: NSError) {
         self.reason = reason
         self.state = .Rejected
     }
     
-    convenience
-    public init(resolver: (resolve: (value: V) -> Void, reject: (reason: NSError) -> Void) -> Void) {
+    public convenience
+    init(resolver: (resolve: (value: V) -> Void, reject: (reason: NSError) -> Void) -> Void) {
         self.init()
-        
         let deferred = Deferred<V>(promise: self)
         resolver(
             resolve: deferred.resolve,
@@ -48,10 +47,9 @@ public class Promise<V>: Thenable
         )
     }
     
-    convenience
-    public init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(thenable: T) {
+    public convenience
+    init<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(thenable: T) {
         self.init()
-        
         let deferred = Deferred<V>(promise: self)
         deferred.resolve(thenable: thenable, fraction: 1.0)
     }
@@ -321,9 +319,9 @@ public extension Promise {
     private
     func bindCallbackSet<N>(callbackSet: CallbackSet<V>, unbinder deferred: Deferred<N>) -> Void {
         bindCallbackSet(callbackSet)
-        deferred.onCanceled { [weak self, unowned deferred] () -> Promise<Void>? in
+        deferred.onCanceled { [unowned deferred] () -> Promise<Void> in
             deferred.cancelResolvingPromise()
-            return self?.cancelByRemovingCallbackSet(callbackSet)
+            return self.cancelByRemovingCallbackSet(callbackSet)
         }
     }
 }
@@ -404,7 +402,7 @@ public extension Promise {
             )
         }
         
-        allDeferred.onCanceled { () -> Promise<Void>? in
+        allDeferred.onCanceled { () -> Promise<Void> in
             var cancelPromises: [Promise<Void>] = []
             for promise in promises {
                 cancelPromises.append(promise.cancel())
@@ -449,7 +447,7 @@ public extension Promise {
             )
         }
         
-        raceDeferred.onCanceled { () -> Promise<Void>? in
+        raceDeferred.onCanceled { () -> Promise<Void> in
             var cancelPromises: [Promise<Void>] = []
             for promise in promises {
                 cancelPromises.append(promise.cancel())
@@ -476,7 +474,7 @@ public extension Promise {
         if .Pending == self.state {
             return invokeCancelEvent(canceled: true)
         }
-        else if .Rejected == self.state && cancelErr == self.reason  {
+        else if self.isCanceled()  {
             return Promise<Void>(value: ())
         }
         else {
@@ -491,7 +489,7 @@ public extension Promise {
         let callbackSet = CallbackSetThroughBuilder<V>(deferred: deferred).build()
         bindCallbackSet(callbackSet)
         
-        deferred.onCanceled { () -> Promise<Void>? in
+        deferred.onCanceled { () -> Promise<Void> in
             return Promise<Void>(reason: NSError.promiseCancelForkedPromiseError());
         }
         
@@ -521,8 +519,8 @@ public extension Promise {
     private
     func bindCallbackSet<N>(callbackSet: CallbackSet<V>, unbindByDeferred deferred: Deferred<N>) -> Void {
         bindCallbackSet(callbackSet)
-        deferred.onCanceled { [weak self] () -> Promise<Void>? in
-            return self?.cancelByRemovingCallbackSet(callbackSet)
+        deferred.onCanceled { () -> Promise<Void> in
+            return self.cancelByRemovingCallbackSet(callbackSet)
         }
     }
 }

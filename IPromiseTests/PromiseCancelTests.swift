@@ -17,7 +17,7 @@ class PromiseCancelTests: XCTestCase {
     */
     func test_cancel_state() {
         var expts: [XCTestExpectation] = []
-        for index in 0..<3 {
+        for index in 0...5 {
             expts.append(expectationWithDescription("\(__FUNCTION__)_\(index)"))
         }
         
@@ -43,7 +43,10 @@ class PromiseCancelTests: XCTestCase {
         
         let canceledPromise = Promise<String> { (resolve, reject) -> Void in
         }
-        canceledPromise.cancel()
+        canceledPromise.catch { (reason) -> Void in
+            XCTAssertEqual(PromiseCancelError, reason.code)
+            expts[4].fulfill()
+        }
         canceledPromise.cancel().then(
             onFulfilled: { (value) -> Void in
                 expts[2].fulfill()
@@ -51,6 +54,23 @@ class PromiseCancelTests: XCTestCase {
             onRejected: { (reason) -> Void in
                 XCTAssertFalse(true)
         })
+        
+        let (canceledTwiceDeferred, canceledTwicePromise) = Promise<String>.defer()
+        canceledTwiceDeferred.onCanceled { () -> Void in
+            
+        }
+        canceledTwicePromise.cancel()
+        canceledTwicePromise.cancel().then(
+            onFulfilled: { (value) -> Void in
+                expts[3].fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+        })
+        canceledTwicePromise.catch { (reason) -> Void in
+            XCTAssertEqual(PromiseCancelError, reason.code)
+            expts[5].fulfill()
+        }
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
@@ -282,14 +302,14 @@ class PromiseCancelTests: XCTestCase {
     If cancel a promise which's result depends on another promise returned in then closures, the depended promise is canceled too
     */
     func test_cancel_leaf() {
-        var expts: [Int: XCTestExpectation] = expectationsFor(keys: [Int](0..<2), descPrefix: __FUNCTION__)
+        var expts: [Int: XCTestExpectation] = expectationsFor(keys: [Int](0...1), descPrefix: __FUNCTION__)
         
         var memHolder: Deferred<Void>? = nil
         let promise = Promise<String>(value: STRING_VALUE_1)
         promise
             .then(onFulfilled: { (value) -> Promise<Void> in
                 let (d_leaf, p_leaf) = Promise<Void>.defer()
-                memHolder = d_leaf
+                //memHolder = d_leaf
                 d_leaf.onCanceled({ () -> Promise<Void> in
                     expts[0]!.fulfill()
                     let (d_cancel, p_cancel) = Promise<Void>.defer()

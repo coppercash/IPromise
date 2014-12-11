@@ -13,7 +13,7 @@ public class Deferred<V> {
     public let promise: Promise<V>
     
     private var cancelEvent: Optional<CancelEvent> = nil
-    private weak var resolvingPromise: Optional<Promise<V>> = nil
+    private var resolvingPromise: Optional<Promise<V>> = nil
     
     public required convenience
     init() {
@@ -28,18 +28,26 @@ public class Deferred<V> {
     public
     func resolve(value: V) -> Void {
         self.promise.resolve(value)
-        self.cancelEvent?.reject(State.Fulfilled)
+        self.clean(State.Fulfilled)
     }
     
     public
     func reject(reason: NSError) -> Void {
         self.promise.reject(reason)
-        self.cancelEvent?.reject(State.Rejected)
+        self.clean(State.Rejected)
     }
     
     public
     func progress(progress: Float) -> Void {
         self.promise.progress(progress)
+    }
+    
+    private
+    func clean(toState: State) {
+        self.cancelEvent?.reject(toState)
+        self.cancelEvent = nil
+        self.resolvingPromise = nil
+        self.promise.deferred = nil
     }
 }
 
@@ -54,7 +62,7 @@ public extension Deferred {
     }
     
     public
-    func onCanceled(cancelation: () -> Promise<Void>?) -> Bool {
+    func onCanceled(cancelation: () -> Promise<Void>) -> Bool {
         if self.cancelEvent != nil {
             return false
         }
@@ -87,7 +95,7 @@ public extension Deferred {
             return cancelEvent.bufferPromise
         }
         else {
-            return Promise<Void>(reason: NSError.promiseNoSuchEventError(name: "cancel"))
+            return Promise<Void>(value: ())
         }
     }
 }

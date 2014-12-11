@@ -11,9 +11,9 @@ import XCTest
 import IPromise
 
 class ReadMeTests: XCTestCase {
-
+    
     func test_typeSafe() {
-
+        
         func answerToEverthing() -> Promise<Int> {
             return Promise(value: 42)
         }
@@ -100,7 +100,7 @@ class ReadMeTests: XCTestCase {
                 onRejected: Optional<(reason: NSError) -> Void>,
                 onProgress: Optional<(progress: Float) -> Float>
                 ) -> Void {
-                // Implement
+                    // Implement
             }
         }
         
@@ -154,5 +154,24 @@ class ReadMeTests: XCTestCase {
             onProgress: { (progress) -> Float in
                 return progress * 0.7   // The '0.7' is used as fraction
         })
+    }
+    
+    func test_finally() {
+        let (deferred, promise) = Promise<Void>.defer()
+        
+        promise
+            .then(
+                onFulfilled: { (value) -> Void in
+                    println("Fulfill")
+                },
+                onRejected: { (reason) -> Void in
+                    println("Reject")
+                }
+            )
+            .then { (value) -> Void in
+                println("Finally...")
+        }
+        
+        deferred.reject(NSError())
     }
 }
