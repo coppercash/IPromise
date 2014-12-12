@@ -17,7 +17,9 @@ public class Promise<V>: Thenable
     public private(set) var reason: NSError? = nil
     
     internal var deferred: Deferred<V>?
+    
     private lazy var callbackSets: [CallbackSet<V>] = []
+    private var cancelCallbacksCount = 0;
     
     // MARK: - Initializers
     
@@ -280,7 +282,7 @@ public extension Promise {
         let deferred = Deferred<N>()
         
         let fraction: Float = (onProgress == nil) ? 0.0 : 1.0 - onProgress!(progress: 1.0)
-
+        
         let callbackSet = CallbackSetBuilder<V, N>(deferred: deferred)
             .setReject(useDefault: (onRejected == nil)) { (reason: NSError) -> Void in
                 let nextThenable = onRejected!(reason: reason)
@@ -469,6 +471,16 @@ public extension Promise {
     
     public
     func cancel() -> Promise<Void> {
+        if let deferred = self.deferred {
+            return Promise<Void>.all(deferred.cancel(),  cancelThen()).then()
+        }
+        else {
+            reject(NSError.promiseCancelError())
+            return cancelThen()
+        }
+        
+        
+        /*
         let cancelErr = NSError.promiseCancelError()
         
         if .Pending == self.state {
@@ -480,6 +492,7 @@ public extension Promise {
         else {
             return Promise<Void>(reason: NSError.promiseWrongStateError(state: self.state, to: "cancel"))
         }
+*/
     }
     
     public
@@ -501,11 +514,43 @@ public extension Promise {
         return self.reason != nil && self.reason!.isCanceled()
     }
     
-    private
-    func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V>) -> Promise<Void> {
-        return (unbindCallbackSet(callbackSet) == 0) ? cancel() : invokeCancelEvent(canceled: false)
+    internal
+    func cancelThen() -> Promise<Void> {
+        let deferred = Deferred<Void>()
+        
+        let callbackSet = CallbackSet<V>(
+            fulfill: { (value: V) -> Void in
+                deferred.reject(NSError.promiseWrongStateError(state: State.Fulfilled, to: "cancel"))  // TODO: SPecific error
+            },
+            reject: { (reason: NSError) -> Void in
+                if reason.isCanceled() {
+                    deferred.resolve()
+                }
+                else {
+                    deferred.reject(NSError.promiseWrongStateError(state: State.Fulfilled, to: "cancel"))  // TODO: SPecific error
+                }
+            },
+            progress: { (progress: Float) -> Void in
+            }
+        )
+        
+        bindCallbackSet(callbackSet, unbindByDeferred: deferred)
+        self.cancelCallbacksCount += 1
+        
+        return deferred.promise
     }
     
+    private
+    func cancelByRemovingCallbackSet(callbackSet: CallbackSet<V>) -> Promise<Void> {
+        if unbindCallbackSet(callbackSet) > self.cancelCallbacksCount {
+            return cancelThen()
+        }
+        else {
+            return cancel()
+        }
+        //return (unbindCallbackSet(callbackSet) == 0) ? cancel() : invokeCancelEvent(canceled: false)
+    }
+    /*
     private
     func invokeCancelEvent(#canceled: Bool) -> Promise<Void> {
         if let deferred = self.deferred? {
@@ -515,7 +560,7 @@ public extension Promise {
             return Promise<Void>(value: ())
         }
     }
-    
+    */
     private
     func bindCallbackSet<N>(callbackSet: CallbackSet<V>, unbindByDeferred deferred: Deferred<N>) -> Void {
         bindCallbackSet(callbackSet)

@@ -11,27 +11,16 @@ import Foundation
 class CancelEvent {
     typealias Callback = () -> Promise<Void>
     
-    private var invoked: Bool = false
-    private let callback: Callback
-    private let buffer: Deferred<Void> = Deferred<Void>()
+    internal var invoked: Bool = false
+    internal let callback: Callback
     
     init(callback: Callback) {
         self.callback = callback
     }
-    
-    func resolve() {
-        if self.invoked == false {
-            let cancelPromise = self.callback()
-            self.buffer.resolve(thenable: cancelPromise, fraction: 1)
-            self.invoked = true
-        }
-    }
-    
-    func reject(state: State) {
-        self.buffer.reject(NSError.promiseWrongStateError(state: state, to: "cancel"))
-    }
-    
-    var bufferPromise: Promise<Void> {
-        return buffer.promise
+
+    internal
+    func invoke() -> Promise<Void> {
+        self.invoked = true
+        return callback()
     }
 }

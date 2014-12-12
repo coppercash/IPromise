@@ -76,7 +76,7 @@ class PromiseCancelTests: XCTestCase {
     }
     
     /*
-    The promise returned from method `Promise#cancel` will be rejected if there is promise fulfilled or rejected on chain.
+    The promise returned from method `Promise#cancel` will be rejected if there is promise fulfilled or rejected in chain.
     */
     func test_cancel_fail_stateChange() {
         let expts = expectationsFor(indexes: [Int](0...1), descPrefix: __FUNCTION__)
@@ -227,7 +227,7 @@ class PromiseCancelTests: XCTestCase {
     }
     
     func test_cancel_onCanceled_returnPromise_reject() {
-        var expts = expectationsFor(indexes:[Int](0..<2), descPrefix: __FUNCTION__)
+        var expts = expectationsFor(indexes:[Int](0...1), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let (deferred, promise) = Promise<Void>.defer()
@@ -236,9 +236,8 @@ class PromiseCancelTests: XCTestCase {
             let (deferred, promise) = Promise<Void>.defer()
             
             0.1 ~> {
-                XCTAssertEqual(0, sequencer)
                 expts[sequencer].fulfill()
-                sequencer++
+                XCTAssertEqual(0, sequencer++)
                 deferred.reject(ERROR_0)
                 }()
             
@@ -252,8 +251,9 @@ class PromiseCancelTests: XCTestCase {
             onRejected: { (reason) -> Void in
                 XCTAssertEqual(ERROR_0, reason)
                 
-                XCTAssertEqual(1, sequencer)
                 expts[sequencer].fulfill()
+                XCTAssertEqual(1, sequencer++)
+
                 sequencer++
             }
         )
@@ -265,15 +265,14 @@ class PromiseCancelTests: XCTestCase {
     The promise is canceled only if all its sub-promises canceled
     */
     func test_cancel_onCanceled_branch() {
-        var expts: [XCTestExpectation] = expectationsFor(indexes: [Int](0..<3), descPrefix: __FUNCTION__)
+        var expts: [XCTestExpectation] = expectationsFor(indexes: [Int](0...2), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let (deferred, promise) = Promise<Void>.defer()
         
         deferred.onCanceled { () -> Void in
-            XCTAssertEqual(0, sequencer)
             expts[sequencer].fulfill()
-            sequencer++
+            XCTAssertEqual(0, sequencer++)
         }
         
         let promise0 = promise.then(onFulfilled: { (value) -> String in
@@ -284,15 +283,13 @@ class PromiseCancelTests: XCTestCase {
         })
         
         promise0.cancel().then(onFulfilled: { (value) -> Void in
-            XCTAssertEqual(1, sequencer)
             expts[sequencer].fulfill()
-            sequencer++
+            XCTAssertEqual(1, sequencer++)
         })
         
         promise1.cancel().then(onFulfilled: { (value) -> Void in
-            XCTAssertEqual(2, sequencer)
             expts[sequencer].fulfill()
-            sequencer++
+            XCTAssertEqual(2, sequencer++)
         })
         
         waitForExpectationsWithTimeout(7, handler: nil)
