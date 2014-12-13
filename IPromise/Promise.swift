@@ -409,7 +409,7 @@ public extension Promise {
             for promise in promises {
                 cancelPromises.append(promise.cancel())
             }
-            return Promise<Void>.all(cancelPromises).then()
+            return Promise<Void>.race(cancelPromises)
         }
         
         return allPromise
@@ -454,7 +454,7 @@ public extension Promise {
             for promise in promises {
                 cancelPromises.append(promise.cancel())
             }
-            return Promise<Void>.all(cancelPromises).then()
+            return Promise<Void>.race(cancelPromises)
         }
         
         return racePromise
@@ -472,27 +472,12 @@ public extension Promise {
     public
     func cancel() -> Promise<Void> {
         if let deferred = self.deferred {
-            return Promise<Void>.all(deferred.cancel(),  cancelThen()).then()
+            return Promise<Void>.race(deferred.cancel(), cancelThen())
         }
         else {
             reject(NSError.promiseCancelError())
             return cancelThen()
         }
-        
-        
-        /*
-        let cancelErr = NSError.promiseCancelError()
-        
-        if .Pending == self.state {
-            return invokeCancelEvent(canceled: true)
-        }
-        else if self.isCanceled()  {
-            return Promise<Void>(value: ())
-        }
-        else {
-            return Promise<Void>(reason: NSError.promiseWrongStateError(state: self.state, to: "cancel"))
-        }
-*/
     }
     
     public
@@ -548,19 +533,8 @@ public extension Promise {
         else {
             return cancel()
         }
-        //return (unbindCallbackSet(callbackSet) == 0) ? cancel() : invokeCancelEvent(canceled: false)
     }
-    /*
-    private
-    func invokeCancelEvent(#canceled: Bool) -> Promise<Void> {
-        if let deferred = self.deferred? {
-            return deferred.cancel(invoke: canceled)
-        }
-        else {
-            return Promise<Void>(value: ())
-        }
-    }
-    */
+
     private
     func bindCallbackSet<N>(callbackSet: CallbackSet<V>, unbindByDeferred deferred: Deferred<N>) -> Void {
         bindCallbackSet(callbackSet)

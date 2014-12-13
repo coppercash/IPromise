@@ -44,7 +44,6 @@ public class Deferred<V> {
     
     private
     func clean(toState: State) {
-        //self.cancelEvent?.reject(toState)
         self.cancelEvent = nil
         self.resolvingPromise = nil
         self.promise.deferred = nil
@@ -85,26 +84,15 @@ public extension Deferred {
             return Promise<Void>(value: ())
         }
     }
-    /*
-    internal
-    func cancel(#invoke: Bool) -> Promise<Void> {
-        if let cancelEvent = self.cancelEvent {
-            if invoke {
-                cancelEvent.resolve()
-            }
-            return cancelEvent.bufferPromise
-        }
-        else {
-            return Promise<Void>(value: ())
-        }
-    }
-    */
+
     internal
     func cancel() -> Promise<Void> {
         if let cancelEvent = self.cancelEvent {
-            return cancelEvent.invoke().then { (value) -> Void in
+            let cancelPromise = cancelEvent.invoke()
+            cancelPromise.then { (value) -> Void in
                 self.reject(NSError.promiseCancelError())
             }
+            return cancelPromise
         }
         else {
             reject(NSError.promiseCancelError())

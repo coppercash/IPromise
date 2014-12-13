@@ -21,6 +21,7 @@ class CancelEvent {
     internal
     func invoke() -> Promise<Void> {
         self.invoked = true
-        return callback()
+        let b = callback()
+        return b
     }
 }

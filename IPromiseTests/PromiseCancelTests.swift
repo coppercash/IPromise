@@ -378,22 +378,24 @@ class PromiseCancelTests: XCTestCase {
     }
 
     /*
-    A 'all' promise will be canceled after all its sub-promises canceled
+    A 'all' promise will be canceled if one of its sub-promises get canceled, but all sub-promises will get a notification in `onCanceled`.
     */
     func test_cancel_all_success() {
         let expts = expectationsFor(indexes: [Int](0...3), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let d0 = Deferred<String>();
-        d0.onCanceled { () -> Void in
+        d0.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(0, sequencer++)
+            return Deferred<Void>().promise
         }
         
         let d1 = Deferred<String>();
-        d1.onCanceled { () -> Void in
+        d1.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(1, sequencer++)
+            return Deferred<Void>().promise
         }
         
         let d2 = Deferred<String>();
@@ -428,9 +430,10 @@ class PromiseCancelTests: XCTestCase {
         var sequencer = 0
         
         let d0 = Deferred<String>();
-        d0.onCanceled { () -> Void in
+        d0.onCanceled { () -> Promise<Void> in
             XCTAssertEqual(0, sequencer)
             expts[sequencer++].fulfill()
+            return Deferred<Void>().promise
         }
         
         let d1 = Deferred<String>();
@@ -444,12 +447,7 @@ class PromiseCancelTests: XCTestCase {
             return deferred.promise
         }
         
-        let d2 = Deferred<String>();
-        d2.onCanceled { () -> Promise<Void> in
-            return Deferred<Void>().promise
-        }
-        
-        let promise = Promise.all(d0.promise, d1.promise, d2.promise)
+        let promise = Promise.all(d0.promise, d1.promise)
         
         promise.cancel()
             .then(
@@ -457,6 +455,7 @@ class PromiseCancelTests: XCTestCase {
                     XCTAssertFalse(true)
                 },
                 onRejected: { (reason) -> Void in
+                    XCTAssertEqual(ERROR_0, reason)
                     XCTAssertEqual(2, sequencer)
                     expts[sequencer++].fulfill()
                 }
@@ -466,22 +465,24 @@ class PromiseCancelTests: XCTestCase {
     }
     
     /*
-    A 'race' promise will be canceled after all its sub-promises canceled
+    A 'race' promise will be canceled if one of its sub-promises get canceled, but all sub-promises will get a notification in `onCanceled`.
     */
     func test_cancel_race_success() {
         let expts = expectationsFor(indexes: [Int](0...3), descPrefix: __FUNCTION__)
         var sequencer = 0
         
         let d0 = Deferred<String>();
-        d0.onCanceled { () -> Void in
+        d0.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(0, sequencer++)
+            return Deferred<Void>().promise
         }
         
         let d1 = Deferred<String>();
-        d1.onCanceled { () -> Void in
+        d1.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(1, sequencer++)
+            return Deferred<Void>().promise
         }
         
         let d2 = Deferred<String>();
@@ -516,9 +517,10 @@ class PromiseCancelTests: XCTestCase {
         var sequencer = 0
         
         let d0 = Deferred<String>();
-        d0.onCanceled { () -> Void in
+        d0.onCanceled { () -> Promise<Void> in
             XCTAssertEqual(0, sequencer)
             expts[sequencer++].fulfill()
+            return Deferred<Void>().promise
         }
         
         let d1 = Deferred<String>();
@@ -532,12 +534,7 @@ class PromiseCancelTests: XCTestCase {
             return deferred.promise
         }
         
-        let d2 = Deferred<String>();
-        d2.onCanceled { () -> Promise<Void> in
-            return Deferred<Void>().promise
-        }
-        
-        let promise = Promise.race(d0.promise, d1.promise, d2.promise)
+        let promise = Promise.race(d0.promise, d1.promise)
         
         promise.cancel()
             .then(
@@ -545,6 +542,7 @@ class PromiseCancelTests: XCTestCase {
                     XCTAssertFalse(true)
                 },
                 onRejected: { (reason) -> Void in
+                    XCTAssertEqual(ERROR_0, reason)
                     XCTAssertEqual(2, sequencer)
                     expts[sequencer++].fulfill()
                 }
