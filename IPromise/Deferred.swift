@@ -12,7 +12,7 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
-    private var cancelEvent: Optional<CancelEvent> = nil
+    private var cancelClosure: Optional<() -> Promise<Void>>
     private var resolvingPromise: Optional<Promise<V>> = nil
     
     public required convenience
@@ -44,7 +44,7 @@ public class Deferred<V> {
     
     private
     func clean(toState: State) {
-        self.cancelEvent = nil
+        self.cancelClosure = nil
         self.resolvingPromise = nil
         self.promise.deferred = nil
     }
@@ -53,26 +53,16 @@ public class Deferred<V> {
 public extension Deferred {
     
     public
-    func onCanceled(cancelation: () -> Void) -> Bool {
-        return onCanceled { () -> Promise<Void> in
-            cancelation()
+    func onCanceled(closure: () -> Void) {
+        onCanceled { () -> Promise<Void> in
+            closure()
             return Promise<Void>(value: ())
         }
     }
     
     public
-    func onCanceled(cancelation: () -> Promise<Void>) -> Bool {
-        if self.cancelEvent != nil {
-            return false
-        }
-        else {
-            let cancelEvent: CancelEvent = CancelEvent(callback: cancelation)
-            self.cancelEvent = cancelEvent
-            if self.promise.isCanceled() {
-                cancelEvent.invoke()
-            }
-            return true
-        }
+    func onCanceled(closure: () -> Promise<Void>) {
+        self.cancelClosure = closure
     }
     
     public
@@ -87,12 +77,10 @@ public extension Deferred {
 
     internal
     func cancel() -> Promise<Void> {
-        if let cancelEvent = self.cancelEvent {
-            let cancelPromise = cancelEvent.invoke()
-            cancelPromise.then { (value) -> Void in
+        if let closure = self.cancelClosure {
+            return closure().then { (value) -> Void in
                 self.reject(NSError.promiseCancelError())
             }
-            return cancelPromise
         }
         else {
             reject(NSError.promiseCancelError())
