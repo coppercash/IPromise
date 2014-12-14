@@ -28,13 +28,13 @@ public class Deferred<V> {
     public
     func resolve(value: V) -> Void {
         self.promise.resolve(value)
-        self.clean(State.Fulfilled)
+        clean()
     }
     
     public
     func reject(reason: NSError) -> Void {
         self.promise.reject(reason)
-        self.clean(State.Rejected)
+        clean()
     }
     
     public
@@ -43,10 +43,9 @@ public class Deferred<V> {
     }
     
     private
-    func clean(toState: State) {
+    func clean() {
         self.cancelClosure = nil
         self.resolvingPromise = nil
-        self.promise.deferred = nil
     }
 }
 
@@ -62,7 +61,12 @@ public extension Deferred {
     
     public
     func onCanceled(closure: () -> Promise<Void>) {
-        self.cancelClosure = closure
+        if .Pending == self.promise.state {
+            self.cancelClosure = closure
+        }
+        else if self.promise.isCanceled() {
+            closure()
+        }
     }
     
     public

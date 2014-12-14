@@ -59,11 +59,11 @@ extension NSError {
         )
     }
     
-    class func promiseWrongStateError(#state: State, to action: String) -> Self {
+    class func promiseWrongStateError(#state: State) -> Self {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseWrongStateError,
-            userInfo: [NSLocalizedDescriptionKey: "Can't not do '\(action)' under state '\(state)'",]
+            userInfo: [NSLocalizedDescriptionKey: "Promise has been already '\(state)'",]
         )
     }
     
