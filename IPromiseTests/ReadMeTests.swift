@@ -139,11 +139,12 @@ class ReadMeTests: XCTestCase {
             onFulfilled: nil,
             onRejected: nil,
             onProgress: { (progress) -> Float in
-                return progress // The return value is used to propagate
+                println("The return value '\(progress)' is used to propagate")
+                return progress
         })
         
         promise.progress { (progress) -> Void in
-            // The return value can also be omitted
+            println("The return value '\(progress)' can also be omitted")
         }
         
         promise.then(
@@ -152,7 +153,8 @@ class ReadMeTests: XCTestCase {
                 return anotherPromise
             },
             onProgress: { (progress) -> Float in
-                return progress * 0.7   // The '0.7' is used as fraction
+                println("The value '\(0.7)' is used as fraction")
+                return progress * 0.7
         })
     }
     
