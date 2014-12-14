@@ -15,6 +15,10 @@ public class Deferred<V> {
     private var cancelClosure: Optional<() -> Promise<Void>>
     private var resolvingPromise: Optional<Promise<V>> = nil
     
+    deinit {
+        println("321")
+    }
+    
     public required convenience
     init() {
         self.init(promise: Promise<V>())

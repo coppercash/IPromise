@@ -10,13 +10,17 @@ import Foundation
 
 public class Promise<V>: Thenable
 {
+    deinit {
+        println("123")
+    }
+    
     // MARK: - ivars
     
     public private(set) var state: State = .Pending
     public private(set) var value: V? = nil
     public private(set) var reason: NSError? = nil
     
-    internal var deferred: Deferred<V>?
+    internal weak var deferred: Deferred<V>?
     
     private lazy var callbackSets: [CallbackSet<V>] = []
     private lazy var cancelCallbackSets: [CallbackSet<V>] = []

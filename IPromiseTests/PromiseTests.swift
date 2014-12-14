@@ -1065,4 +1065,19 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
+    // MARK: - Memory
+    
+    /*
+    Promise shouldn't be released if its Deferred still held.
+    */
+    
+    func test_memory_hold_deferred() {
+        var deferred: Deferred<Void>? = Deferred<Void>()
+        weak var promise: Promise<Void>? = deferred?.promise
+        XCTAssertNotNil(promise)
+
+        deferred = nil
+        
+        XCTAssertNil(promise)
+    }
 }
