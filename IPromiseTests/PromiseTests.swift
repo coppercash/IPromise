@@ -16,7 +16,7 @@ class PromiseTests: XCTestCase
     
     func test_state_pendingToFulfill(){
         let expt = expectationWithDescription(__FUNCTION__)
-
+        
         let promise = Promise { (resolve, reject) -> Void in
             0 ~> resolve(value: STRING_VALUE_0)
         }
@@ -24,12 +24,12 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.value)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -45,11 +45,11 @@ class PromiseTests: XCTestCase
             expt.fulfill()
         })
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.reason)
-
+        
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertEqual(promise.reason!, ERROR_0)
         })
     }
@@ -72,12 +72,12 @@ class PromiseTests: XCTestCase
             reject(reason: ERROR_2)
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+        XCTAssertEqual(promise.state, State.Fulfilled)
         XCTAssertEqual(promise.value!, STRING_VALUE_0)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -101,12 +101,12 @@ class PromiseTests: XCTestCase
             reject(reason: ERROR_2)
         }
         
-        XCTAssertEqual(promise.state, PromiseState.Rejected)
+        XCTAssertEqual(promise.state, State.Rejected)
         XCTAssertEqual(promise.reason!, ERROR_0)
         XCTAssertNil(promise.value)
         
         waitForExpectationsWithTimeout(7, handler: { (error) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertEqual(promise.reason!, ERROR_0)
             XCTAssertNil(promise.value)
         })
@@ -129,7 +129,7 @@ class PromiseTests: XCTestCase
                 XCTAssertEqual(++counter, 1)
                 
                 resolve(value: STRING_VALUE_0)
-
+                
                 resolve(value: STRING_VALUE_1)
                 reject(reason: ERROR_1)
                 
@@ -153,7 +153,7 @@ class PromiseTests: XCTestCase
             XCTAssertEqual(++counter, 3)
             expts[3]!.fulfill()
         }
-
+        
         promise.catch { (reason) -> Void in
             XCTAssertFalse(true)
         }
@@ -202,9 +202,9 @@ class PromiseTests: XCTestCase
             
         })
     }
-
+    
     // MARK: - 2.2.3; 2.2.6
-
+    
     func test_then_onRejected() {
         
         var counter = 0
@@ -292,7 +292,7 @@ class PromiseTests: XCTestCase
     
     func test_optional_fulfill() {
         let promise = Promise(value: STRING_VALUE_0)
-        XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+        XCTAssertEqual(promise.state, State.Fulfilled)
         XCTAssertNil(promise.reason)
         
         promise
@@ -313,12 +313,12 @@ class PromiseTests: XCTestCase
     }
     
     // MARK: - 2.2.1; 2.2.7.4; init(reason:)
-
+    
     func test_optional_reject() {
         let promise = Promise<String>(reason: ERROR_0)
-        XCTAssertEqual(promise.state, PromiseState.Rejected)
+        XCTAssertEqual(promise.state, State.Rejected)
         XCTAssertNil(promise.value)
-
+        
         promise
             .then(
                 onFulfilled: nil,
@@ -448,7 +448,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
         })
     }
-
+    
     // MARK: - 2.3.3
     
     // MARK: - 2.3.4; chain
@@ -459,7 +459,7 @@ class PromiseTests: XCTestCase
         for index in 0...3 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
-
+        
         Promise<Void>(reason: ERROR_0)
             .then(
                 onFulfilled: { (value) -> String in
@@ -497,7 +497,7 @@ class PromiseTests: XCTestCase
         for index in 0...3 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
         }
-
+        
         Promise<Void>(reason: ERROR_0)
             .then(
                 onFulfilled: { (value: Void) -> Void in
@@ -523,9 +523,9 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
     func test_chain_void_fulfill() {
-
+        
         var expts: [Int: XCTestExpectation] = [:]
         for index in 0...2 {
             expts[index] = expectationWithDescription("\(__FUNCTION__)_\(index)")
@@ -555,19 +555,19 @@ class PromiseTests: XCTestCase
     func test_catch_value() {
         let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let expt1 = expectationWithDescription("\(__FUNCTION__)_1")
-
+        
         Promise<String>(reason: ERROR_0)
-        .catch { (reason) -> String in
-            XCTAssertEqual(ERROR_0, reason)
-            expt0.fulfill()
-            return STRING_VALUE_0
+            .catch { (reason) -> String in
+                XCTAssertEqual(ERROR_0, reason)
+                expt0.fulfill()
+                return STRING_VALUE_0
+            }
+            .then { (value) -> String in
+                XCTAssertEqual(STRING_VALUE_0, value)
+                expt1.fulfill()
+                return STRING_VALUE_1
         }
-        .then { (value) -> String in
-            XCTAssertEqual(STRING_VALUE_0, value)
-            expt1.fulfill()
-            return STRING_VALUE_1
-        }
-
+        
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
@@ -601,21 +601,21 @@ class PromiseTests: XCTestCase
         
         let promise = Promise(thenable: superPromise)
         promise.then(
-                onFulfilled: { (value) -> Void in
-                    XCTAssertEqual(value, STRING_VALUE_0)
-                    expt.fulfill()
-                },
-                onRejected: { (reason) -> Void in
-                    XCTAssertFalse(true)
-                }
+            onFulfilled: { (value) -> Void in
+                XCTAssertEqual(value, STRING_VALUE_0)
+                expt.fulfill()
+            },
+            onRejected: { (reason) -> Void in
+                XCTAssertFalse(true)
+            }
         )
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertNil(promise.value)
         XCTAssertNil(promise.reason)
-
+        
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
+            XCTAssertEqual(promise.state, State.Fulfilled)
             XCTAssertEqual(promise.value!, STRING_VALUE_0)
             XCTAssertNil(promise.reason)
         })
@@ -639,12 +639,12 @@ class PromiseTests: XCTestCase
             }
         )
         
-        XCTAssertEqual(promise.state, PromiseState.Pending)
+        XCTAssertEqual(promise.state, State.Pending)
         XCTAssertTrue(promise.value == nil)
         XCTAssertNil(promise.reason)
         
         waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Rejected)
+            XCTAssertEqual(promise.state, State.Rejected)
             XCTAssertTrue(promise.value == nil)
             XCTAssertEqual(promise.reason!, ERROR_0)
         })
@@ -653,7 +653,7 @@ class PromiseTests: XCTestCase
     // MARK: - resolve(_)
     
     func test_resolve() {
-
+        
         let expt0 = expectationWithDescription("\(__FUNCTION__)_0")
         let a0: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
         a0.then { (value) -> Void in
@@ -662,8 +662,8 @@ class PromiseTests: XCTestCase
         }
         XCTAssertEqual(a0.value! as String, STRING_VALUE_0)
         
-        let a1: Promise<Any> = Promise<String>.resolve(STRING_VALUE_0)
-        XCTAssertEqual(a1.value as String, STRING_VALUE_0)
+        let a1: Promise<String> = Promise<String>.resolve(STRING_VALUE_0)
+        XCTAssertEqual(STRING_VALUE_0, a1.value!)
         
         let q2 = Promise<String>(value: STRING_VALUE_0)
         let a2: Promise<String> = Promise<String>.resolve(q2)
@@ -687,8 +687,8 @@ class PromiseTests: XCTestCase
             println(reason.localizedDescription)
             expt1.fulfill()
         }
-        XCTAssertEqual(a1.state, PromiseState.Rejected)
-
+        XCTAssertEqual(a1.state, State.Rejected)
+        
         let expt3 = expectationWithDescription("\(__FUNCTION__)_3")
         let q3 = Promise<Int>(value: 3)
         let a3: Promise<String> = Promise<String>.resolve(q3)
@@ -698,35 +698,33 @@ class PromiseTests: XCTestCase
             println(reason.localizedDescription)
             expt3.fulfill()
         }
-        XCTAssertEqual(a3.state, PromiseState.Rejected)
+        XCTAssertEqual(a3.state, State.Rejected)
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
     
     // MARK: - reject(_)
-
-        func test_reject() {
-        let a0 = AnyPromise.reject(ERROR_0)
-        XCTAssertEqual(a0.state, PromiseState.Rejected)
-        XCTAssertTrue(a0.value == nil)
-        XCTAssertEqual(a0.reason as NSError, ERROR_0)
+    
+    func test_reject() {
+        let a0 = Promise<String>.reject(ERROR_0)
+        XCTAssertEqual(State.Rejected, a0.state)
+        XCTAssertNil(a0.value)
+        XCTAssertEqual(ERROR_0, a0.reason!)
     }
-
     
     // MARK: - all
     
     func test_all_fulfill_async() {
-
+        
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(vagueThenable:
-            AnyPromise { (resolve, reject) -> Void in
-                0 ~> resolve(value: STRING_VALUE_2)
-            })
+        let prms2 = Promise<Any?> { (resolve, reject) -> Void in
+            0 ~> resolve(value: STRING_VALUE_2)
+        }
         
-        let promise = Promise<Any>.all(prms0, prms1, prms2)
+        let promise = Promise.all(prms0, prms1, prms2)
         promise.then(
             onFulfilled: { (value) -> Any? in
                 
@@ -757,7 +755,7 @@ class PromiseTests: XCTestCase
         let prms1 = Promise(value: STRING_VALUE_1)
         let prms2 = Promise(value: STRING_VALUE_2)
         
-        let promise = Promise<Any>.all([prms0, prms1, prms2])
+        let promise = Promise.all([prms0, prms1, prms2])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertEqual(value, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
@@ -771,22 +769,21 @@ class PromiseTests: XCTestCase
         )
         
         XCTAssertEqual(promise.value!, [STRING_VALUE_0, STRING_VALUE_1, STRING_VALUE_2])
-
+        
         waitForExpectationsWithTimeout(7) { println($0) }
     }
-
+    
     func test_all_reject_aync() {
         
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms0 = Promise(value: STRING_VALUE_0 as Any?)
         let prms1 = Promise(value: STRING_VALUE_1 as Any?)
-        let prms2 = Promise<Any?>(vagueThenable:
-            AnyPromise { (resolve, reject) -> Void in
-                0 ~> reject(reason: ERROR_2)
-            })
+        let prms2 = Promise<Any?> { (resolve, reject) -> Void in
+            0 ~> reject(reason: ERROR_2)
+        }
         
-        let promise = Promise<Any>.all([prms0, prms1, prms2])
+        let promise = Promise.all([prms0, prms1, prms2])
         promise.then(
             onFulfilled: { (value) -> Any? in
                 XCTAssertFalse(true)
@@ -870,9 +867,8 @@ class PromiseTests: XCTestCase
     }
     
     // MARK: - race
-
-    func test_race_fulfill_sync()
-    {
+    
+    func test_race_fulfill_sync() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = Promise(value: STRING_VALUE_1)
@@ -897,8 +893,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_fulfill_async()
-    {
+    func test_race_fulfill_async() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let prms1 = Promise { (resolve, reject) -> Void in
@@ -925,8 +920,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_reject_sync()
-    {
+    func test_race_reject_sync() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let (deferred1, prms1) = Promise<String>.defer()
@@ -951,8 +945,7 @@ class PromiseTests: XCTestCase
         waitForExpectationsWithTimeout(7) { println($0) }
     }
     
-    func test_race_reject_async()
-    {
+    func test_race_reject_async() {
         let expectation = expectationWithDescription(__FUNCTION__)
         
         let (deferred1, prms1) = Promise<String>.defer()
@@ -1011,108 +1004,32 @@ class PromiseTests: XCTestCase
         
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
-    // MARK: - init(:vagueThenable)
-    
-    func test_init_vagueThenable_fulfill() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> resolve(value: STRING_VALUE_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertEqual(value as String, STRING_VALUE_0)
-                expt.fulfill()
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertFalse(true)
-            }
-        )
-        
-        XCTAssertEqual(promise.state, PromiseState.Pending)
-        XCTAssertTrue(promise.value == nil)
-        XCTAssertNil(promise.reason)
-        
-        waitForExpectationsWithTimeout(7, handler: { (e) -> Void in
-            XCTAssertEqual(promise.state, PromiseState.Fulfilled)
-            XCTAssertEqual(promise.value as String, STRING_VALUE_0)
-            XCTAssertNil(promise.reason)
-        })
-    }
-    
-    func test_init_vagueThenable_rejectNSError() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> reject(reason: ERROR_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertFalse(true)
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertEqual(reason, ERROR_0)
-                expt.fulfill()
-            }
-        )
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
-    
-    func test_init_vagueThenable_rejectAny() {
-        let expt = expectationWithDescription(__FUNCTION__)
-        
-        let superPromise = AnyPromise { (resolve, reject) -> Void in
-            0 ~> reject(reason: STRING_VALUE_0)
-        }
-        
-        let promise = Promise<Any?>(vagueThenable: superPromise)
-        promise.then(
-            onFulfilled: { (value) -> Void in
-                XCTAssertFalse(true)
-            },
-            onRejected: { (reason) -> Void in
-                XCTAssertEqual(reason.domain, PromiseErrorDomain)
-                XCTAssertEqual(reason.code, PromiseReasonWrapperError)
-                XCTAssertEqual(reason.userInfo![PromiseErrorReasonKey]! as String, STRING_VALUE_0)
-
-                expt.fulfill()
-            }
-        )
-        
-        waitForExpectationsWithTimeout(7, handler: nil)
-    }
     
     // MARK: - progress
     
     func test_progress() {
         let answers: [Float] = [0.0, 0.5, 1.0]
-        var map: [Float: XCTestExpectation] = [:]
-        for (index, answer) in enumerate(answers) {
-            let expt = expectationWithDescription("\(__FUNCTION__)_\(index)")
-            map[answer] = expt
-        }
+        let expts = expectationsFor(keys: answers, descPrefix: __FUNCTION__)
+        let propagateAnswers: [Float: Float] = [0.0: 0.1, 0.5: 0.6, 1.0: 0.9]
+        let porpagateExpts = expectationsFor(keys: Array(propagateAnswers.values), descPrefix: __FUNCTION__)
         
         let deferred = Deferred<Void>()
         
-        deferred.promise.progress { (progress) -> Float in
-            let expt = map[progress]
-            expt!.fulfill()
-            return progress
+        deferred.promise
+            .progress { (progress) -> Float in
+                expts[progress]!.fulfill()
+                return propagateAnswers[progress]!
+            }.progress { (progress) -> Void in
+                porpagateExpts[progress]!.fulfill()
         }
         
         deferred.progress(0.0)
         deferred.progress(0.5)
         deferred.progress(1.0)
-
+        
         waitForExpectationsWithTimeout(7, handler: nil)
     }
-
+    
     func test_progress_fraction() {
         let answers: [Float] = [0.0, 0.35, 0.7, 0.73, 0.85, 1.0]
         var map: [Float: XCTestExpectation] = [:]
@@ -1131,10 +1048,10 @@ class PromiseTests: XCTestCase
             onProgress: { (progress) -> Float in
                 return progress * 0.7
         })
-        .progress { (progress) -> Float in
-            let expt = map[progress]
-            expt!.fulfill()
-            return progress
+            .progress { (progress) -> Float in
+                let expt = map[progress]
+                expt!.fulfill()
+                return progress
         }
         
         deferred0.progress(0.0)
@@ -1146,5 +1063,21 @@ class PromiseTests: XCTestCase
         deferred1.progress(1.0)
         
         waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    // MARK: - Memory
+    
+    /*
+    Promise shouldn't be released if its Deferred still held.
+    */
+    
+    func test_memory_hold_deferred() {
+        var deferred: Deferred<Void>? = Deferred<Void>()
+        weak var promise: Promise<Void>? = deferred?.promise
+        XCTAssertNotNil(promise)
+
+        deferred = nil
+        
+        XCTAssertNil(promise)
     }
 }

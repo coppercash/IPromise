@@ -6,19 +6,27 @@
 //  Copyright (c) 2014 CopperCash. All rights reserved.
 //
 
-public enum PromiseState: Printable {
+public enum State: Printable {
     case Pending, Fulfilled, Rejected
     
     mutating func fulfill() -> Bool {
-        if self != .Pending { return false }
-        self = .Fulfilled
-        return true
+        if self != .Pending {
+            return false
+        }
+        else {
+            self = .Fulfilled
+            return true
+        }
     }
     
     mutating func reject() -> Bool {
-        if self != .Pending { return false }
-        self = .Rejected
-        return true
+        if self != .Pending {
+            return false
+        }
+        else {
+            self = .Rejected
+            return true
+        }
     }
     
     public var description: String {

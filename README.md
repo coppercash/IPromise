@@ -25,31 +25,6 @@ promise
 }
 ```
 
-## Type free
-
-Promise with no type constraint is also supported as `AnyPromise`. Just like in **Javascript**, you are free to pass value of any type.
-
-```swift
-let typeFreePromise: AnyPromise = answerToUniverse()
-
-typeFreePromise.then(
-    onFulfilled: { (value: Any?) -> Any? in
-        let isItStill42 = (value as Int) == 42
-        return nil
-    },
-    onRejected: { (reason: Any?) -> Any? in
-        return nil
-    }
-)
-```
-
-And the 2 kinds of promises are bridgeable.
-
-```swift
-let fromTypeFree: Promise<Any?> = Promise(vagueThenable: typeFreePromise)
-let fromTypeSafe: AnyPromise = AnyPromise(promise: fromTypeFree)
-```
-
 ## Aggregate
 
 You can combine several promises as a new promise.

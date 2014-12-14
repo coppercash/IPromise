@@ -11,9 +11,9 @@ import XCTest
 import IPromise
 
 class ReadMeTests: XCTestCase {
-
+    
     func test_typeSafe() {
-
+        
         func answerToEverthing() -> Promise<Int> {
             return Promise(value: 42)
         }
@@ -33,28 +33,6 @@ class ReadMeTests: XCTestCase {
                 println(value.stringByAppendingString(" Oh yeah!"))
         }
     }
-
-    func test_typeFree() {
-        
-        func answerToUniverse() -> AnyPromise {
-            return AnyPromise(value: 42)
-        }
-        
-        let typeFreePromise: AnyPromise = answerToUniverse()
-        
-        typeFreePromise.then(
-            onFulfilled: { (value: Any?) -> Any? in
-                let isItStill42 = (value as Int) == 42
-                return nil
-            },
-            onRejected: { (reason: Any?) -> Any? in
-                return nil
-            }
-        )
-        
-        let fromTypeFree: Promise<Any?> = Promise(vagueThenable: typeFreePromise)
-        let fromTypeSafe: AnyPromise = AnyPromise(promise: fromTypeFree)
-    }
     
     func test_aggregate() {
         
@@ -70,8 +48,8 @@ class ReadMeTests: XCTestCase {
         ]
         
         let promise = arrayOrVariadic ?
-            Promise<[Int]>.all(promises) :
-            Promise<[Int]>.all(promiseA, promiseB, promiseC)
+            Promise.all(promises) :
+            Promise.all(promiseA, promiseB, promiseC)
         
         promise.then { (value) -> Void in
             for number: Int in value {
@@ -122,7 +100,7 @@ class ReadMeTests: XCTestCase {
                 onRejected: Optional<(reason: NSError) -> Void>,
                 onProgress: Optional<(progress: Float) -> Float>
                 ) -> Void {
-                // Implement
+                    // Implement
             }
         }
         
@@ -176,5 +154,24 @@ class ReadMeTests: XCTestCase {
             onProgress: { (progress) -> Float in
                 return progress * 0.7   // The '0.7' is used as fraction
         })
+    }
+    
+    func test_finally() {
+        let (deferred, promise) = Promise<Void>.defer()
+        
+        promise
+            .then(
+                onFulfilled: { (value) -> Void in
+                    println("Fulfill")
+                },
+                onRejected: { (reason) -> Void in
+                    println("Reject")
+                }
+            )
+            .then { (value) -> Void in
+                println("Finally...")
+        }
+        
+        deferred.reject(NSError())
     }
 }

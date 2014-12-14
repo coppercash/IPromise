@@ -12,51 +12,108 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
-    required
-    public convenience init() {
+    private var cancelClosure: Optional<() -> Promise<Void>> = nil
+    private var resolvingPromise: Optional<Promise<V>> = nil
+    
+    public required convenience
+    init() {
         self.init(promise: Promise<V>())
     }
     
     init(promise: Promise<V>) {
         self.promise = promise
+        promise.deferred = self
     }
     
-    public func resolve(value: V) -> Void
-    {
-        objc_sync_enter(promise)
-        let fulfilled = promise.state.fulfill()
-        objc_sync_exit(promise)
-        if !fulfilled { return }
-        
-        promise.value = value
-        for callback in promise.fulfillCallbacks {
-            callback(value: value)
+    public
+    func resolve(value: V) -> Void {
+        self.promise.resolve(value)
+        clean()
+    }
+    
+    public
+    func reject(reason: NSError) -> Void {
+        self.promise.reject(reason)
+        clean()
+    }
+    
+    public
+    func progress(progress: Float) -> Void {
+        self.promise.progress(progress)
+    }
+    
+    private
+    func clean() {
+        self.cancelClosure = nil
+        self.resolvingPromise = nil
+    }
+    
+    deinit {
+        if .Pending == self.promise.state {
+            self.reject(NSError.promiseUnresolvedError())
+        }
+    }
+}
+
+public extension Deferred {
+    
+    public
+    func onCanceled(closure: () -> Void) {
+        onCanceled { () -> Promise<Void> in
+            closure()
+            return Promise<Void>(value: ())
         }
     }
     
-    public func reject(reason: NSError) -> Void
-    {
-        objc_sync_enter(promise)
-        let rejected = promise.state.reject()
-        objc_sync_exit(promise)
-        if !rejected { return }
-        
-        promise.reason = reason
-        for callback in promise.rejectCallbacks {
-            callback(reason: reason)
+    public
+    func onCanceled(closure: () -> Promise<Void>) {
+        if .Pending == self.promise.state {
+            self.cancelClosure = closure
+        }
+        else if self.promise.isCanceled() {
+            closure()
         }
     }
     
-    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>(
-        #thenable: T,
-        fraction: Float
-        ) -> Void
+    public
+    func cancelResolvingPromise() -> Promise<Void> {
+        if let promise = self.resolvingPromise? {
+            return promise.cancel()
+        }
+        else {
+            return Promise<Void>(value: ())
+        }
+    }
+
+    internal
+    func cancel() -> Promise<Void> {
+        if let closure = self.cancelClosure {
+            return closure().then { (value) -> Void in
+                self.reject(NSError.promiseCancelError())
+            }
+        }
+        else {
+            reject(NSError.promiseCancelError())
+            return Promise<Void>(value: ())
+        }
+    }
+}
+
+extension Deferred {
+    
+    internal
+    func resolve<T: Thenable where T.ValueType == V, T.ReasonType == NSError, T.ReturnType == Void>
+        (#thenable: T, fraction: Float) -> Void
     {
         if (thenable as? Promise<V>) === promise {
             self.reject(NSError.promiseTypeError())
             return
         }
-
+        
+        if let promise = thenable as? Promise<V> {
+            self.resolvingPromise = promise
+        }
+        
         thenable.then(
             onFulfilled: { (value: V) -> Void in
                 self.resolve(value)
@@ -69,18 +126,5 @@ public class Deferred<V> {
                 return -1
             }
         )
-    }
-    
-    public func progress(progress: Float) -> Void
-    {
-        objc_sync_enter(promise)
-        
-        if promise.state == .Pending && (0.0 <= progress && progress <= 1.0) {
-            for callback in promise.progressCallbacks {
-                callback(progress: progress)
-            }
-        }
-        
-        objc_sync_exit(promise)
     }
 }
