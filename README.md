@@ -148,7 +148,8 @@ promise.then(
     onFulfilled: nil,
     onRejected: nil,
     onProgress: { (progress) -> Float in
-        return progress // The return value is used to propagate if it is locate in range 0.0...1.0
+        println("The return value '\(progress)' is used to propagate, if it is between 0.0...1.0")
+        return progress
 })
 ```
 
@@ -156,7 +157,7 @@ Or use the shortcut method `progress`:
 
 ```swift
 promise.progress { (progress) -> Void in
-    // The return value can also be omitted
+    println("The return value '\(progress)' can also be omitted")
 }
 ```
 
@@ -169,7 +170,8 @@ promise.then(
         return anotherPromise
     },
     onProgress: { (progress) -> Float in
-        return progress * 0.5   // The '0.5' indicates `promise` and `anotherPromise` take same weight
+        println("The value '\(0.5)' indicates the progress of `promise` and `anotherPromise` take same weight")
+        return progress * 0.5
 })
 ```
 
