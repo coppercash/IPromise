@@ -18,6 +18,7 @@ public let PromiseCancelError = 1003
 public let PromiseNoSuchEventError = 1004
 public let PromiseWrongStateError = 1005
 public let PromiseCancelForkedPromiseError = 1006
+public let PromiseMissingDeferredPromiseError = 1007
 
 public let PromiseErrorReasonKey = "reason"
 
@@ -63,7 +64,7 @@ extension NSError {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseWrongStateError,
-            userInfo: [NSLocalizedDescriptionKey: "Promise has been already '\(state)'",]
+            userInfo: [NSLocalizedDescriptionKey: "Promise has been already '\(state)'.",]
         )
     }
     
@@ -71,7 +72,15 @@ extension NSError {
         return self(
             domain: PromiseErrorDomain,
             code: PromiseCancelForkedPromiseError,
-            userInfo: [NSLocalizedDescriptionKey: "A forked promise can not be canceled",]
+            userInfo: [NSLocalizedDescriptionKey: "A forked promise can not be canceled.",]
+        )
+    }
+    
+    class func promiseUnresolvedError() -> Self {
+        return self(
+            domain: PromiseErrorDomain,
+            code: PromiseMissingDeferredPromiseError,
+            userInfo: [NSLocalizedDescriptionKey: "The Deferred must be fulfilled or rejected before it is canceled",]
         )
     }
 }

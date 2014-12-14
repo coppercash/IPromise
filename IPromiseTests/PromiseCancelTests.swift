@@ -41,8 +41,7 @@ class PromiseCancelTests: XCTestCase {
                 expts[1].fulfill()
         })
         
-        let canceledPromise = Promise<String> { (resolve, reject) -> Void in
-        }
+        let (canceledDeferred, canceledPromise) = Promise<String>.defer()
         canceledPromise.catch { (reason) -> Void in
             XCTAssertEqual(PromiseCancelError, reason.code)
             expts[4].fulfill()
@@ -84,7 +83,9 @@ class PromiseCancelTests: XCTestCase {
         
         let deferred = Deferred<String>()
         deferred.onCanceled { () -> Promise<Void> in
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
        
         0.1 ~> {
@@ -100,6 +101,7 @@ class PromiseCancelTests: XCTestCase {
             onRejected: { (reason) -> Void in
                 expts[sequencer].fulfill()
                 XCTAssertEqual(1, sequencer++)
+                XCTAssertEqual(PromiseWrongStateError, reason.code)
             }
         )
         
@@ -301,12 +303,11 @@ class PromiseCancelTests: XCTestCase {
     func test_cancel_leaf() {
         var expts: [Int: XCTestExpectation] = expectationsFor(keys: [Int](0...1), descPrefix: __FUNCTION__)
         
-        var memHolder: Deferred<Void>? = nil
         let promise = Promise<String>(value: STRING_VALUE_1)
         promise
             .then(onFulfilled: { (value) -> Promise<Void> in
                 let (d_leaf, p_leaf) = Promise<Void>.defer()
-                //memHolder = d_leaf
+                7 ~> d_leaf.resolve()
                 d_leaf.onCanceled({ () -> Promise<Void> in
                     expts[0]!.fulfill()
                     let (d_cancel, p_cancel) = Promise<Void>.defer()
@@ -348,8 +349,10 @@ class PromiseCancelTests: XCTestCase {
                 XCTAssertFalse(true)
             },
             onRejected: { (reason) -> Void in
-                XCTAssertFalse(true)
+                XCTAssertEqual(PromiseWrongStateError, reason.code)
         })
+        
+        d_0.resolve(STRING_VALUE_0)
     }
     
     /*
@@ -388,14 +391,18 @@ class PromiseCancelTests: XCTestCase {
         d0.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(0, sequencer++)
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d1 = Deferred<String>();
         d1.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(1, sequencer++)
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d2 = Deferred<String>();
@@ -433,7 +440,9 @@ class PromiseCancelTests: XCTestCase {
         d0.onCanceled { () -> Promise<Void> in
             XCTAssertEqual(0, sequencer)
             expts[sequencer++].fulfill()
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d1 = Deferred<String>();
@@ -475,14 +484,18 @@ class PromiseCancelTests: XCTestCase {
         d0.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(0, sequencer++)
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d1 = Deferred<String>();
         d1.onCanceled { () -> Promise<Void> in
             expts[sequencer].fulfill()
             XCTAssertEqual(1, sequencer++)
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d2 = Deferred<String>();
@@ -520,7 +533,9 @@ class PromiseCancelTests: XCTestCase {
         d0.onCanceled { () -> Promise<Void> in
             XCTAssertEqual(0, sequencer)
             expts[sequencer++].fulfill()
-            return Deferred<Void>().promise
+            let deferred = Deferred<Void>()
+            7 ~> deferred.resolve()
+            return deferred.promise
         }
         
         let d1 = Deferred<String>();

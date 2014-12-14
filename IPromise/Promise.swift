@@ -10,10 +10,6 @@ import Foundation
 
 public class Promise<V>: Thenable
 {
-    deinit {
-        println("123")
-    }
-    
     // MARK: - ivars
     
     public private(set) var state: State = .Pending

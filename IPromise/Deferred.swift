@@ -12,12 +12,8 @@ public class Deferred<V> {
     
     public let promise: Promise<V>
     
-    private var cancelClosure: Optional<() -> Promise<Void>>
+    private var cancelClosure: Optional<() -> Promise<Void>> = nil
     private var resolvingPromise: Optional<Promise<V>> = nil
-    
-    deinit {
-        println("321")
-    }
     
     public required convenience
     init() {
@@ -50,6 +46,12 @@ public class Deferred<V> {
     func clean() {
         self.cancelClosure = nil
         self.resolvingPromise = nil
+    }
+    
+    deinit {
+        if .Pending == self.promise.state {
+            self.reject(NSError.promiseUnresolvedError())
+        }
     }
 }
 
