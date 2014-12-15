@@ -49,10 +49,10 @@ promise.then { (value) -> Void in
 
 Following aggregate methods are supported for now
 
-| Method | Fulfill condition | Reject condition | Promise | APlusPromise |
-| :--:  | :-- | :-- | :--: | :--: |
-| `all` | When every item in the array fulfils | If (and when) any item rejects | √ | √ |
-| `race` | As soon as any item fulfills | As soon as any item rejects | √ | √ |
+| Method | Fulfill condition | Reject condition | Progress meaning |
+| :--:  | :-- | :-- | :-- |
+| `all` | When every item in the array fulfils | If (and when) any item rejects | Average of all sub promises' progress |
+| `race` | As soon as any item fulfills | As soon as any item rejects | Max of all sub promises' progress |
 
 ## Chain
 
@@ -82,6 +82,25 @@ Promise { (resolve, reject) -> Void in
    }
    .catch { (reason) -> Void in
        println(reason)
+}
+```
+
+## Finally
+
+The **finally** callback, which is triggered in both **fulfilled** and **rejected** cases, is not supported explictily. Because as an implementation of **Promise/A+**, **finally** can be written as following:
+
+```swift
+promise
+    .then(
+        onFulfilled: { (value) -> Void in
+            println("Fulfill")
+        },
+        onRejected: { (reason) -> Void in
+            println("Reject")
+        }
+    )
+    .then { (value) -> Void in
+        println("Finally...")
 }
 ```
 
@@ -148,7 +167,8 @@ promise.then(
     onFulfilled: nil,
     onRejected: nil,
     onProgress: { (progress) -> Float in
-        return progress // The return value is used to propagate if it is locate in range 0.0...1.0
+        println("The return value '\(progress)' is used to propagate, if it is between 0.0...1.0")
+        return progress
 })
 ```
 
@@ -156,7 +176,7 @@ Or use the shortcut method `progress`:
 
 ```swift
 promise.progress { (progress) -> Void in
-    // The return value can also be omitted
+    println("The return value '\(progress)' can also be omitted")
 }
 ```
 
@@ -169,16 +189,37 @@ promise.then(
         return anotherPromise
     },
     onProgress: { (progress) -> Float in
-        return progress * 0.5   // The '0.5' indicates `promise` and `anotherPromise` take same weight
+        println("The value '\(0.5)' indicates the progress of `promise` and `anotherPromise` take same weight")
+        return progress * 0.5
 })
 ```
 
-The aggregate functions also notify progress in proper ways
+## Cancel
 
-| Method | Progress meaning |
-| :--:  | :-- |
-| `all` | Average of all sub promises' progress |
-| `race` | Max of all sub promises' progress |
+You can cancel a promise by calling method `cancel` on it.
+
+```swift
+let (deferred, promise) = Promise<String>.defer()
+
+deferred.onCanceled { () -> Promise<Void> in
+    println("Do the cancel work and return a promise to notify when the work is finished")
+    return Promise<Void>(value: ())
+}
+
+promise.cancel()
+    .then(
+        onFulfilled: { (value) -> Void in
+            println("Succeed to cancel")
+        },
+        onRejected: { (reason) -> Void in
+            println("Fail to cancel")
+        }
+)
+```
+
+Sometimes, a promise can have more than one consumer. In that case, the promise won't be canceled untill all its consumers (sub-promises) canceled.
+
+When a promise gets canceled, it is actually rejected with a special 'CancelError' as reason. Therefore, the **cancel** behaviours of aggregate methods like `all` are same with their **reject** behavious.
 
 ## Licence
 
