@@ -13,7 +13,7 @@ import IPromise
 class PromiseCancelTests: XCTestCase {
 
     /*
-    The cancel of a promise will be succeed if it is failed with 'CancelError' as reason
+    The cancel of a promise will succeed if it is failed with 'CancelError' as reason
     */
     func test_cancel_state() {
         var expts: [XCTestExpectation] = []
