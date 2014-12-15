@@ -139,7 +139,7 @@ class ReadMeTests: XCTestCase {
             onFulfilled: nil,
             onRejected: nil,
             onProgress: { (progress) -> Float in
-                println("The return value '\(progress)' is used to propagate")
+                println("The return value '\(progress)' is used to propagate, if it is between 0.0...1.0")
                 return progress
         })
         
@@ -153,8 +153,8 @@ class ReadMeTests: XCTestCase {
                 return anotherPromise
             },
             onProgress: { (progress) -> Float in
-                println("The value '\(0.7)' is used as fraction")
-                return progress * 0.7
+                println("The value '\(0.5)' indicates the progress of `promise` and `anotherPromise` take same weight")
+                return progress * 0.5
         })
     }
     
@@ -175,5 +175,24 @@ class ReadMeTests: XCTestCase {
         }
         
         deferred.reject(NSError())
+    }
+    
+    func test_cancel() {
+        let (deferred, promise) = Promise<String>.defer()
+        
+        deferred.onCanceled { () -> Promise<Void> in
+            println("Do the cancel work and return a promise to notify when the work is finished")
+            return Promise<Void>(value: ())
+        }
+        
+        promise.cancel()
+            .then(
+                onFulfilled: { (value) -> Void in
+                    println("Succeed to cancel")
+                },
+                onRejected: { (reason) -> Void in
+                    println("Fail to cancel")
+                }
+        )
     }
 }
