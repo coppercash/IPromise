@@ -50,7 +50,7 @@ promise.then { (value) -> Void in
 Following aggregate methods are supported for now
 
 | Method | Fulfill condition | Reject condition | Progress meaning |
-| --:  | :-- | :-- | :--: |
+| :--:  | :-- | :-- | :-- |
 | `all` | When every item in the array fulfils | If (and when) any item rejects | Average of all sub promises' progress |
 | `race` | As soon as any item fulfills | As soon as any item rejects | Max of all sub promises' progress |
 
@@ -194,6 +194,32 @@ promise.then(
 })
 ```
 
+## Cancel
+
+You can cancel a promise by calling method `cancel` on it.
+
+```swift
+let (deferred, promise) = Promise<String>.defer()
+
+deferred.onCanceled { () -> Promise<Void> in
+    println("Do the cancel work and return a promise to notify when the work is finished")
+    return Promise<Void>(value: ())
+}
+
+promise.cancel()
+    .then(
+        onFulfilled: { (value) -> Void in
+            println("Succeed to cancel")
+        },
+        onRejected: { (reason) -> Void in
+            println("Fail to cancel")
+        }
+)
+```
+
+Sometimes, a promise can have more than one consumer. In that case, the promise won't be canceled untill all its consumers (sub-promises) canceled.
+
+When a promise gets canceled, it is actually rejected with a special 'CancelError' as reason. Therefore, the **cancel** behaviours of aggregate methods like `all` are same with their **reject** behavious.
 
 ## Licence
 
