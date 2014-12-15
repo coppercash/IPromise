@@ -85,6 +85,25 @@ Promise { (resolve, reject) -> Void in
 }
 ```
 
+## Finally
+
+The **finally** callback, which is triggered in both **fulfilled** and **rejected** cases, is not supported explictily. Because as an implementation of **Promise/A+**, **finally** can be written as following:
+
+```swift
+promise
+    .then(
+        onFulfilled: { (value) -> Void in
+            println("Fulfill")
+        },
+        onRejected: { (reason) -> Void in
+            println("Reject")
+        }
+    )
+    .then { (value) -> Void in
+        println("Finally...")
+}
+```
+
 ## Thenable support
 
 **Thenable** is supported via protocal.
