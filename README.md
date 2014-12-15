@@ -49,10 +49,10 @@ promise.then { (value) -> Void in
 
 Following aggregate methods are supported for now
 
-| Method | Fulfill condition | Reject condition | Promise | APlusPromise |
-| :--:  | :-- | :-- | :--: | :--: |
-| `all` | When every item in the array fulfils | If (and when) any item rejects | √ | √ |
-| `race` | As soon as any item fulfills | As soon as any item rejects | √ | √ |
+| Method | Fulfill condition | Reject condition | Progress meaning |
+| --:  | :-- | :-- | :--: |
+| `all` | When every item in the array fulfils | If (and when) any item rejects | Average of all sub promises' progress |
+| `race` | As soon as any item fulfills | As soon as any item rejects | Max of all sub promises' progress |
 
 ## Chain
 
@@ -194,12 +194,6 @@ promise.then(
 })
 ```
 
-The aggregate functions also notify progress in proper ways
-
-| Method | Progress meaning |
-| :--:  | :-- |
-| `all` | Average of all sub promises' progress |
-| `race` | Max of all sub promises' progress |
 
 ## Licence
 
