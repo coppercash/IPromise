@@ -2,7 +2,7 @@
 
 # IPromise
 
-Promise library in Swift conforming to [Promises/A+](http://promises-aplus.github.com/promises-spec), and more.
+Promise library in Swift conforms to [Promises/A+](http://promises-aplus.github.com/promises-spec), and more.
 
 ## Type safe
 
