@@ -16,9 +16,3 @@ DerivedData
 .idea/
 *.hmap
 *.xccheckout
-
-#CocoaPods
-Pods
-
-#NimbusBase
-Products/*
